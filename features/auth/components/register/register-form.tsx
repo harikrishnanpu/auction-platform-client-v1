@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { SiginWithGoogleButton } from '@/components/ui/buttons/google-signin';
 import { useRegister } from '../../hooks/useRegister';
 import { useSearchParams } from 'next/navigation';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,7 +29,7 @@ export function RegisterForm() {
           >
             First Name
           </label>
-          <input
+          <Input
             {...register('firstName')}
             className="block w-full px-4 py-3 rounded-xl border border-input bg-background/50 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm shadow-sm outline-none"
             id="firstName"
@@ -48,13 +50,14 @@ export function RegisterForm() {
           >
             Last Name
           </label>
-          <input
+          <Input
             {...register('lastName')}
             className="block w-full px-4 py-3 rounded-xl border border-input bg-background/50 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm shadow-sm outline-none"
             id="lastName"
             placeholder="lastname"
             type="text"
           />
+
           {errors.lastName && (
             <p className="text-red-500 text-xs mt-1 ml-1">
               {errors.lastName.message}
@@ -70,7 +73,7 @@ export function RegisterForm() {
         >
           Email Address
         </label>
-        <input
+        <Input
           {...register('email')}
           className="block w-full px-4 py-3 rounded-xl border border-input bg-background/50 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm shadow-sm outline-none"
           id="email"
@@ -92,7 +95,7 @@ export function RegisterForm() {
         >
           Phone
         </label>
-        <input
+        <Input
           {...register('phone')}
           className="block w-full px-4 py-3 rounded-xl border border-input bg-background/50 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm shadow-sm outline-none"
           id="phone"
@@ -114,7 +117,7 @@ export function RegisterForm() {
         >
           Address
         </label>
-        <input
+        <Input
           {...register('address')}
           className="block w-full px-4 py-3 rounded-xl border border-input bg-background/50 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm shadow-sm outline-none"
           id="address"
@@ -137,7 +140,7 @@ export function RegisterForm() {
           Password
         </label>
         <div className="relative">
-          <input
+          <Input
             {...register('password')}
             className="block w-full px-4 py-3 rounded-xl border border-input bg-background/50 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm shadow-sm pr-10 outline-none"
             id="password"
@@ -207,7 +210,7 @@ export function RegisterForm() {
         </div>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={isSubmitting}
         className="w-full cursor-pointer bg-black hover:bg-[#333333] dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black font-medium py-3.5 px-4 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
@@ -217,7 +220,7 @@ export function RegisterForm() {
         ) : (
           'Create Account'
         )}
-      </button>
+      </Button>
 
       <div className="mt-8">
         <div className="relative">
