@@ -9,8 +9,8 @@ export interface UserInfo {
   id: string;
   name: string;
   email: string;
-  is_verified: boolean;
-  is_profile_completed?: boolean;
+  isVerified: boolean;
+  isProfileCompleted: boolean;
   roles: UserRole[];
   phone?: string;
   address?: string;

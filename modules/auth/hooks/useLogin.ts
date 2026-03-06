@@ -5,9 +5,12 @@ import { useRouter } from 'next/navigation';
 import { LoginFormValues, loginSchema } from '../schemes/login-from.schema';
 import { loginAction } from '@/actions/auth/auth.actions';
 import { getErrorMessage } from '@/utils/get-app-error';
+import useUserStore from '@/store/user.store';
 
 export const useLogin = () => {
   const router = useRouter();
+
+  const { setUser } = useUserStore();
 
   const {
     register,
@@ -17,21 +20,14 @@ export const useLogin = () => {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: 'one@gmail.com',
+      password: 'Hari123',
     },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
       const res = await loginAction(data);
-
-      if (res.success) {
-        router.push(
-          `/email?email=${encodeURIComponent(data.email)}&autoSend=0`
-        );
-        return;
-      }
 
       if (!res.success) {
         setError('root', {
@@ -40,8 +36,21 @@ export const useLogin = () => {
         return;
       }
 
+      if (res.data?.user) {
+        setUser(res.data.user);
+      }
+
+      if (res.data?.user.isVerified) {
+        router.replace('/home');
+        return;
+      }
+
+      if (!res.data?.user.isProfileCompleted) {
+        router.replace('/complete-profile');
+        return; // Fixed missing return
+      }
+
       router.replace('/home');
-      router.refresh();
     } catch (err) {
       setError('root', {
         message: getErrorMessage(err) || 'Something went wrong',

@@ -1,6 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
+import useUserStore from '@/store/user.store';
 import {
   CreditCard,
   Wallet,
@@ -15,7 +15,6 @@ import {
   ArrowUpRight,
   ArrowRight,
 } from 'lucide-react';
-import useUserStore from '@/store/user.store';
 import { useRouter } from 'next/navigation';
 
 interface DashboardAuction {
@@ -30,7 +29,7 @@ interface DashboardAuction {
 
 export function DashboardView() {
   const router = useRouter();
-  const user = useUserStore((s) => s.user);
+  const { user } = useUserStore();
   const loading = false;
   const liveAuctions: DashboardAuction[] = [];
   const upcomingAuctions: DashboardAuction[] = [];

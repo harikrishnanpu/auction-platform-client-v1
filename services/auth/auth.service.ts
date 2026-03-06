@@ -6,7 +6,7 @@ import { ApiResponse } from '@/types/api.index';
 import { getErrorMessage } from '@/utils/get-app-error';
 import { UserInfo } from '@/types/user.type';
 
-const getSession = async (): Promise<ApiResponse<{ userId: string }>> => {
+const getSession = async (): Promise<ApiResponse<UserInfo>> => {
   try {
     const cookieStorage = await cookies();
 
@@ -18,7 +18,7 @@ const getSession = async (): Promise<ApiResponse<{ userId: string }>> => {
     });
 
     const session = await res.json();
-
+    console.log('auth/me', session);
     return session;
   } catch (err: unknown) {
     return {
@@ -29,9 +29,11 @@ const getSession = async (): Promise<ApiResponse<{ userId: string }>> => {
   }
 };
 
+type newCombinedType = UserInfo & { accessToken: string; refreshToken: string };
+
 const login = async (
   data: LoginFormValues
-): Promise<ApiResponse<{ userId: string }>> => {
+): Promise<ApiResponse<newCombinedType>> => {
   try {
     const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.login), {
       method: 'POST',
@@ -42,6 +44,8 @@ const login = async (
     });
 
     const response = await res.json();
+    (await cookies()).set('accessToken', response.data.accessToken);
+    (await cookies()).set('refreshToken', response.data.refreshToken);
     return response;
   } catch (error: unknown) {
     return { success: false, data: null, error: getErrorMessage(error) };
@@ -111,9 +115,36 @@ const sendVerificationCode = async (data: {
 const verifyEmail = async (data: {
   otp: string;
   email: string;
-}): Promise<ApiResponse<{ user: UserInfo }>> => {
+}): Promise<ApiResponse<newCombinedType>> => {
   try {
     const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.verifyEmail), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+
+    const response = await res.json();
+    (await cookies()).set('accessToken', response.data.accessToken);
+    (await cookies()).set('refreshToken', response.data.refreshToken);
+    return response;
+  } catch (error: unknown) {
+    return { success: false, data: null, error: getErrorMessage(error) };
+  }
+};
+
+const completeProfile = async (data: {
+  phone: string;
+  address: string;
+}): Promise<ApiResponse<{ user: UserInfo }>> => {
+  try {
+    const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.completeProfile), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -133,10 +164,22 @@ const verifyEmail = async (data: {
   }
 };
 
+const logout = async (): Promise<ApiResponse<null>> => {
+  try {
+    (await cookies()).delete('accessToken');
+    (await cookies()).delete('refreshToken');
+    return { success: true, data: null };
+  } catch (error: unknown) {
+    return { success: false, data: null, error: getErrorMessage(error) };
+  }
+};
+
 export const authService = {
   getSession,
   login,
   register,
   sendVerificationCode,
   verifyEmail,
+  completeProfile,
+  logout,
 };

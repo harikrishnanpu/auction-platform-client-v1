@@ -12,18 +12,34 @@ import {
 } from 'lucide-react';
 import { ModeToggle } from '@/components/ui/mode-toggle';
 import { useState, useRef, useEffect } from 'react';
-import useUserStore from '@/store/user.store';
 
 import Image from 'next/image';
+import { logoutAction } from '@/actions/auth/auth.actions';
+import { useRouter } from 'next/navigation';
+import useUserStore from '@/store/user.store';
 
 export function DashboardHeader() {
-  const user = useUserStore((s) => s.user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const { user } = useUserStore();
 
-  const handleLogout = async () => {};
+  const userInitials = user?.name
+    ? user.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : 'UN';
+
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logoutAction();
+    router.replace('/login');
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -45,15 +61,6 @@ export function DashboardHeader() {
       document.removeEventListener('mousedown', handleNotificationOutside);
     };
   }, [isMenuOpen, isNotificationOpen]);
-
-  const userInitials = user?.name
-    ? user.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
-    : 'UN';
 
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-md border-b border-border bg-background/80">

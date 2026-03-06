@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/providers';
 import { Toaster } from '@/components/ui/sonner';
+import { authGetSesssion } from '@/actions/auth/auth.actions';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -19,17 +20,18 @@ export const metadata: Metadata = {
   description: 'Auction Platform Project by Hari Krishnan P U',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await authGetSesssion();
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <Providers user={user.data || null}>{children}</Providers>
         <Toaster richColors position="top-right" />
       </body>
     </html>

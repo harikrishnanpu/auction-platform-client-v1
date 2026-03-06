@@ -2,13 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import useUserStore from '@/store/user.store';
 import {
   sendVerificationCodeAction,
   verifyEmailAction,
 } from '@/actions/auth/auth.actions';
 import { OTP_CHANNEL, OTP_PURPOSE } from '@/constants/auth/otp.constants';
 import { useLocalStorage } from '@/shared/hooks/useLocalStorage';
+import useUserStore from '@/store/user.store';
 
 const RESEND_INTERVALS = [20, 40, 60, 120];
 
@@ -20,7 +20,7 @@ export const useVerify = ({
   autoSend?: boolean;
 }) => {
   const router = useRouter();
-  const setUser = useUserStore((s) => s.setUser);
+  const { setUser } = useUserStore();
 
   const [otp, setOtp] = useState<string>('');
   const [isVerifying, setIsVerifying] = useState(false);
@@ -115,10 +115,8 @@ export const useVerify = ({
         return;
       }
 
-      if (res.data && typeof res.data === 'object' && 'user' in res.data) {
-        const userData = (res.data as { user: Parameters<typeof setUser>[0] })
-          .user;
-        setUser(userData);
+      if (res.data?.user) {
+        setUser(res.data.user);
       }
 
       setSuccess('Email verified successfully! Redirecting...');
