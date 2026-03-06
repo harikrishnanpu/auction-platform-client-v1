@@ -262,7 +262,7 @@ export function RegisterForm() {
             <div className="mt-6 grid grid-cols-1 gap-3">
               <SiginWithGoogleButton
                 handleClick={() => {
-                  const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+                  const backendUrl = process.env.NEXT_PUBLIC_API_URL;
                   window.location.href = `${backendUrl}/auth/google?callBack=register`;
                 }}
               />
