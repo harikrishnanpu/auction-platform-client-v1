@@ -4,6 +4,7 @@ import { RegisterFormValues } from '@/modules/auth/schemes/register-form.schema'
 import { cookies } from 'next/headers';
 import { ApiResponse } from '@/types/api.index';
 import { getErrorMessage } from '@/utils/get-app-error';
+import { UserInfo } from '@/types/user.type';
 
 const getSession = async (): Promise<ApiResponse<{ userId: string }>> => {
   try {
@@ -110,7 +111,7 @@ const sendVerificationCode = async (data: {
 const verifyEmail = async (data: {
   otp: string;
   email: string;
-}): Promise<ApiResponse<{ userId: string }>> => {
+}): Promise<ApiResponse<{ user: UserInfo }>> => {
   try {
     const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.verifyEmail), {
       method: 'POST',

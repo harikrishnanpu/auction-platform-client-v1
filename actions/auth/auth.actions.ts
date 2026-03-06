@@ -5,6 +5,7 @@ import { LoginFormValues } from '@/modules/auth/schemes/login-from.schema';
 import { RegisterFormValues } from '@/modules/auth/schemes/register-form.schema';
 import { authService } from '@/services/auth/auth.service';
 import { ApiResponse } from '@/types/api.index';
+import { UserInfo } from '@/types/user.type';
 
 export const authGetSesssion = async (): Promise<
   ApiResponse<{ userId: string }>
@@ -37,6 +38,6 @@ export const verifyEmailAction = async (data: {
   email: string;
   purpose: OtpPurpose;
   channel: OtpChannel;
-}): Promise<ApiResponse<{ userId: string }>> => {
+}): Promise<ApiResponse<{ user: UserInfo }>> => {
   return await authService.verifyEmail(data);
 };

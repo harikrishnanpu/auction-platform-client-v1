@@ -115,7 +115,6 @@ export const useVerify = ({
         return;
       }
 
-      // Safely access user without 'any'
       if (res.data && typeof res.data === 'object' && 'user' in res.data) {
         const userData = (res.data as { user: Parameters<typeof setUser>[0] })
           .user;
