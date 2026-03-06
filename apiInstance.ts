@@ -9,6 +9,8 @@ export const API_ENDPOINTS = {
     verifyEmail: '/auth/verify-credentials',
     sendVerificationCode: '/auth/send-verification-code',
     me: '/auth/me',
+    completeProfile: '/auth/complete-profile',
+    logout: '/auth/logout',
   },
 } as const;
 

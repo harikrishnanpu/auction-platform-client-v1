@@ -1,25 +1,20 @@
+import { ThemeProvider } from 'next-themes';
 import React from 'react';
-import { ThemeProvider } from './theme-provider';
-import { SessionProvider } from '@/context/auth.context';
+import UserProvider from './user-provider';
 import { UserInfo } from '@/types/user.type';
 
 export function Providers({
   children,
-  initialUser,
+  user,
 }: {
   children: React.ReactNode;
-  initialUser: UserInfo | null;
+  user: UserInfo | null;
 }) {
   return (
-    <SessionProvider initialUser={initialUser}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
+    <UserProvider user={user}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
         {children}
       </ThemeProvider>
-    </SessionProvider>
+    </UserProvider>
   );
 }

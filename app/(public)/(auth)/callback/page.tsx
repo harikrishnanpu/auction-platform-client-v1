@@ -2,27 +2,19 @@
 
 import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
 
 function CallbackContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const success = searchParams.get('success');
   const error = searchParams.get('error');
 
   useEffect(() => {
-    if (success === 'true') {
-      toast.success('Successfully logged in with Google');
-      // Force a hard refresh to ensure server-side auth state (cookies) is picked up by RootLayout
+    if (success == 'true') {
       window.location.href = '/home';
-    } else if (error) {
-      toast.error(error);
-      router.push('/login');
     } else {
-      // Fallback if no params
-      router.push('/login');
+      window.location.href = '/login';
     }
-  }, [success, error, router]);
+  }, [success]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">

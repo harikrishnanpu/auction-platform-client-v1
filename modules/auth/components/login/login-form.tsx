@@ -136,7 +136,7 @@ const LoginForm = () => {
         <div className="grid grid-cols-1 gap-4 mb-2">
           <SiginWithGoogleButton
             handleClick={() => {
-              const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+              const backendUrl = process.env.NEXT_PUBLIC_API_URL;
               window.location.href = `${backendUrl}/auth/google?callBack=login`;
             }}
           />
