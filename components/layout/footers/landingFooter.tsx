@@ -4,7 +4,7 @@ export function LandingFooter() {
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="md:col-span-1">
-            <span className="text-2xl   font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+            <span className="text-2xl font-serif font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
               <svg
                 className="w-6 h-6 text-blue-500"
                 fill="currentColor"

@@ -5,7 +5,7 @@ export enum UserRole {
   MODERATOR = 'MODERATOR',
 }
 
-export interface User {
+export interface UserInfo {
   id: string;
   name: string;
   email: string;
@@ -15,6 +15,4 @@ export interface User {
   phone?: string;
   address?: string;
   avatar_url?: string;
-  has_password?: boolean;
-  is_google_user?: boolean;
 }
