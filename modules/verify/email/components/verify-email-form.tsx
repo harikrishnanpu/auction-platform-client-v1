@@ -92,7 +92,7 @@ export function VerifyEmailForm() {
         <ArrowLeft size={20} />
       </Link>
 
-      <div className="absolute top-8 right-8 text-xs italic opacity-60 font-serif text-gray-500 dark:text-gray-400">
+      <div className="absolute top-8 right-8 text-xs italic opacity-60   text-gray-500 dark:text-gray-400">
         security check
       </div>
 

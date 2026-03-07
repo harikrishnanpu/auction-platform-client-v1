@@ -69,7 +69,7 @@ export function DashboardHeader() {
           <div className="flex items-center gap-8">
             <Link
               href="/home"
-              className="font-bold text-2xl tracking-tight cursor-pointer font-serif text-foreground"
+              className="font-bold text-2xl tracking-tight cursor-pointer   text-foreground"
             >
               HammerDown
             </Link>

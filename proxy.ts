@@ -8,7 +8,9 @@ export async function proxy(request: NextRequest) {
     '/login',
     '/register',
     '/forgot-password',
-    '/reset-password',
+    '/reset/password',
+    '/reset/password/change',
+    '/email',
   ];
 
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
@@ -43,6 +45,14 @@ export async function proxy(request: NextRequest) {
     }
 
     return NextResponse.next();
+  }
+
+  // PROFILE COMPLETED BUT TRYING TO ACCESS COMPLETE PROFILE PAGE
+  if (
+    response.data?.isProfileCompleted &&
+    pathname.startsWith('/complete-profile')
+  ) {
+    return NextResponse.redirect(new URL('/home', request.url));
   }
 
   // EMAIL NOT VERIFIED

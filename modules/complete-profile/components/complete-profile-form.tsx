@@ -16,10 +16,7 @@ export function CompleteProfileForm() {
   return (
     <div className="w-full max-w-md bg-[#F0F6FA]/80 backdrop-blur-xl border dark:bg-blue-500/10 rounded-[2rem] shadow-xl p-8 md:p-10 relative overflow-hidden fade-in">
       <div className="text-center mb-8">
-        <h1
-          className="text-3xl md:text-4xl font-bold mb-3 text-gray-900 dark:text-white"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
+        <h1 className="text-3xl md:text-4xl font-bold mb-3 text-gray-900 dark:text-white">
           Almost There
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -41,7 +38,7 @@ export function CompleteProfileForm() {
             </div>
             <input
               id="phone"
-              placeholder="9876543210"
+              placeholder="+1 234 567 890"
               className="block w-full pl-11 pr-4 py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all outline-none"
               disabled={isSubmitting}
               {...register('phone')}

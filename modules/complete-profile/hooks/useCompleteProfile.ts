@@ -29,10 +29,15 @@ export const useCompleteProfile = () => {
       setIsSubmitting(true);
       const response = await completeProfileAction(data);
 
-      if (response.success && response.data?.user) {
+      if (response.success && response.data) {
         toast.success('Profile updated successfully');
+
+        if (!response.data.isVerified) {
+          router.replace(`/email?email=${response.data.email}&autoSend=1`);
+          return;
+        }
+
         router.replace('/home');
-        router.refresh();
       } else {
         form.setError('root', {
           message: response.error || 'Failed to update profile',
