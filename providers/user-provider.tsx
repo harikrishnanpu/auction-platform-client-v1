@@ -11,14 +11,16 @@ export default function UserProvider({
   user: UserInfo | null;
   children: React.ReactNode;
 }) {
-  const init = useRef(false);
+  const setUserStore = useUserStore((state) => state.setUser);
+
+  const initialized = useRef(false);
 
   useEffect(() => {
-    if (!init.current) {
-      init.current = true;
-      useUserStore.setState({ user });
+    if (!initialized.current) {
+      initialized.current = true;
+      setUserStore(user);
     }
-  }, [user]);
+  }, [setUserStore, user]);
 
   return <>{children}</>;
 }

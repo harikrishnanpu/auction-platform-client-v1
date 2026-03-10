@@ -17,7 +17,7 @@ export function AdminHeader() {
           <div className="flex items-center gap-8">
             <Link
               href="/home"
-              className="font-bold text-xl tracking-tight font-serif text-foreground"
+              className="font-bold text-xl tracking-tight   text-foreground"
             >
               HammerDown
             </Link>

@@ -17,11 +17,11 @@ export const registerAction = async (
   return await authService.register(data);
 };
 
-type newCombinedType = UserInfo & { accessToken: string; refreshToken: string };
-
 export const loginAction = async (
   data: LoginFormValues
-): Promise<ApiResponse<newCombinedType>> => {
+): Promise<
+  ApiResponse<{ user: UserInfo; accessToken: string; refreshToken: string }>
+> => {
   return await authService.login(data);
 };
 
@@ -38,17 +38,32 @@ export const verifyEmailAction = async (data: {
   email: string;
   purpose: OtpPurpose;
   channel: OtpChannel;
-}): Promise<ApiResponse<newCombinedType>> => {
+}): Promise<
+  ApiResponse<{ user: UserInfo; accessToken: string; refreshToken: string }>
+> => {
   return await authService.verifyEmail(data);
 };
 
 export const completeProfileAction = async (data: {
   phone: string;
   address: string;
-}): Promise<ApiResponse<{ user: UserInfo }>> => {
+}): Promise<ApiResponse<UserInfo>> => {
   return await authService.completeProfile(data);
 };
 
 export const logoutAction = async (): Promise<ApiResponse<null>> => {
   return await authService.logout();
+};
+
+export const forgotPasswordAction = async (data: {
+  email: string;
+}): Promise<ApiResponse<null>> => {
+  return await authService.forgotPassword(data);
+};
+
+export const changePasswordAction = async (data: {
+  newPassword: string;
+  token: string;
+}): Promise<ApiResponse<null>> => {
+  return await authService.changePassword(data);
 };

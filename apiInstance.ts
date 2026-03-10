@@ -11,6 +11,17 @@ export const API_ENDPOINTS = {
     me: '/auth/me',
     completeProfile: '/auth/complete-profile',
     logout: '/auth/logout',
+    forgotPassword: '/auth/forgot-password',
+    changePassword: '/auth/change-password',
+  },
+
+  user: {
+    profile: '/user/profile',
+    getAvatarUploadUrl: '/user/get-avatar-upload-url',
+    editProfile: '/user/edit-profile',
+    sendProfileChangePasswordOtp: '/user/send-profile-change-password-otp',
+    changeProfilePassword: '/user/change-profile-password',
+    editProfileSendOtp: '/user/edit-profile-send-otp',
   },
 } as const;
 

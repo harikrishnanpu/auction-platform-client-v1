@@ -46,8 +46,9 @@ export function DashboardView() {
                 Market Open
               </p>
             </div>
-            <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-4 leading-tight font-serif">
-              Welcome back, {user?.name}.
+            <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
+              Welcome back, <br />
+              {user?.name}.
             </h1>
             <p className="text-muted-foreground max-w-lg text-lg">
               You have{' '}
@@ -94,7 +95,7 @@ export function DashboardView() {
             <p className="text-sm font-medium text-muted-foreground">
               Total Balance
             </p>
-            <h2 className="text-4xl font-bold text-foreground mt-2 tracking-tight font-serif tabular-nums font-outfit">
+            <h2 className="text-4xl font-bold text-foreground mt-2 tracking-tight   tabular-nums font-outfit">
               ₹ 42,500
             </h2>
           </div>
@@ -124,7 +125,7 @@ export function DashboardView() {
         {/* Active Bids / Live Auctions Section */}
         <div className="lg:col-span-8 space-y-8">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-2xl font-bold text-foreground font-serif">
+            <h3 className="text-2xl font-bold text-foreground  ">
               Live Auctions
             </h3>
             <a
@@ -192,7 +193,7 @@ export function DashboardView() {
                         </div>
                       )}
                     </div>
-                    <h5 className="text-xl font-bold text-foreground mb-1 font-serif truncate">
+                    <h5 className="text-xl font-bold text-foreground mb-1   truncate">
                       {auction.title}
                     </h5>
                     <p className="text-sm text-muted-foreground mb-4">
@@ -220,7 +221,7 @@ export function DashboardView() {
 
         <div className="lg:col-span-8 space-y-8">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-2xl font-bold text-foreground font-serif">
+            <h3 className="text-2xl font-bold text-foreground  ">
               Upcoming Auctions
             </h3>
           </div>
@@ -273,7 +274,7 @@ export function DashboardView() {
                         </div>
                       )}
                     </div>
-                    <h5 className="text-xl font-bold text-foreground mb-1 font-serif truncate">
+                    <h5 className="text-xl font-bold text-foreground mb-1   truncate">
                       {auction.title}
                     </h5>
                     <p className="text-sm text-muted-foreground mb-4">
@@ -304,9 +305,7 @@ export function DashboardView() {
           {/* Watchlist */}
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-3xl p-6 shadow-sm border border-white/50 dark:border-white/10">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-foreground font-serif">
-                Watchlist
-              </h3>
+              <h3 className="text-xl font-bold text-foreground  ">Watchlist</h3>
               <span className="bg-muted text-muted-foreground text-xs font-bold px-2.5 py-1 rounded-full border border-border font-outfit">
                 5 items
               </span>
@@ -395,7 +394,7 @@ export function DashboardView() {
                     Upcoming
                   </span>
                 </div>
-                <h3 className="text-2xl font-bold mb-3 leading-snug font-serif">
+                <h3 className="text-2xl font-bold mb-3 leading-snug  ">
                   Rare Sneakers Collection Drop
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed line-clamp-2 group-hover:text-gray-300 transition">

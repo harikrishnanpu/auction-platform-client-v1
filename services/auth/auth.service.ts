@@ -29,11 +29,11 @@ const getSession = async (): Promise<ApiResponse<UserInfo>> => {
   }
 };
 
-type newCombinedType = UserInfo & { accessToken: string; refreshToken: string };
-
 const login = async (
   data: LoginFormValues
-): Promise<ApiResponse<newCombinedType>> => {
+): Promise<
+  ApiResponse<{ user: UserInfo; accessToken: string; refreshToken: string }>
+> => {
   try {
     const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.login), {
       method: 'POST',
@@ -43,10 +43,15 @@ const login = async (
       body: JSON.stringify(data),
     });
 
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+
     const response = await res.json();
     (await cookies()).set('accessToken', response.data.accessToken);
     (await cookies()).set('refreshToken', response.data.refreshToken);
-    return response;
+    return { success: true, data: response.data };
   } catch (error: unknown) {
     return { success: false, data: null, error: getErrorMessage(error) };
   }
@@ -115,7 +120,9 @@ const sendVerificationCode = async (data: {
 const verifyEmail = async (data: {
   otp: string;
   email: string;
-}): Promise<ApiResponse<newCombinedType>> => {
+}): Promise<
+  ApiResponse<{ user: UserInfo; accessToken: string; refreshToken: string }>
+> => {
   try {
     const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.verifyEmail), {
       method: 'POST',
@@ -142,12 +149,14 @@ const verifyEmail = async (data: {
 const completeProfile = async (data: {
   phone: string;
   address: string;
-}): Promise<ApiResponse<{ user: UserInfo }>> => {
+}): Promise<ApiResponse<UserInfo>> => {
   try {
+    const cookieStorage = await cookies();
     const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.completeProfile), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Cookie: cookieStorage.toString(),
       },
       body: JSON.stringify(data),
     });
@@ -174,6 +183,55 @@ const logout = async (): Promise<ApiResponse<null>> => {
   }
 };
 
+const forgotPassword = async (data: {
+  email: string;
+}): Promise<ApiResponse<null>> => {
+  try {
+    const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.forgotPassword), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+
+    const response = await res.json();
+    return response;
+  } catch (error: unknown) {
+    return { success: false, data: null, error: getErrorMessage(error) };
+  }
+};
+
+const changePassword = async (data: {
+  newPassword: string;
+  token: string;
+}): Promise<ApiResponse<null>> => {
+  try {
+    const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.changePassword), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+
+    const response = await res.json();
+    return response;
+  } catch (error: unknown) {
+    return { success: false, data: null, error: getErrorMessage(error) };
+  }
+};
+
 export const authService = {
   getSession,
   login,
@@ -182,4 +240,6 @@ export const authService = {
   verifyEmail,
   completeProfile,
   logout,
+  forgotPassword,
+  changePassword,
 };
