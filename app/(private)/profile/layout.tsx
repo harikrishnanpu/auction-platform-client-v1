@@ -48,7 +48,7 @@ export default function ProfileLayout({
           <Card className="p-4 sticky top-24 border-border/50 shadow-sm bg-card/50 backdrop-blur-sm">
             <CardContent className="flex flex-col items-center justify-center">
               <div className="mb-2 relative">
-                <AvatarUpload user={user} onUploadSuccess={() => {}} />
+                <AvatarUpload user={user} onUploadSuccess={setUser} />
               </div>
               <div className="flex flex-col items-center justify-center text-center">
                 <p className="text-2xl font-bold">{user.name}</p>
