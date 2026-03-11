@@ -140,7 +140,7 @@ export function DashboardHeader() {
                   {user?.avatar_url ? (
                     <Image
                       className="rounded-full"
-                      src={user?.avatar_url}
+                      src={`https://hammer-down-auction-platform.s3.ap-south-1.amazonaws.com/${user?.avatar_url}`}
                       alt="avatar_url"
                       width={42}
                       height={42}

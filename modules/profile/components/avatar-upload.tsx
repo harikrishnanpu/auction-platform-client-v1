@@ -6,13 +6,18 @@ import { Camera, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { UserInfo as User } from '@/types/user.type';
 import { getErrorMessage } from '@/utils/get-app-error';
+import {
+  getAvatarUploadUrlAction,
+  updateAvatarAction,
+  uploadAvatarAction,
+} from '@/actions/user/profile.actions';
 
 interface AvatarUploadProps {
   user: User;
-  onUploadSuccess: () => void;
+  onUploadSuccess: (user: User) => void;
 }
 
-export function AvatarUpload({ user }: AvatarUploadProps) {
+export function AvatarUpload({ user, onUploadSuccess }: AvatarUploadProps) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -24,6 +29,7 @@ export function AvatarUpload({ user }: AvatarUploadProps) {
       toast.error('Image size must be less than 5MB');
       return;
     }
+
     if (!file.type.startsWith('image/')) {
       toast.error('Only image files are allowed');
       return;
@@ -31,8 +37,39 @@ export function AvatarUpload({ user }: AvatarUploadProps) {
 
     setUploading(true);
     try {
+      const response = await getAvatarUploadUrlAction({
+        contentType: file.type,
+        fileName: file.name,
+        fileSize: file.size,
+      });
+
+      if (!response.success || !response.data) {
+        toast.error(response.error || 'Failed to get upload url');
+        return;
+      }
+
+      const { uploadUrl, fileKey } = response.data;
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileKey', fileKey);
+
+      const uploadResponse = await uploadAvatarAction(uploadUrl, file);
+
+      if (!uploadResponse.success) {
+        toast.error(uploadResponse.error || 'Failed to upload avatar');
+        return;
+      }
+
+      const updateResponse = await updateAvatarAction(fileKey);
+
+      if (!updateResponse.success || !updateResponse.data) {
+        toast.error(updateResponse.error || 'Failed to update avatar');
+        return;
+      }
+
+      onUploadSuccess(updateResponse.data.user);
     } catch (error: unknown) {
-      console.error('Avatar upload error:', error);
       const errorMessage = getErrorMessage(error) || 'Failed to upload avatar';
       toast.error(errorMessage);
     } finally {
@@ -53,15 +90,11 @@ export function AvatarUpload({ user }: AvatarUploadProps) {
           </div>
         ) : user.avatar_url ? (
           <Image
-            src={user.avatar_url}
+            src={`https://hammer-down-auction-platform.s3.ap-south-1.amazonaws.com/${user?.avatar_url}`}
             alt={user.name}
             width={128}
             height={128}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            unoptimized={
-              !!user.avatar_url?.includes('googleusercontent') ||
-              !!user.avatar_url?.includes('amazonaws')
-            }
           />
         ) : (
           <div className="h-full w-full flex items-center justify-center bg-gray-200 text-muted-foreground font-medium">

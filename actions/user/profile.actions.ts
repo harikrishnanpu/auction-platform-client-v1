@@ -14,12 +14,6 @@ export const editProfileAction = async (
   return await profileService.editProfile(data);
 };
 
-export const getAvatarUploadUrlAction = async (): Promise<
-  ApiResponse<string>
-> => {
-  return await profileService.getAvatarUploadUrl();
-};
-
 export const sendProfileChangePasswordOtpAction = async (): Promise<
   ApiResponse<null>
 > => {
@@ -36,4 +30,33 @@ export const editProfileSendOtpAction = async (): Promise<
   ApiResponse<null>
 > => {
   return await profileService.editProfileSendOtp();
+};
+
+export const getAvatarUploadUrlAction = async ({
+  contentType,
+  fileName,
+  fileSize,
+}: {
+  contentType: string;
+  fileName: string;
+  fileSize: number;
+}): Promise<ApiResponse<{ uploadUrl: string; fileKey: string }>> => {
+  return await profileService.getAvatarUploadUrl({
+    contentType: contentType,
+    fileName: fileName,
+    fileSize: fileSize,
+  });
+};
+
+export const uploadAvatarAction = async (
+  uploadUrl: string,
+  file: File
+): Promise<ApiResponse<null>> => {
+  return await profileService.uploadAvatar(uploadUrl, file);
+};
+
+export const updateAvatarAction = async (
+  fileKey: string
+): Promise<ApiResponse<{ user: UserInfo }>> => {
+  return await profileService.updateAvatar(fileKey);
 };
