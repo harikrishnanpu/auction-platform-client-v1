@@ -32,8 +32,26 @@ export const API_ENDPOINTS = {
     generateKycUploadUrl: '/kyc/get-kyc-upload-url',
     updateKyc: '/kyc/update-kyc',
   },
+
+  admin: {
+    getAllUsers: '/admin/users',
+    blockUser: '/admin/users/block',
+    getAdminUser: '/admin/users',
+  },
 } as const;
 
 export const buildApiUrl = (endpoint: string): string => {
   return `${API_BASE_URL}${endpoint}`;
 };
+
+export function buildQuery(params: Record<string, string | number>) {
+  const query = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      query.append(key, String(value));
+    }
+  });
+
+  return query.toString();
+}

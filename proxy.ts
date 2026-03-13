@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authGetSesssion } from './actions/auth/auth.actions';
+import { UserRole } from './types/user.type';
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -13,29 +14,50 @@ export async function proxy(request: NextRequest) {
     '/email',
   ];
 
+  const ADMIN_ROUTES = ['/admin'];
+
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
     pathname.startsWith(route)
   );
+
+  const isAdminRoute = ADMIN_ROUTES.some((route) => pathname.startsWith(route));
 
   const response = await authGetSesssion();
 
   console.log('response/proxy/auth/me', response);
 
+  const isLoggedIn = response.success;
+  const isAdmin = response.data?.roles?.includes(UserRole.ADMIN);
+
+  const USER_HOME = '/home';
+  const ADMIN_HOME = '/admin/dashboard';
+  const DASHBOARD = isAdmin ? ADMIN_HOME : USER_HOME;
+
   // ROOT
   if (pathname === '/') {
-    if (response.success) {
-      return NextResponse.redirect(new URL('/home', request.url));
+    if (isLoggedIn) {
+      return NextResponse.redirect(new URL(DASHBOARD, request.url));
     }
     return NextResponse.next();
   }
 
   // NOT LOGGED IN
-  if (!response.success) {
+  if (!isLoggedIn) {
     if (isPublicRoute) {
       return NextResponse.next();
     }
 
     return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // ADMIN TRYING TO ACCESS USER AREA
+  if (isAdmin && !isAdminRoute && pathname.startsWith('/home')) {
+    return NextResponse.redirect(new URL(ADMIN_HOME, request.url));
+  }
+
+  // NON ADMIN TRYING TO ACCESS ADMIN
+  if (!isAdmin && isAdminRoute) {
+    return NextResponse.redirect(new URL(USER_HOME, request.url));
   }
 
   // PROFILE NOT COMPLETED
@@ -52,7 +74,7 @@ export async function proxy(request: NextRequest) {
     response.data?.isProfileCompleted &&
     pathname.startsWith('/complete-profile')
   ) {
-    return NextResponse.redirect(new URL('/home', request.url));
+    return NextResponse.redirect(new URL(DASHBOARD, request.url));
   }
 
   // EMAIL NOT VERIFIED
@@ -69,12 +91,12 @@ export async function proxy(request: NextRequest) {
 
   // USER VERIFIED BUT TRYING TO ACCESS EMAIL PAGE
   if (response.data?.isVerified && pathname.startsWith('/email')) {
-    return NextResponse.redirect(new URL('/home', request.url));
+    return NextResponse.redirect(new URL(DASHBOARD, request.url));
   }
 
   // LOGGED IN USER TRYING TO ACCESS PUBLIC ROUTES
   if (isPublicRoute) {
-    return NextResponse.redirect(new URL('/home', request.url));
+    return NextResponse.redirect(new URL(DASHBOARD, request.url));
   }
 
   return NextResponse.next();
