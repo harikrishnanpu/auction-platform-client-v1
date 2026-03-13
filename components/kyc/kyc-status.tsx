@@ -144,7 +144,6 @@ export function KycStatus({ status = 'INITIAL' }: KycStatusProps) {
         </div>
       </div>
 
-      {/* Support Card */}
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 shadow-lg text-white">
         <div className="flex items-start justify-between mb-4">
           <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center backdrop-blur-sm">

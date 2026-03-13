@@ -21,6 +21,7 @@ export const kycService = {
         body: JSON.stringify({
           kycFor: kycFor,
         }),
+        cache: 'no-store',
       });
 
       if (!res.ok) {
@@ -138,11 +139,14 @@ export const kycService = {
           fileKey: fileKey,
           side: side,
         }),
+        cache: 'no-store',
       });
 
       const response = await res.json();
 
       if (!res.ok) {
+        console.log('ERROR IN UPDATE KYC !OK');
+
         throw new Error(response.message);
       }
 
@@ -150,7 +154,45 @@ export const kycService = {
 
       return { success: true, data: response.data };
     } catch (error: unknown) {
-      console.log(error);
+      console.log(' ERROR IN UPDATE KYC');
+      return { success: false, data: null, error: getErrorMessage(error) };
+    }
+  },
+
+  submitKyc: async ({
+    kycFor,
+  }: {
+    kycFor: KycFor;
+  }): Promise<ApiResponse<IKycStatusOutput>> => {
+    try {
+      const cookieStorage = await cookies();
+
+      const res = await fetch(buildApiUrl(API_ENDPOINTS.kyc.submitKyc), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: cookieStorage.toString(),
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          kycFor: kycFor,
+        }),
+        cache: 'no-store',
+      });
+
+      const response = await res.json();
+
+      if (!res.ok) {
+        console.log('ERROR IN SUBMIT KYC !OK');
+
+        throw new Error(response.message);
+      }
+
+      console.log('RESOPONSE: CHECK:', response);
+
+      return { success: true, data: response.data };
+    } catch (error: unknown) {
+      console.log(' ERROR IN SUBMIT KYC');
       return { success: false, data: null, error: getErrorMessage(error) };
     }
   },

@@ -46,5 +46,6 @@ export interface KycProfile {
   userId: string;
   status: KycStatusEnum;
   for: KycFor;
+  rejection_reason_message?: string;
   documents: IKycDocumentResponseDto[];
 }

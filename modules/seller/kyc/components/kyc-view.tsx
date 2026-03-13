@@ -6,7 +6,6 @@ import {
   ShieldAlert,
   Loader2 as LoaderIcon,
 } from 'lucide-react';
-import { DashboardHeader } from '@/components/layout/navbars/navbar';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { PersonalInfo } from '@/components/kyc/personal-info';
 import { DocumentUpload } from '@/components/kyc/document-upload';
@@ -14,20 +13,9 @@ import { LivenessCheck } from '@/components/kyc/liveness-check';
 import { KycStatus } from '@/components/kyc/kyc-status';
 import { KycSuccessModal } from '@/components/kyc/kyc-success-modal';
 
-import { KycProfile } from '@/types/kyc.type';
 import { useSellerKyc } from '@/modules/seller/kyc/hooks/use-seller-kyc';
 
-interface SellerKycViewProps {
-  initialProfile: KycProfile | null;
-  initialStatus: string | null;
-  initialError?: string;
-}
-
-export function SellerKycView({
-  initialProfile,
-  initialStatus,
-  initialError,
-}: SellerKycViewProps) {
+export function SellerKycView() {
   const {
     status,
     loading,
@@ -41,9 +29,8 @@ export function SellerKycView({
     setLivenessCompleted,
     handleSubmit,
     handleModalClose,
-    retryLoad,
     returnToDashboard,
-  } = useSellerKyc(initialStatus ?? '', initialProfile);
+  } = useSellerKyc();
 
   if (status === 'loading') {
     return (
@@ -53,26 +40,9 @@ export function SellerKycView({
     );
   }
 
-  if (initialError) {
-    return (
-      <div className="min-h-screen font-sans bg-background text-foreground flex items-center justify-center px-4">
-        <div className="max-w-md text-center">
-          <p className="text-sm text-red-500 mb-4">{initialError}</p>
-          <button
-            onClick={retryLoad}
-            className="text-primary hover:underline text-sm font-medium"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   if (status === 'PENDING' || status === 'VERIFIED') {
     return (
       <div className="min-h-screen font-sans transition-colors duration-300 bg-background text-foreground">
-        <DashboardHeader />
         <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 animate-in fade-in duration-500">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-4">
@@ -99,7 +69,6 @@ export function SellerKycView({
             </button>
           </div>
         </main>
-        <SiteFooter />
       </div>
     );
   }

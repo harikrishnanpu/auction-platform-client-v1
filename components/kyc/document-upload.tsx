@@ -14,9 +14,14 @@ import {
   updateKycAction,
   uploadKycToS3Action,
 } from '@/actions/kyc/kyc.action';
-import { DocumentSide, DocumentType, KycFor } from '@/types/kyc.type';
+import {
+  DocumentSide,
+  DocumentType,
+  KycFor,
+  KycProfile,
+  KycStatusEnum,
+} from '@/types/kyc.type';
 import { getErrorMessage } from '@/utils/get-app-error';
-import Image from 'next/image';
 
 export interface UploadedFile {
   documentType: DocumentType;
@@ -29,7 +34,7 @@ export interface UploadedFile {
 
 interface DocumentUploadProps {
   uploadedFiles: UploadedFile[];
-  onUploadSuccess: (file: UploadedFile) => void;
+  onUploadSuccess: (data: { kyc: KycProfile; status: KycStatusEnum }) => void;
   onRemoveDocument?: (
     documentType: DocumentType,
     documentSide?: DocumentSide
@@ -41,7 +46,6 @@ export function DocumentUpload({
   uploadedFiles,
   onUploadSuccess,
   onRemoveDocument,
-  kycType = 'SELLER',
 }: DocumentUploadProps) {
   const [idFrontFile, setIdFrontFile] = useState<File | null>(null);
   const [idBackFile, setIdBackFile] = useState<File | null>(null);
@@ -82,6 +86,7 @@ export function DocumentUpload({
     }
 
     setFile(file);
+
     setUploadErrors((prev) => ({
       ...prev,
       [documentType + '_' + documentSide]: null,
@@ -140,14 +145,7 @@ export function DocumentUpload({
         throw new Error(updateKycResponse.error || 'Failed to update kyc');
       }
 
-      onUploadSuccess({
-        documentType,
-        documentSide,
-        fileKey,
-        fileName: file.name,
-        fileSize: file.size,
-        status: 'success',
-      });
+      onUploadSuccess(updateKycResponse.data);
 
       if (
         documentType === DocumentType.ID &&
@@ -175,14 +173,7 @@ export function DocumentUpload({
           getErrorMessage(error) || 'Failed to generate upload URL',
       }));
 
-      onUploadSuccess({
-        documentType,
-        documentSide,
-        fileKey: '',
-        fileName: file.name,
-        fileSize: file.size,
-        status: 'error',
-      });
+      // Error handled by local state
     } finally {
       setUploading(null);
     }
@@ -283,7 +274,7 @@ export function DocumentUpload({
                           </p>
                         </div>
                       ) : (
-                        <Image
+                        <img
                           src={getFileUrl(
                             getUploadedFile(DocumentType.ID, DocumentSide.FRONT)
                               ?.fileKey || ''
@@ -405,7 +396,7 @@ export function DocumentUpload({
                           </p>
                         </div>
                       ) : (
-                        <Image
+                        <img
                           src={getFileUrl(
                             getUploadedFile(DocumentType.ID, DocumentSide.BACK)
                               ?.fileKey || ''
@@ -541,7 +532,7 @@ export function DocumentUpload({
                     .includes('pdf') ? (
                     <FileText className="h-8 w-8 text-green-500" />
                   ) : (
-                    <Image
+                    <img
                       src={getFileUrl(
                         getUploadedFile(
                           DocumentType.ADDRESS_PROOF,

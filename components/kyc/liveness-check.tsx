@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/buttons/button';
 import { toast } from 'sonner';
-import Image from 'next/image';
 
 interface LivenessCheckProps {
   isCompleted: boolean;
@@ -140,7 +139,7 @@ export function LivenessCheck({ isCompleted, onComplete }: LivenessCheckProps) {
         {capturedImage && (
           <div className="flex flex-col items-center gap-4 animate-in fade-in zoom-in duration-300">
             <div className="relative rounded-2xl overflow-hidden shadow-lg aspect-square w-[300px] border border-border">
-              <Image
+              <img
                 src={capturedImage}
                 alt="Captured"
                 className="w-full h-full object-cover"

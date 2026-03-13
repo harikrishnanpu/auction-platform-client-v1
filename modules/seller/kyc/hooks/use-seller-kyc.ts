@@ -9,25 +9,27 @@ import {
   KycStatusEnum,
   DocumentType,
   DocumentSide,
+  KycFor,
 } from '@/types/kyc.type';
 import { useRouter } from 'next/navigation';
+import useKycStore from '@/store/kyc.store';
+import { submitKycAction } from '@/actions/kyc/kyc.action';
+import { getErrorMessage } from '@/utils/get-app-error';
 
-export function useSellerKyc(
-  initialStatus: string,
-  initialProfile: KycProfile | null
-) {
+export function useSellerKyc() {
   const router = useRouter();
 
-  const [status, setStatus] = useState<string>(
-    initialStatus || KycStatusEnum.PENDING
-  );
+  const { kycProfile, kycStatus, setKycData } = useKycStore();
+
+  const status =
+    typeof kycStatus === 'string' ? kycStatus : KycStatusEnum.PENDING;
   const [loading, setLoading] = useState(false);
 
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>(() => {
-    if (!initialProfile || initialStatus === KycStatusEnum.REJECTED) return [];
+  const uploadedFiles = React.useMemo(() => {
+    if (!kycProfile || status === KycStatusEnum.REJECTED) return [];
 
     const files: UploadedFile[] = [];
-    initialProfile.documents?.forEach((doc) => {
+    kycProfile.documents?.forEach((doc) => {
       let docType: DocumentType | null = null;
       let side: DocumentSide | undefined = undefined;
 
@@ -42,6 +44,7 @@ export function useSellerKyc(
         (doc.documentType as string) === 'ADDRESS_PROOF'
       ) {
         docType = DocumentType.ADDRESS_PROOF;
+        side = DocumentSide.FRONT;
       }
 
       if (docType) {
@@ -56,44 +59,50 @@ export function useSellerKyc(
       }
     });
     return files;
-  });
+  }, [kycProfile, status]);
 
   const [livenessCompleted, setLivenessCompleted] = useState(() => {
-    if (!initialProfile || initialStatus === 'REJECTED') return false;
+    if (!kycProfile || status === 'REJECTED') return false;
     return (
-      initialProfile.status === KycStatusEnum.PENDING ||
-      initialProfile.status === KycStatusEnum.APPROVED ||
-      initialStatus === KycStatusEnum.SUBMITTED
+      kycProfile.status === KycStatusEnum.PENDING ||
+      kycProfile.status === KycStatusEnum.APPROVED ||
+      status === KycStatusEnum.SUBMITTED
     );
   });
 
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const rejectReason = initialProfile?.rejection_reason_message || null;
+  const rejectReason = kycProfile?.rejection_reason_message || null;
 
-  const handleUploadSuccess = (file: UploadedFile) => {
-    setUploadedFiles((prev) => [
-      ...prev.filter(
-        (f) =>
-          !(
-            f.documentType === file.documentType &&
-            f.documentSide === file.documentSide
-          )
-      ),
-      file,
-    ]);
+  const handleUploadSuccess = (updatedKycData: {
+    kyc: KycProfile;
+    status: KycStatusEnum;
+  }) => {
+    if (updatedKycData) {
+      setKycData(updatedKycData.kyc, updatedKycData.status);
+    }
   };
 
-  const handleRemoveDocument = (
+  const handleRemoveDocument = async (
     documentType: DocumentType,
     documentSide?: DocumentSide
   ) => {
-    setUploadedFiles((prev) =>
-      prev.filter(
-        (f) =>
-          !(f.documentType === documentType && f.documentSide === documentSide)
-      )
-    );
+    if (kycProfile) {
+      const updatedDocs = kycProfile.documents.filter((f) => {
+        const isMatchType =
+          (f.documentType as string) === (documentType as string) ||
+          f.documentType === documentType;
+        const isMatchSide =
+          !documentSide ||
+          (f.side as string) === (documentSide as string) ||
+          f.side === documentSide;
+        return !(isMatchType && isMatchSide);
+      });
+      setKycData(
+        { ...kycProfile, documents: updatedDocs },
+        kycStatus as string
+      );
+    }
   };
 
   const validateForm = () => {
@@ -144,15 +153,12 @@ export function useSellerKyc(
     setValidationErrors([]);
     try {
       setLoading(true);
-      // await kycService.submitKyc('SELLER');
+      await submitKycAction({ kycFor: KycFor.SELLER });
       setShowSuccessModal(true);
-      setStatus('PENDING');
+      setKycData(kycProfile as KycProfile, 'PENDING');
       window.scrollTo(0, 0);
-    } catch (error) {
-      console.log('Submit error:', error);
-      const message =
-        (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || 'Failed to submit KYC';
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
       toast.error(message);
     } finally {
       setLoading(false);
@@ -161,7 +167,7 @@ export function useSellerKyc(
 
   const handleModalClose = () => {
     setShowSuccessModal(false);
-    setStatus('PENDING');
+    setKycData(kycProfile as KycProfile, 'PENDING');
   };
 
   const retryLoad = () => {

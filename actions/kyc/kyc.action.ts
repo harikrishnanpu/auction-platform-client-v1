@@ -52,3 +52,11 @@ export const updateKycAction = async ({
 }): Promise<ApiResponse<IKycStatusOutput>> => {
   return await kycService.updateKyc({ kycFor, documentType, fileKey, side });
 };
+
+export const submitKycAction = async ({
+  kycFor,
+}: {
+  kycFor: KycFor;
+}): Promise<ApiResponse<IKycStatusOutput>> => {
+  return await kycService.submitKyc({ kycFor });
+};
