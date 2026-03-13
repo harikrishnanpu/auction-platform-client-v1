@@ -10,3 +10,9 @@ export interface IgetllUsersParams {
   status: UserStatus | 'ALL';
   authProvider: AuthProvider | 'ALL';
 }
+
+export interface IgetllSellersParams {
+  page: number;
+  limit: number;
+  pendingOnly?: boolean;
+}
