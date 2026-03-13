@@ -11,12 +11,19 @@ export enum AuthProvider {
   LOCAL = 'LOCAL',
 }
 
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  BLOCKED = 'BLOCKED',
+  PENDING = 'PENDING',
+}
+
 export interface UserInfo {
   id: string;
   name: string;
   email: string;
   isVerified: boolean;
   isProfileCompleted: boolean;
+  status: UserStatus;
   authProvider: AuthProvider;
   roles: UserRole[];
   phone?: string;
