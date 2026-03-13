@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { Camera, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { UserInfo as User } from '@/types/user.type';
+import { AuthProvider, UserInfo as User } from '@/types/user.type';
 import { getErrorMessage } from '@/utils/get-app-error';
 import {
   getAvatarUploadUrlAction,
@@ -89,13 +89,23 @@ export function AvatarUpload({ user, onUploadSuccess }: AvatarUploadProps) {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : user.avatar_url ? (
-          <Image
-            src={`https://hammer-down-auction-platform.s3.ap-south-1.amazonaws.com/${user?.avatar_url}`}
-            alt={user.name}
-            width={128}
-            height={128}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          user?.authProvider == AuthProvider.LOCAL ? (
+            <Image
+              className="rounded-full"
+              src={`https://hammer-down-auction-platform.s3.ap-south-1.amazonaws.com/${user?.avatar_url}`}
+              alt="avatar_url"
+              width={128}
+              height={128}
+            />
+          ) : (
+            <Image
+              className="rounded-full"
+              src={user?.avatar_url}
+              alt="avatar_url"
+              width={128}
+              height={128}
+            />
+          )
         ) : (
           <div className="h-full w-full flex items-center justify-center bg-gray-200 text-muted-foreground font-medium">
             <span className="text-2xl font-bold text-gray-600">

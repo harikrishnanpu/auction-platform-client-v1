@@ -23,6 +23,14 @@ export const API_ENDPOINTS = {
     changeProfilePassword: '/user/change-profile-password',
     editProfileSendOtp: '/user/edit-profile-send-otp',
     updateAvatar: '/user/update-avatar-url',
+    getKycUploadUrl: '/user/get-kyc-upload-url',
+  },
+
+  kyc: {
+    getKycStatus: '/kyc/get-kyc-status',
+    submitKyc: '/kyc/submit-kyc',
+    generateKycUploadUrl: '/kyc/get-kyc-upload-url',
+    updateKyc: '/kyc/update-kyc',
   },
 } as const;
 

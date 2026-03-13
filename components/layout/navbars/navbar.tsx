@@ -17,6 +17,7 @@ import Image from 'next/image';
 import { logoutAction } from '@/actions/auth/auth.actions';
 import { useRouter } from 'next/navigation';
 import useUserStore from '@/store/user.store';
+import { AuthProvider } from '@/types/user.type';
 
 export function DashboardHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -138,13 +139,23 @@ export function DashboardHeader() {
               >
                 <div className="w-8 h-8 rounded-full bg-linear-to-tr from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow-md border border-white/20">
                   {user?.avatar_url ? (
-                    <Image
-                      className="rounded-full"
-                      src={`https://hammer-down-auction-platform.s3.ap-south-1.amazonaws.com/${user?.avatar_url}`}
-                      alt="avatar_url"
-                      width={42}
-                      height={42}
-                    />
+                    user?.authProvider == AuthProvider.LOCAL ? (
+                      <Image
+                        className="rounded-full"
+                        src={`https://hammer-down-auction-platform.s3.ap-south-1.amazonaws.com/${user?.avatar_url}`}
+                        alt="avatar_url"
+                        width={42}
+                        height={42}
+                      />
+                    ) : (
+                      <Image
+                        className="rounded-full"
+                        src={user?.avatar_url}
+                        alt="avatar_url"
+                        width={42}
+                        height={42}
+                      />
+                    )
                   ) : (
                     userInitials
                   )}
