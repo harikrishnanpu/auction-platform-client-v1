@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { SellerTable } from './seller-table';
 import {
-  blockSellerAction,
+  blockUserAction,
   getAllSellersAction,
 } from '@/actions/admin/admin.actions';
 import { SellerInfo } from '@/services/admin/admin.service';
@@ -66,8 +66,8 @@ export function SellerManagementView() {
     setPage(1);
   };
 
-  const handleBlockSeller = async (id: string, block: boolean) => {
-    const res = await blockSellerAction(id, block);
+  const handleBlockUser = async (id: string, block: boolean) => {
+    const res = await blockUserAction(id, block);
 
     if (res.success) {
       setSellers((prev) =>
@@ -78,10 +78,10 @@ export function SellerManagementView() {
         )
       );
       toast.success(
-        block ? 'Seller blocked successfully' : 'Seller unblocked successfully'
+        block ? 'User blocked successfully' : 'User unblocked successfully'
       );
     } else {
-      toast.error(res.error ?? 'Failed to update seller');
+      toast.error(res.error ?? 'Failed to update user status');
     }
   };
 
@@ -139,7 +139,7 @@ export function SellerManagementView() {
         totalPages={totalPages}
         onPageChange={setPage}
         totalSellers={totalSellers}
-        onBlockSeller={handleBlockSeller}
+        onBlockSeller={handleBlockUser}
       />
     </div>
   );

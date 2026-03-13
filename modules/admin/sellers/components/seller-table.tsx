@@ -254,7 +254,11 @@ export function SellerTable({
                   ? 'text-green-600 dark:text-green-400 hover:text-green-700'
                   : 'text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400'
               }`}
-              title={seller.status === UserStatus.BLOCKED ? 'Unblock' : 'Block'}
+              title={
+                seller.status === UserStatus.BLOCKED
+                  ? 'Unblock User'
+                  : 'Block User'
+              }
             >
               <Ban size={18} />
             </button>
@@ -292,7 +296,7 @@ export function SellerTable({
               </button>
             </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              {confirmBlock.block ? 'Block Seller?' : 'Unblock Seller?'}
+              {confirmBlock.block ? 'Block User?' : 'Unblock User?'}
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
               Are you sure you want to{' '}
@@ -319,7 +323,7 @@ export function SellerTable({
                     : 'bg-green-600 hover:bg-green-700 shadow-green-500/20'
                 }`}
               >
-                {confirmBlock.block ? 'Confirm Block' : 'Confirm Unblock'}
+                {confirmBlock.block ? 'Block User' : 'Unblock User'}
               </button>
             </div>
           </div>

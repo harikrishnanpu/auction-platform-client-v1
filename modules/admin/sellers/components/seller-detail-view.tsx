@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import {
-  blockSellerAction,
+  blockUserAction,
   getAdminSellerAction,
   approveSellerKycAction,
   rejectSellerKycAction,
@@ -164,7 +164,7 @@ export function SellerDetailView() {
     if (!confirmBlock) return;
     setBlocking(true);
     try {
-      const res = await blockSellerAction(confirmBlock.id, confirmBlock.block);
+      const res = await blockUserAction(confirmBlock.id, confirmBlock.block);
       if (res.success) {
         setSeller((prev) =>
           prev
@@ -197,8 +197,14 @@ export function SellerDetailView() {
       const res = await approveSellerKycAction(seller.id);
       if (res.success) {
         setSeller((prev) =>
-          prev && prev.kyc
-            ? { ...prev, kyc: { ...prev.kyc, status: KycStatusEnum.APPROVED } }
+          prev
+            ? {
+                ...prev,
+                kycStatus: KycStatusEnum.APPROVED,
+                kyc: prev.kyc
+                  ? { ...prev.kyc, status: KycStatusEnum.APPROVED }
+                  : undefined,
+              }
             : prev
         );
         toast.success('KYC approved.');
@@ -223,14 +229,17 @@ export function SellerDetailView() {
       const res = await rejectSellerKycAction(seller.id, rejectReason.trim());
       if (res.success) {
         setSeller((prev) =>
-          prev && prev.kyc
+          prev
             ? {
                 ...prev,
-                kyc: {
-                  ...prev.kyc,
-                  status: KycStatusEnum.REJECTED,
-                  rejection_reason_message: rejectReason.trim(),
-                },
+                kycStatus: KycStatusEnum.REJECTED,
+                kyc: prev.kyc
+                  ? {
+                      ...prev.kyc,
+                      status: KycStatusEnum.REJECTED,
+                      rejection_reason_message: rejectReason.trim(),
+                    }
+                  : undefined,
               }
             : prev
         );
@@ -284,7 +293,9 @@ export function SellerDetailView() {
 
   const isBlocked = seller.status === UserStatus.BLOCKED;
   const kyc = seller.kyc;
-  const kycStatus = kyc?.status ?? KycStatusEnum.NOT_SUBMITTED;
+  const kycStatus = (seller.kycStatus ??
+    kyc?.status ??
+    KycStatusEnum.NOT_SUBMITTED) as KycStatusEnum;
   const canActOnKyc =
     kycStatus === KycStatusEnum.SUBMITTED ||
     kycStatus === KycStatusEnum.PENDING;
@@ -345,7 +356,7 @@ export function SellerDetailView() {
             }`}
           >
             <Ban size={16} />
-            {isBlocked ? 'Unblock Seller' : 'Block Seller'}
+            {isBlocked ? 'Unblock User' : 'Block User'}
           </button>
         </div>
       </div>

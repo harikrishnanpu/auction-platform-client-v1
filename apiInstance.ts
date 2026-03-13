@@ -39,9 +39,8 @@ export const API_ENDPOINTS = {
     getAdminUser: '/admin/users',
     getAllSellers: '/admin/sellers',
     getAdminSeller: '/admin/sellers',
-    blockSeller: '/admin/sellers/block',
-    approveSellerKyc: '/admin/sellers/kyc/approve',
-    rejectSellerKyc: '/admin/sellers/kyc/reject',
+    approveSellerKyc: '/admin/sellers',
+    rejectSellerKyc: '/admin/sellers',
   },
 } as const;
 

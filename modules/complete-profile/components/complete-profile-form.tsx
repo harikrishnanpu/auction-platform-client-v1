@@ -4,6 +4,7 @@ import { Phone, MapPin, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCompleteProfile } from '../hooks/useCompleteProfile';
 import { logoutAction } from '@/actions/auth/auth.actions';
+import useUserStore from '@/store/user.store';
 
 export function CompleteProfileForm() {
   const { form, isSubmitting, onSubmit } = useCompleteProfile();
@@ -12,6 +13,7 @@ export function CompleteProfileForm() {
     formState: { errors },
   } = form;
   const router = useRouter();
+  const setUser = useUserStore((s) => s.setUser);
 
   return (
     <div className="w-full max-w-md bg-[#F0F6FA]/80 backdrop-blur-xl border dark:bg-blue-500/10 rounded-[2rem] shadow-xl p-8 md:p-10 relative overflow-hidden fade-in">
@@ -105,6 +107,7 @@ export function CompleteProfileForm() {
               type="button"
               onClick={async () => {
                 await logoutAction();
+                setUser(null);
                 router.replace('/login');
               }}
               className="font-bold text-black dark:text-white hover:underline transition-all"

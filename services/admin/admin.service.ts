@@ -177,35 +177,20 @@ export const adminService = {
       if (!response.success)
         throw new Error(response.error ?? response.message);
 
-      const seller: SellerInfo = response.data?.seller ?? response.data;
+      const raw = response.data?.seller ?? response.data;
+      const kyc = raw?.kyc
+        ? {
+            ...raw.kyc,
+            rejection_reason_message:
+              raw.kyc.rejectionReason ?? raw.kyc.rejection_reason_message,
+          }
+        : undefined;
+      const seller: SellerInfo = {
+        ...raw,
+        kycStatus: raw?.kycStatus ?? raw?.kyc?.status,
+        kyc,
+      };
       return { success: true, data: seller };
-    } catch (err: unknown) {
-      return { success: false, data: null, error: getErrorMessage(err) };
-    }
-  },
-
-  blockSeller: async (
-    id: string,
-    block: boolean,
-    cookieString: string
-  ): Promise<ApiResponse<null>> => {
-    try {
-      const res = await fetch(
-        buildApiUrl(`${API_ENDPOINTS.admin.blockSeller}/${id}`),
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', Cookie: cookieString },
-          credentials: 'include',
-          body: JSON.stringify({ block }),
-        }
-      );
-
-      const response = await res.json();
-      if (!res.ok) throw new Error(response.error ?? response.message);
-      if (!response.success)
-        throw new Error(response.error ?? response.message);
-
-      return { success: true, data: null };
     } catch (err: unknown) {
       return { success: false, data: null, error: getErrorMessage(err) };
     }
@@ -217,7 +202,9 @@ export const adminService = {
   ): Promise<ApiResponse<null>> => {
     try {
       const res = await fetch(
-        buildApiUrl(`${API_ENDPOINTS.admin.approveSellerKyc}/${sellerId}`),
+        buildApiUrl(
+          `${API_ENDPOINTS.admin.getAdminSeller}/${sellerId}/kyc/approve`
+        ),
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', Cookie: cookieString },
@@ -243,7 +230,9 @@ export const adminService = {
   ): Promise<ApiResponse<null>> => {
     try {
       const res = await fetch(
-        buildApiUrl(`${API_ENDPOINTS.admin.rejectSellerKyc}/${sellerId}`),
+        buildApiUrl(
+          `${API_ENDPOINTS.admin.getAdminSeller}/${sellerId}/kyc/reject`
+        ),
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', Cookie: cookieString },

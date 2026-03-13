@@ -1,14 +1,14 @@
+import { redirect } from 'next/navigation';
 import { getKycStatusAction } from '@/actions/kyc/kyc.action';
 import { SellerKycView } from '@/modules/seller/kyc/components/kyc-view';
+import { KycStatusEnum } from '@/types/kyc.type';
 
 export default async function SellerKycPage() {
-  const { data, error } = await getKycStatusAction('SELLER');
+  const { data } = await getKycStatusAction('SELLER');
 
-  return (
-    <SellerKycView
-      initialProfile={data?.kyc ?? null}
-      initialStatus={data?.status ?? null}
-      initialError={error}
-    />
-  );
+  if (data?.status === KycStatusEnum.APPROVED) {
+    redirect('/seller/dashboard');
+  }
+
+  return <SellerKycView />;
 }

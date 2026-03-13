@@ -59,14 +59,6 @@ export const getAdminSellerAction = async (
   return adminService.getAdminSeller(cookieStore.toString(), id);
 };
 
-export const blockSellerAction = async (
-  id: string,
-  block: boolean
-): Promise<ApiResponse<null>> => {
-  const cookieStore = await cookies();
-  return adminService.blockSeller(id, block, cookieStore.toString());
-};
-
 export const approveSellerKycAction = async (
   sellerId: string
 ): Promise<ApiResponse<null>> => {

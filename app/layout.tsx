@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { redirect } from 'next/navigation';
 import './globals.css';
 import { Providers } from '@/providers';
 import { Toaster } from '@/components/ui/sonner';
@@ -26,6 +27,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const user = await authGetSesssion();
+  if (user.success === false && user.error === 'ACCOUNT_BLOCKED') {
+    redirect('/login?error=blocked');
+  }
   return (
     <html lang="en" suppressHydrationWarning>
       <body
