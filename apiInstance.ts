@@ -29,6 +29,8 @@ export const API_ENDPOINTS = {
   kyc: {
     getKycStatus: '/kyc/get-kyc-status',
     submitKyc: '/kyc/submit-kyc',
+    generateKycUploadUrl: '/kyc/get-kyc-upload-url',
+    updateKyc: '/kyc/update-kyc',
   },
 } as const;
 

@@ -6,8 +6,9 @@ export enum UserRole {
 }
 
 export enum AuthProvider {
-  GOOGLE = 'google',
-  EMAIL = 'email',
+  GOOGLE = 'GOOGLE',
+  EMAIL = 'EMAIL',
+  LOCAL = 'LOCAL',
 }
 
 export interface UserInfo {
