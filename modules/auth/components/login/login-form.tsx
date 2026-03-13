@@ -3,7 +3,7 @@
 import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useLogin } from '../../hooks/useLogin';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SiginWithGoogleButton } from '@/components/ui/buttons/google-signin';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -17,13 +17,30 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import useUserStore from '@/store/user.store';
+
+const BLOCKED_MESSAGE =
+  'Your account has been blocked. Please contact support for assistance.';
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit, errors, onSubmit, isSubmitting } = useLogin();
+  const setUser = useUserStore((s) => s.setUser);
 
   const params = useSearchParams();
-  const error = params.get('error');
+  const errorParam = params.get('error');
+  const isBlockedError = errorParam === 'blocked';
+  const errorDisplayMessage = isBlockedError
+    ? BLOCKED_MESSAGE
+    : (errorParam ?? '');
+
+  useEffect(() => {
+    if (isBlockedError) {
+      setUser(null);
+      toast.error(BLOCKED_MESSAGE, { duration: 5000 });
+    }
+  }, [isBlockedError, setUser]);
 
   return (
     <Card className="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-3xl shadow-xl overflow-hidden fade-in relative z-10">
@@ -97,9 +114,9 @@ const LoginForm = () => {
             )}
           </div>
 
-          {(errors.root || error) && (
+          {(errors.root || errorDisplayMessage) && (
             <div className="text-red-500 text-sm text-center bg-red-100 dark:bg-red-500/10 border border-red-200 dark:border-red-500/50 p-3 rounded-xl mb-4 font-medium animate-in fade-in slide-in-from-top-2">
-              {errors.root?.message || error}
+              {errors.root?.message || errorDisplayMessage}
             </div>
           )}
 

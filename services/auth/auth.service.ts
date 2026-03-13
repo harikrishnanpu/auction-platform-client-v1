@@ -17,8 +17,21 @@ const getSession = async (): Promise<ApiResponse<UserInfo>> => {
       cache: 'no-store',
     });
 
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      if (res.status === 403 && body?.message === 'ACCOUNT_BLOCKED') {
+        cookieStorage.delete('accessToken');
+        cookieStorage.delete('refreshToken');
+        return { success: false, data: null, error: 'ACCOUNT_BLOCKED' };
+      }
+      return {
+        success: false,
+        data: null,
+        error: body?.message ?? getErrorMessage(new Error('Session failed')),
+      };
+    }
+
     const session = await res.json();
-    console.log('auth/me', session);
     return session;
   } catch (err: unknown) {
     return {
@@ -44,8 +57,10 @@ const login = async (
     });
 
     if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message);
+      const body = await res.json().catch(() => ({}));
+      const message =
+        body?.message ?? body?.error ?? 'Login failed. Please try again.';
+      throw new Error(message);
     }
 
     const response = await res.json();

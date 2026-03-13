@@ -37,6 +37,10 @@ export const API_ENDPOINTS = {
     getAllUsers: '/admin/users',
     blockUser: '/admin/users/block',
     getAdminUser: '/admin/users',
+    getAllSellers: '/admin/sellers',
+    getAdminSeller: '/admin/sellers',
+    approveSellerKyc: '/admin/sellers',
+    rejectSellerKyc: '/admin/sellers',
   },
 } as const;
 
@@ -44,7 +48,7 @@ export const buildApiUrl = (endpoint: string): string => {
   return `${API_BASE_URL}${endpoint}`;
 };
 
-export function buildQuery(params: Record<string, string | number>) {
+export function buildQuery(params: object) {
   const query = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {

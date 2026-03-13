@@ -13,15 +13,21 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
+import { logoutAction } from '@/actions/auth/auth.actions';
 
 export function AdminNavbar() {
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
-  const logout = () => {
+  const handleLogout = async () => {
     setIsMenuOpen(false);
+    await logoutAction();
+    setUser(null);
+    router.replace('/login');
   };
 
   useEffect(() => {
@@ -165,7 +171,7 @@ export function AdminNavbar() {
                         : 'Staff'}
                     </p>
                     <button
-                      onClick={logout}
+                      onClick={handleLogout}
                       className="flex w-full items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
                     >
                       <LogOut size={16} />

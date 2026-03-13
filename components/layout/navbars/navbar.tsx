@@ -24,7 +24,7 @@ export function DashboardHeader() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
 
   const userInitials = user?.name
     ? user.name
@@ -39,6 +39,7 @@ export function DashboardHeader() {
 
   const handleLogout = async () => {
     await logoutAction();
+    setUser(null);
     router.replace('/login');
   };
 
