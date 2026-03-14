@@ -27,6 +27,7 @@ import {
   UserRole,
   UserStatus,
 } from '@/types/user.type';
+import useUserStore from '@/store/user.store';
 
 const S3_BASE =
   'https://hammer-down-auction-platform.s3.ap-south-1.amazonaws.com';
@@ -115,6 +116,7 @@ function StatusBadge({ status }: { status: UserStatus }) {
 export default function AdminUserDetail() {
   const params = useParams();
   const router = useRouter();
+  const currentUserId = useUserStore((s) => s.user?.id);
   const [user, setUser] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -250,23 +252,25 @@ export default function AdminUserDetail() {
             </div>
           </div>
 
-          <button
-            onClick={() =>
-              setConfirmBlock({
-                id: user.id,
-                name: user.name,
-                block: !isBlocked,
-              })
-            }
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition ${
-              isBlocked
-                ? 'border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/10'
-                : 'border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10'
-            }`}
-          >
-            <Ban size={16} />
-            {isBlocked ? 'Unblock User' : 'Block User'}
-          </button>
+          {user.id !== currentUserId && (
+            <button
+              onClick={() =>
+                setConfirmBlock({
+                  id: user.id,
+                  name: user.name,
+                  block: !isBlocked,
+                })
+              }
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition ${
+                isBlocked
+                  ? 'border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/10'
+                  : 'border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10'
+              }`}
+            >
+              <Ban size={16} />
+              {isBlocked ? 'Unblock User' : 'Block User'}
+            </button>
+          )}
         </div>
       </div>
 

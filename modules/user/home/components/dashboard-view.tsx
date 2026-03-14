@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import useUserStore from '@/store/user.store';
 import {
   CreditCard,
@@ -14,8 +15,11 @@ import {
   Plus,
   ArrowUpRight,
   ArrowRight,
+  Loader2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { getAuctionImageUrl } from '@/lib/auction-utils';
+import type { BrowseAuctionListItem } from '@/types/auction.type';
 
 interface DashboardAuction {
   auctionId: string;
@@ -24,16 +28,48 @@ interface DashboardAuction {
   startPrice: number;
   endTime: string;
   isPaused: boolean;
-  media?: { url: string; isPrimary?: boolean }[];
+  imageUrl: string;
 }
 
-export function DashboardView() {
+function mapToDashboardAuction(a: BrowseAuctionListItem): DashboardAuction {
+  return {
+    auctionId: a.id,
+    title: a.title,
+    category: a.category,
+    startPrice: a.startPrice,
+    endTime: a.endAt,
+    isPaused: false,
+    imageUrl: getAuctionImageUrl(a.primaryImageKey),
+  };
+}
+
+export function DashboardView({
+  auctions,
+  loading,
+  error,
+}: {
+  auctions: BrowseAuctionListItem[];
+  loading: boolean;
+  error: string | null;
+}) {
   const router = useRouter();
   const { user } = useUserStore();
-  const loading = false;
-  const liveAuctions: DashboardAuction[] = [];
-  const upcomingAuctions: DashboardAuction[] = [];
-  const error = false;
+
+  const { liveAuctions, upcomingAuctions } = useMemo(() => {
+    const now = new Date();
+    const live: DashboardAuction[] = [];
+    const upcoming: DashboardAuction[] = [];
+    auctions.forEach((a) => {
+      const mapped = mapToDashboardAuction(a);
+      const startAt = new Date(a.startAt);
+      if (startAt <= now) {
+        live.push(mapped);
+      } else {
+        upcoming.push(mapped);
+      }
+    });
+    return { liveAuctions: live, upcomingAuctions: upcoming };
+  }, [auctions]);
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-20 mt-8 space-y-8 animate-in fade-in duration-500">
@@ -60,7 +96,10 @@ export function DashboardView() {
             </p>
           </div>
           <div className="z-10 relative mt-8 flex flex-wrap gap-4">
-            <button className="bg-foreground hover:bg-foreground/90 text-background px-6 py-3 rounded-xl text-sm font-medium shadow-lg transition flex items-center gap-2 group">
+            <button
+              onClick={() => router.push('/auctions')}
+              className="bg-foreground hover:bg-foreground/90 text-background px-6 py-3 rounded-xl text-sm font-medium shadow-lg transition flex items-center gap-2 group"
+            >
               Explore New Lots{' '}
               <ArrowRight
                 size={16}
@@ -128,20 +167,22 @@ export function DashboardView() {
             <h3 className="text-2xl font-bold text-foreground  ">
               Live Auctions
             </h3>
-            <a
-              href="#"
+            <button
+              type="button"
+              onClick={() => router.push('/auctions')}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition flex items-center gap-1 group"
             >
-              View All Activity{' '}
+              View all auctions{' '}
               <ArrowRight
                 size={16}
                 className="group-hover:translate-x-1 transition-transform"
               />
-            </a>
+            </button>
           </div>
 
           {loading && (
-            <div className="p-8 text-center bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+            <div className="p-8 text-center bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               <p className="text-muted-foreground">Loading live auctions...</p>
             </div>
           )}
@@ -158,72 +199,77 @@ export function DashboardView() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {liveAuctions.map((auction) => {
-                const primaryMedia =
-                  auction.media?.find((m) => m.isPrimary) || auction.media?.[0];
-                return (
-                  <div
-                    key={auction.auctionId}
-                    className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/20 dark:border-white/5 rounded-2xl p-6 hover:border-blue-400/50 transition duration-300 group cursor-pointer"
-                    onClick={() =>
-                      router.push(`/auction/long/${auction.auctionId}`)
-                    }
-                  >
-                    <div className="flex justify-between items-start mb-6">
-                      <div
-                        className={`flex items-center gap-2 px-2 py-1 rounded text-xs font-bold uppercase tracking-wide ${auction.isPaused ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'}`}
-                      >
-                        <Timer size={14} />
-                        <span>{auction.isPaused ? 'Paused' : 'Live'}</span>
-                      </div>
-                      <span className="text-xs font-outfit font-bold text-muted-foreground tabular-nums">
-                        {new Date(auction.endTime).toLocaleDateString()}
-                      </span>
+              {liveAuctions.map((auction) => (
+                <div
+                  key={auction.auctionId}
+                  className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/20 dark:border-white/5 rounded-2xl p-6 hover:border-blue-400/50 transition duration-300 group cursor-pointer"
+                  onClick={() => router.push(`/auctions/${auction.auctionId}`)}
+                >
+                  <div className="flex justify-between items-start mb-6">
+                    <div
+                      className={`flex items-center gap-2 px-2 py-1 rounded text-xs font-bold uppercase tracking-wide ${auction.isPaused ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'}`}
+                    >
+                      <Timer size={14} />
+                      <span>{auction.isPaused ? 'Paused' : 'Live'}</span>
                     </div>
-                    <div className="aspect-video w-full mb-6 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700 relative">
-                      {primaryMedia?.url ? (
-                        <img
-                          src={primaryMedia.url}
-                          alt={auction.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <Camera className="text-slate-400" size={32} />
-                        </div>
-                      )}
-                    </div>
-                    <h5 className="text-xl font-bold text-foreground mb-1   truncate">
-                      {auction.title}
-                    </h5>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {auction.category}
-                    </p>
-                    <div className="flex justify-between items-end border-t border-border pt-4">
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">
-                          Starting Bid
-                        </p>
-                        <p className="font-bold text-lg text-foreground font-outfit tabular-nums">
-                          ₹ {auction.startPrice.toLocaleString()}
-                        </p>
-                      </div>
-                      <button className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center hover:bg-foreground/90 hover:scale-110 transition shadow-lg">
-                        <Gavel size={18} />
-                      </button>
-                    </div>
+                    <span className="text-xs font-outfit font-bold text-muted-foreground tabular-nums">
+                      {new Date(auction.endTime).toLocaleDateString()}
+                    </span>
                   </div>
-                );
-              })}
+                  <div className="aspect-video w-full mb-6 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700 relative">
+                    {auction.imageUrl ? (
+                      <img
+                        src={auction.imageUrl}
+                        alt={auction.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <Camera className="text-slate-400" size={32} />
+                      </div>
+                    )}
+                  </div>
+                  <h5 className="text-xl font-bold text-foreground mb-1 truncate">
+                    {auction.title}
+                  </h5>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {auction.category}
+                  </p>
+                  <div className="flex justify-between items-end border-t border-border pt-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        Starting Bid
+                      </p>
+                      <p className="font-bold text-lg text-foreground font-outfit tabular-nums">
+                        ₹ {auction.startPrice.toLocaleString()}
+                      </p>
+                    </div>
+                    <button className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center hover:bg-foreground/90 hover:scale-110 transition shadow-lg">
+                      <Gavel size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
 
         <div className="lg:col-span-8 space-y-8">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-2xl font-bold text-foreground  ">
+            <h3 className="text-2xl font-bold text-foreground">
               Upcoming Auctions
             </h3>
+            <button
+              type="button"
+              onClick={() => router.push('/auctions')}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition flex items-center gap-1 group"
+            >
+              View all{' '}
+              <ArrowRight
+                size={16}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+            </button>
           </div>
 
           {loading && (
@@ -233,69 +279,62 @@ export function DashboardView() {
               </p>
             </div>
           )}
+
           {!loading && !error && upcomingAuctions.length === 0 ? (
             <div className="p-8 text-center bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
               <p className="text-muted-foreground">No upcoming auctions yet.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {upcomingAuctions.map((auction) => {
-                const primaryMedia =
-                  auction.media?.find((m) => m.isPrimary) || auction.media?.[0];
-                return (
-                  <div
-                    key={auction.auctionId}
-                    className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/20 dark:border-white/5 rounded-2xl p-6 hover:border-blue-400/50 transition duration-300 group cursor-pointer"
-                    onClick={() =>
-                      router.push(`/auction/long/${auction.auctionId}`)
-                    }
-                  >
-                    <div className="flex justify-between items-start mb-6">
-                      <div
-                        className={`flex items-center gap-2 px-2 py-1 rounded text-xs font-bold uppercase tracking-wide ${auction.isPaused ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}
-                      >
-                        <Timer size={14} />
-                        <span>{auction.isPaused ? 'Paused' : 'Upcoming'}</span>
-                      </div>
-                      <span className="text-xs font-outfit font-bold text-muted-foreground tabular-nums">
-                        {new Date(auction.endTime).toLocaleDateString()}
-                      </span>
+              {upcomingAuctions.map((auction) => (
+                <div
+                  key={auction.auctionId}
+                  className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/20 dark:border-white/5 rounded-2xl p-6 hover:border-blue-400/50 transition duration-300 group cursor-pointer"
+                  onClick={() => router.push(`/auctions/${auction.auctionId}`)}
+                >
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-2 px-2 py-1 rounded text-xs font-bold uppercase tracking-wide bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                      <Timer size={14} />
+                      <span>Upcoming</span>
                     </div>
-                    <div className="aspect-video w-full mb-6 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700 relative">
-                      {primaryMedia?.url ? (
-                        <img
-                          src={primaryMedia.url}
-                          alt={auction.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <Camera className="text-slate-400" size={32} />
-                        </div>
-                      )}
-                    </div>
-                    <h5 className="text-xl font-bold text-foreground mb-1   truncate">
-                      {auction.title}
-                    </h5>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {auction.category}
-                    </p>
-                    <div className="flex justify-between items-end border-t border-border pt-4">
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">
-                          Starting Bid
-                        </p>
-                        <p className="font-bold text-lg text-foreground font-outfit tabular-nums">
-                          ₹ {auction.startPrice.toLocaleString()}
-                        </p>
-                      </div>
-                      <button className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center hover:bg-foreground/90 hover:scale-110 transition shadow-lg">
-                        <Gavel size={18} />
-                      </button>
-                    </div>
+                    <span className="text-xs font-outfit font-bold text-muted-foreground tabular-nums">
+                      {new Date(auction.endTime).toLocaleDateString()}
+                    </span>
                   </div>
-                );
-              })}
+                  <div className="aspect-video w-full mb-6 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700 relative">
+                    {auction.imageUrl ? (
+                      <img
+                        src={auction.imageUrl}
+                        alt={auction.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <Camera className="text-slate-400" size={32} />
+                      </div>
+                    )}
+                  </div>
+                  <h5 className="text-xl font-bold text-foreground mb-1 truncate">
+                    {auction.title}
+                  </h5>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {auction.category}
+                  </p>
+                  <div className="flex justify-between items-end border-t border-border pt-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        Starting Bid
+                      </p>
+                      <p className="font-bold text-lg text-foreground font-outfit tabular-nums">
+                        ₹ {auction.startPrice.toLocaleString()}
+                      </p>
+                    </div>
+                    <button className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center hover:bg-foreground/90 hover:scale-110 transition shadow-lg">
+                      <Gavel size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

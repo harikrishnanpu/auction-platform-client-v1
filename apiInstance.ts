@@ -33,6 +33,19 @@ export const API_ENDPOINTS = {
     updateKyc: '/kyc/update-kyc',
   },
 
+  auction: {
+    create: '/auction',
+    getSellerAuctions: '/auction',
+    getBrowse: '/auction/browse',
+    getAuctionForSeller: (id: string) => `/auction/seller/${id}`,
+    getAuctionForUser: (id: string) => `/auction/user/${id}`,
+    placeBid: (id: string) => `/auction/${id}/bid`,
+    update: (id: string) => `/auction/${id}`,
+    publish: (id: string) => `/auction/${id}/publish`,
+    end: (id: string) => `/auction/${id}/end`,
+    generateUploadUrl: '/auction/upload-url',
+  },
+
   admin: {
     getAllUsers: '/admin/users',
     blockUser: '/admin/users/block',

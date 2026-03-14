@@ -7,7 +7,6 @@ import { getErrorMessage } from '@/utils/get-app-error';
 
 export interface SellerInfo extends UserInfo {
   kyc?: KycProfile;
-  /** KYC status from GET /admin/sellers (flat on seller object) */
   kycStatus?: string;
 }
 

@@ -63,7 +63,7 @@ export function AdminNavbar() {
             <div className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600 dark:text-gray-300">
               <Link
                 className="hover:text-[#111111] dark:hover:text-white transition-colors"
-                href="/admin"
+                href="/admin/dashboard"
               >
                 Dashboard
               </Link>

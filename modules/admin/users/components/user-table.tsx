@@ -39,6 +39,7 @@ interface UserTableProps {
   onPageChange: (page: number) => void;
   totalUsers: number;
   onBlockUser?: (id: string, block: boolean) => Promise<void>;
+  currentUserId?: string;
 }
 
 const ROLE_COLORS: Record<string, string> = {
@@ -137,6 +138,7 @@ export function UserTable({
   onPageChange,
   totalUsers,
   onBlockUser,
+  currentUserId,
 }: UserTableProps) {
   const [confirmBlock, setConfirmBlock] = useState<{
     id: string;
@@ -223,7 +225,7 @@ export function UserTable({
           >
             <Eye size={18} />
           </Link>
-          {onBlockUser && (
+          {onBlockUser && user.id !== currentUserId && (
             <button
               onClick={() =>
                 setConfirmBlock({
