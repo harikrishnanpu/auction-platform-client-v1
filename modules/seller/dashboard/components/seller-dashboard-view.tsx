@@ -1,43 +1,46 @@
 'use client';
 
-import React from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  Download,
-  TrendingUp,
-  CheckCircle,
-  Clock,
-  Gavel,
-  ChevronRight,
-  Landmark,
-  LifeBuoy,
-  CreditCard,
-} from 'lucide-react';
+import { Download, Gavel, ChevronRight, LifeBuoy, Loader2 } from 'lucide-react';
 
-import { StatCard } from './stat-card';
 import { SettlementRow } from './settlement-row';
-import { RevenueBarChart } from './revenue-bar-chart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  DUMMY_DASHBOARD_STATS,
-  DUMMY_AUCTIONS,
-  type DummyAuctionItem,
-} from '../data/dummy-dashboard.data';
-
-function statusLabel(item: DummyAuctionItem): string {
-  if (item.status === 'DRAFT') return 'Draft';
-  if (item.status === 'ACTIVE') return 'Active';
-  return 'Ended';
-}
+import { getSellerAuctionsAction } from '@/actions/auction/auction.actions';
+import { getAuctionImageUrl, getAuctionStatusLabel } from '@/lib/auction-utils';
 
 export function SellerDashboardView() {
   const router = useRouter();
-  const recentListings = DUMMY_AUCTIONS.slice(0, 5);
-  const activeCount = DUMMY_AUCTIONS.filter(
-    (a) => a.status === 'ACTIVE' || a.status === 'DRAFT'
-  ).length;
+  const [auctions, setAuctions] = useState<
+    {
+      id: string;
+      title: string;
+      category: string;
+      startAt: string;
+      startPrice: number;
+      status: string;
+      primaryImageKey?: string;
+    }[]
+  >([]);
+  const [loadingListings, setLoadingListings] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    getSellerAuctionsAction().then((res) => {
+      if (cancelled) return;
+      if (res.success && res.data) {
+        setAuctions(res.data.auctions);
+      }
+      setLoadingListings(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const recentListings = auctions.slice(0, 5);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300 flex flex-col font-sans antialiased">
@@ -65,7 +68,7 @@ export function SellerDashboardView() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total Earnings"
             value={DUMMY_DASHBOARD_STATS.totalEarnings}
@@ -116,7 +119,7 @@ export function SellerDashboardView() {
             colorClass="bg-blue-500 text-blue-500"
             delay="300ms"
           />
-        </div>
+        </div> */}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
@@ -131,15 +134,22 @@ export function SellerDashboardView() {
                   className="text-primary p-0 h-auto"
                   asChild
                 >
-                  <Link href="#" className="flex items-center gap-1">
-                    View All History
+                  <Link
+                    href="/seller/auction"
+                    className="flex items-center gap-1"
+                  >
+                    View All Auctions
                     <ChevronRight size={16} className="shrink-0" />
                   </Link>
                 </Button>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y">
-                  {recentListings.length === 0 ? (
+                  {loadingListings ? (
+                    <div className="p-6 flex items-center justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : recentListings.length === 0 ? (
                     <div className="p-6 text-center text-muted-foreground">
                       No auctions yet. Create one to get started!
                     </div>
@@ -147,18 +157,14 @@ export function SellerDashboardView() {
                     recentListings.map((auction) => (
                       <SettlementRow
                         key={auction.id}
-                        image={auction.imageUrl}
+                        image={getAuctionImageUrl(auction.primaryImageKey)}
                         title={auction.title}
                         category={auction.category}
-                        date={new Date(auction.startTime).toLocaleDateString()}
-                        soldPrice={
-                          auction.soldPrice
-                            ? `₹ ${auction.soldPrice.toLocaleString()}`
-                            : `₹ ${auction.startPrice.toLocaleString()}`
-                        }
-                        fee={auction.fee ?? '-'}
-                        net={auction.net ?? '-'}
-                        status={statusLabel(auction)}
+                        date={new Date(auction.startAt).toLocaleDateString()}
+                        soldPrice={`₹ ${auction.startPrice.toLocaleString()}`}
+                        fee="-"
+                        net="-"
+                        status={getAuctionStatusLabel(auction.status)}
                         onClick={() =>
                           router.push(`/seller/auction/${auction.id}`)
                         }
@@ -169,7 +175,7 @@ export function SellerDashboardView() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-2xl">
+            {/* <Card className="rounded-2xl">
               <CardHeader className="flex flex-row justify-between items-center space-y-0 pb-2">
                 <CardTitle className="text-lg font-serif">
                   Monthly Revenue
@@ -182,11 +188,11 @@ export function SellerDashboardView() {
               <CardContent>
                 <RevenueBarChart />
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
 
           <div className="lg:col-span-1 space-y-8">
-            <Card className="bg-linear-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-black border-0 text-white overflow-hidden">
+            {/* <Card className="bg-linear-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-black border-0 text-white overflow-hidden">
               <CardContent className="pt-6 relative">
                 <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl" />
                 <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 bg-blue-500 opacity-10 rounded-full blur-xl" />
@@ -223,7 +229,7 @@ export function SellerDashboardView() {
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
             <Card className="rounded-2xl">
               <CardHeader>
