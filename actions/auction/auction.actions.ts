@@ -8,6 +8,7 @@ import {
   SellerAuctionListItem,
   BrowseAuctionListItem,
   AuctionDetail,
+  AuctionWithRoom,
   UpdateAuctionInput,
   UpdateAuctionOutput,
 } from '@/types/auction.type';
@@ -31,10 +32,51 @@ export async function getBrowseAuctionsAction(params?: {
   return auctionService.getBrowse(params);
 }
 
+export type AuctionViewMode = 'seller' | 'user';
+
 export async function getAuctionByIdAction(
-  id: string
+  id: string,
+  mode: AuctionViewMode = 'user'
 ): Promise<ApiResponse<AuctionDetail>> {
-  return auctionService.getAuctionById(id);
+  const fn =
+    mode === 'seller'
+      ? auctionService.getAuctionForSeller
+      : auctionService.getAuctionForUser;
+  const res = await fn(id);
+  if (res.success && res.data) {
+    return { success: true, data: res.data.auction };
+  }
+  return {
+    success: res.success,
+    data: null,
+    error: res.error,
+  };
+}
+
+export async function getAuctionWithRoomAction(
+  id: string,
+  mode: AuctionViewMode
+): Promise<ApiResponse<AuctionWithRoom>> {
+  const fn =
+    mode === 'seller'
+      ? auctionService.getAuctionForSeller
+      : auctionService.getAuctionForUser;
+  return fn(id);
+}
+
+export async function placeBidAction(
+  auctionId: string,
+  amount: number
+): Promise<
+  ApiResponse<{
+    id: string;
+    auctionId: string;
+    userId: string;
+    amount: number;
+    createdAt: string;
+  }>
+> {
+  return auctionService.placeBid(auctionId, amount);
 }
 
 export async function updateAuctionAction(
@@ -48,6 +90,12 @@ export async function publishAuctionAction(
   id: string
 ): Promise<ApiResponse<{ id: string; status: string }>> {
   return auctionService.publish(id);
+}
+
+export async function endAuctionAction(
+  id: string
+): Promise<ApiResponse<{ id: string; status: string }>> {
+  return auctionService.end(id);
 }
 
 export async function generateAuctionUploadUrlAction({

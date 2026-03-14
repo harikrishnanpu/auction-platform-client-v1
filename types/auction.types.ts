@@ -51,10 +51,11 @@ export interface Participant {
   id: string;
   auctionId: string;
   userId: string;
+  userName?: string;
   joinedAt: string;
   revokedAt?: string | null;
-  isOnline: boolean;
-  lastSeen: string;
+  isOnline?: boolean;
+  lastSeen?: string;
   socketId?: string | null;
   user?: {
     user_id: string;

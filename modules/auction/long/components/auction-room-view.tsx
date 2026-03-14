@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Auction } from '../types/auction.types';
+import { Auction } from '../../../../types/auction.types';
 import { useAuctionRoom } from '../hooks/use-auction-room';
 import { BidGraph } from './bid-graph';
 import { toast } from 'sonner';
 import useUserStore from '@/store/user.store';
 import { PaymentModal } from '@/modules/profile/components/payment-modal';
-import { Trophy } from 'lucide-react';
+import { endAuctionAction } from '@/actions/auction/auction.actions';
+import { Loader2, Flag, Trophy } from 'lucide-react';
 
 interface AuctionRoomViewProps {
   auction: Auction;
@@ -24,27 +25,40 @@ export const AuctionRoomView = ({
     auction.status === 'ENDED' && user?.id === (auction.winnerId ?? null);
   const canPay = isWinner && auction.completionStatus !== 'PAID';
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [endingAuction, setEndingAuction] = useState(false);
 
   const {
     bids,
     messages,
     participants,
-    connected,
     error,
     errorCode,
     endTimeOverride,
     lastBidTime,
     statusOverride,
     pausedOverride,
+    isLoading: roomLoading,
     placeBid,
     sendMessage,
-  } = useAuctionRoom(auction.auctionId);
-  const [bidAmount, setBidAmount] = useState<number>(auction.startPrice);
+  } = useAuctionRoom(auction.auctionId, isSeller ? 'seller' : 'user');
+  const nextBidAmount = useMemo(
+    () =>
+      (bids.length > 0
+        ? Math.max(...bids.map((b) => b.amount))
+        : auction.startPrice) + auction.minIncrement,
+    [bids, auction.startPrice, auction.minIncrement]
+  );
+  const [bidAmount, setBidAmount] = useState<number>(
+    auction.startPrice + auction.minIncrement
+  );
   const [chatText, setChatText] = useState('');
   const [now, setNow] = useState<Date>(new Date());
 
   const highestBid = useMemo(
-    () => bids[0]?.amount ?? auction.startPrice,
+    () =>
+      bids.length > 0
+        ? Math.max(...bids.map((b) => b.amount))
+        : auction.startPrice,
     [bids, auction.startPrice]
   );
   const primaryMedia =
@@ -127,7 +141,7 @@ export const AuctionRoomView = ({
     if (!bidAmount) return;
     if (auctionStatus !== 'LIVE') return;
     if (cooldownRemaining > 0) return;
-    if (!connected || errorCode === 'USER_REVOKED') return;
+    if (roomLoading || errorCode === 'USER_REVOKED') return;
     const result = await placeBid(bidAmount);
     if (!result.success) {
       toast.error(result.message || 'Failed to place bid');
@@ -136,15 +150,13 @@ export const AuctionRoomView = ({
     toast.success('Bid placed');
   };
 
-  const suggestedBid =
-    Math.max(highestBid, auction.startPrice) + auction.minIncrement;
   useEffect(() => {
-    setBidAmount(suggestedBid);
-  }, [suggestedBid]);
+    setBidAmount(nextBidAmount);
+  }, [nextBidAmount]);
 
   const handleSendMessage = async (): Promise<void> => {
     if (!chatText.trim()) return;
-    if (!connected || errorCode === 'USER_REVOKED') return;
+    if (roomLoading || errorCode === 'USER_REVOKED') return;
     const result = await sendMessage(chatText.trim());
     if (!result.success) {
       toast.error(result.message || 'Failed to send message');
@@ -153,58 +165,61 @@ export const AuctionRoomView = ({
     setChatText('');
   };
 
-  // Show error if user is the seller
-  if (isSeller) {
-    return (
-      <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg text-center">
-          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-8 h-8 text-amber-600 dark:text-amber-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold mb-2 text-slate-900 dark:text-slate-100">
-            You&apos;re the Seller
-          </h2>
-          <p className="text-slate-600 dark:text-slate-300 mb-6">
-            As the seller of this auction, you cannot participate as a bidder.
-            You can monitor and manage your auction from the seller dashboard.
-          </p>
-          <a
-            href={`/seller/auction/${auction.auctionId}`}
-            className="inline-block px-6 py-3 bg-slate-900 dark:bg-blue-600 text-white rounded-lg font-semibold hover:bg-slate-700 dark:hover:bg-blue-500 transition"
-          >
-            Go to Seller Dashboard
-          </a>
-        </div>
-      </main>
-    );
-  }
+  const formatDate = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold font-serif">
             {auction.title}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
             {auction.category} • {auction.condition}
+            {isSeller && (
+              <span className="ml-2 px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 text-xs font-medium">
+                Seller view
+              </span>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {isSeller && auction.status === 'ACTIVE' && (
+            <button
+              type="button"
+              onClick={async () => {
+                setEndingAuction(true);
+                const res = await endAuctionAction(auction.auctionId);
+                setEndingAuction(false);
+                if (res.success) {
+                  toast.success('Auction ended successfully');
+                  onAuctionRefetch?.();
+                } else {
+                  toast.error(res.error ?? 'Failed to end auction');
+                }
+              }}
+              disabled={endingAuction}
+              className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2"
+            >
+              {endingAuction ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Flag className="h-4 w-4" />
+              )}
+              {endingAuction ? 'Ending…' : 'End auction'}
+            </button>
+          )}
           <div className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-200 dark:bg-slate-700">
-            {connected ? 'Live' : 'Connecting'}
+            {roomLoading ? 'Loading…' : 'Live'}
           </div>
           <div className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
             {auctionStatus}
@@ -242,9 +257,9 @@ export const AuctionRoomView = ({
             : error}
         </div>
       )}
-      {!connected && auctionStatus !== 'ENDED' && (
+      {roomLoading && auctionStatus !== 'ENDED' && (
         <div className="bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-200 px-4 py-2 rounded">
-          Connecting to live auction updates…
+          Loading auction room…
         </div>
       )}
 
@@ -316,7 +331,9 @@ export const AuctionRoomView = ({
               ₹ {highestBid.toLocaleString()}
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Minimum increment: ₹ {auction.minIncrement.toLocaleString()}
+              Min increment: ₹ {auction.minIncrement.toLocaleString()} · Bid
+              cooldown: {auction.bidCooldownSeconds ?? 10}s · Anti-snip:{' '}
+              {auction.antiSnipeThresholdSeconds ?? 60}s
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               {auctionStatus === 'UPCOMING' &&
@@ -328,60 +345,69 @@ export const AuctionRoomView = ({
             </p>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm">
-            <h3 className="font-semibold mb-3">Place Bid</h3>
-            <div className="flex items-center gap-3">
-              <input
-                type="number"
-                className="flex-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2"
-                value={bidAmount}
-                onChange={(e) => setBidAmount(Number(e.target.value))}
-                disabled={
-                  auctionStatus !== 'LIVE' ||
-                  cooldownRemaining > 0 ||
-                  !connected ||
-                  errorCode === 'USER_REVOKED'
-                }
-                min={highestBid + auction.minIncrement}
-              />
-              <button
-                onClick={handlePlaceBid}
-                className="px-4 py-2 rounded-lg bg-slate-900 dark:bg-blue-600 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={
-                  auctionStatus !== 'LIVE' ||
-                  cooldownRemaining > 0 ||
-                  !connected ||
-                  errorCode === 'USER_REVOKED'
-                }
-              >
-                {cooldownRemaining > 0 ? `Wait ${cooldownRemaining}s` : 'Place'}
-              </button>
+          {!isSeller && (
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm">
+              <h3 className="font-semibold mb-3">Place Bid</h3>
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  className="flex-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2"
+                  value={bidAmount}
+                  onChange={(e) => setBidAmount(Number(e.target.value))}
+                  disabled={
+                    auctionStatus !== 'LIVE' ||
+                    cooldownRemaining > 0 ||
+                    roomLoading ||
+                    errorCode === 'USER_REVOKED'
+                  }
+                  min={nextBidAmount}
+                />
+                <button
+                  onClick={handlePlaceBid}
+                  className="px-4 py-2 rounded-lg bg-slate-900 dark:bg-blue-600 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={
+                    auctionStatus !== 'LIVE' ||
+                    cooldownRemaining > 0 ||
+                    roomLoading ||
+                    errorCode === 'USER_REVOKED'
+                  }
+                >
+                  {cooldownRemaining > 0
+                    ? `Wait ${cooldownRemaining}s`
+                    : 'Place'}
+                </button>
+              </div>
+              {auctionStatus !== 'LIVE' && (
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                  {auctionStatus === 'ENDED'
+                    ? 'Auction ended. Bidding is closed.'
+                    : 'Bidding is only available while the auction is live.'}
+                </p>
+              )}
             </div>
-            {auctionStatus !== 'LIVE' && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                {auctionStatus === 'ENDED'
-                  ? 'Auction ended. Bidding is closed.'
-                  : 'Bidding is only available while the auction is live.'}
-              </p>
-            )}
-          </div>
+          )}
 
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm">
-            <h3 className="font-semibold mb-3">Live Bids</h3>
-            <div className="space-y-3 max-h-64 overflow-auto">
+            <h3 className="font-semibold mb-3">All Bids ({bids.length})</h3>
+            <div className="space-y-2 max-h-80 overflow-auto">
               {bids.length === 0 && (
                 <p className="text-sm text-slate-500">No bids yet.</p>
               )}
               {bids.map((bid) => (
                 <div
                   key={bid.id}
-                  className="flex items-center justify-between text-sm"
+                  className="flex items-center justify-between text-sm py-1.5 border-b border-slate-100 dark:border-slate-700 last:border-0"
                 >
-                  <span className="text-slate-500">
-                    Bidder {bid.userId.slice(0, 6)}
-                  </span>
-                  <span className="font-semibold">
-                    ₹ {bid.amount.toLocaleString()}
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-slate-700 dark:text-slate-300 font-medium">
+                      ₹ {bid.amount.toLocaleString()}
+                    </span>
+                    <span className="text-xs text-slate-500 truncate">
+                      Bidder {bid.userId.slice(0, 8)}…
+                    </span>
+                  </div>
+                  <span className="text-xs text-slate-400 shrink-0 ml-2">
+                    {formatDate(bid.createdAt)}
                   </span>
                 </div>
               ))}
@@ -399,31 +425,33 @@ export const AuctionRoomView = ({
             <h3 className="font-semibold mb-3">
               Participants ({participants.length})
             </h3>
-            <div className="space-y-2 max-h-40 overflow-auto">
+            <div className="space-y-2 max-h-80 overflow-auto">
               {participants.length === 0 && (
                 <p className="text-sm text-slate-500">No participants yet.</p>
               )}
-              {participants
-                .filter((p) => !p.revokedAt)
-                .map((participant) => (
-                  <div
-                    key={participant.id}
-                    className="flex items-center gap-2 text-sm"
-                  >
+              {participants.map((participant) => (
+                <div
+                  key={participant.id}
+                  className="flex flex-col gap-0.5 py-2 px-2 rounded-lg border border-slate-100 dark:border-slate-700"
+                >
+                  <div className="flex items-center gap-2">
                     <div
-                      className={`w-2 h-2 rounded-full ${participant.isOnline ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+                      className={`w-2 h-2 rounded-full shrink-0 ${participant.isOnline !== false ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'}`}
                     />
-                    <span className="text-slate-700 dark:text-slate-300 truncate">
-                      {participant.user?.username ||
-                        `User ${participant.userId.slice(0, 6)}`}
+                    <span className="text-slate-800 dark:text-slate-200 font-medium truncate">
+                      {participant.userName ||
+                        participant.user?.username ||
+                        `User ${participant.userId.slice(0, 8)}`}
                     </span>
-                    {participant.isOnline && (
-                      <span className="text-xs text-green-600 dark:text-green-400">
-                        Online
-                      </span>
-                    )}
                   </div>
-                ))}
+                  <span className="text-xs text-slate-500 truncate">
+                    ID: {participant.userId}
+                  </span>
+                  <span className="text-xs text-slate-400">
+                    Joined {formatDate(participant.joinedAt)}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -450,7 +478,7 @@ export const AuctionRoomView = ({
                 placeholder="Send a message"
                 disabled={
                   auctionStatus !== 'LIVE' ||
-                  !connected ||
+                  roomLoading ||
                   errorCode === 'USER_REVOKED'
                 }
                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -460,7 +488,7 @@ export const AuctionRoomView = ({
                 className="px-3 py-2 rounded-lg bg-slate-900 dark:bg-blue-600 text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={
                   auctionStatus !== 'LIVE' ||
-                  !connected ||
+                  roomLoading ||
                   errorCode === 'USER_REVOKED'
                 }
               >

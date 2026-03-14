@@ -3,21 +3,21 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAuctionByIdAction } from '@/actions/auction/auction.actions';
 import type { AuctionDetail } from '@/types/auction.type';
-import { auctionQueryKeys } from './query-keys';
+import { auctionKeys } from './query-keys';
 
-export interface UseAuctionByIdQueryOptions {
-  auctionId: string | null | undefined;
-  enabled?: boolean;
-}
+type Mode = 'seller' | 'user';
 
-export function useAuctionByIdQuery(options: UseAuctionByIdQueryOptions) {
-  const { auctionId, enabled = true } = options;
+export function useAuctionByIdQuery(
+  auctionId: string | null | undefined,
+  mode: Mode = 'user',
+  enabled = true
+) {
   const id = auctionId ?? '';
 
   return useQuery({
-    queryKey: auctionQueryKeys.detail(id),
+    queryKey: auctionKeys.detail(id, mode),
     queryFn: async (): Promise<AuctionDetail> => {
-      const result = await getAuctionByIdAction(id);
+      const result = await getAuctionByIdAction(id, mode);
       if (!result.success || !result.data) {
         throw new Error(result.error ?? 'Auction not found');
       }

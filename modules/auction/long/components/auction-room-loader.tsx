@@ -4,16 +4,19 @@ import { Loader2 } from 'lucide-react';
 import { useAuctionRoomData } from '../hooks/use-auction-room-data';
 import { AuctionRoomView } from './auction-room-view';
 import Link from 'next/link';
+import type { AuctionViewMode } from '@/actions/auction/auction.actions';
 
 export interface AuctionRoomLoaderProps {
   auctionId: string;
+  mode: AuctionViewMode;
 }
 
-export function AuctionRoomLoader({ auctionId }: AuctionRoomLoaderProps) {
-  const { auction, isLoading, isError, error, refetch } = useAuctionRoomData({
+export function AuctionRoomLoader({ auctionId, mode }: AuctionRoomLoaderProps) {
+  const { auction, isLoading, isError, error, refetch } = useAuctionRoomData(
     auctionId,
-    enabled: Boolean(auctionId),
-  });
+    mode,
+    Boolean(auctionId)
+  );
 
   if (isLoading) {
     return (

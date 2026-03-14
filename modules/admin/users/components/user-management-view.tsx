@@ -11,8 +11,10 @@ import {
 import { IgetllUsersParams } from '@/types/admin.type';
 import { UserStatus } from '@/types/user.type';
 import { toast } from 'sonner';
+import useUserStore from '@/store/user.store';
 
 export function UserManagementView() {
+  const currentUserId = useUserStore((s) => s.user?.id);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<UserFilterState>(DEFAULT_FILTERS);
   const [users, setUsers] = useState<User[]>([]);
@@ -109,6 +111,7 @@ export function UserManagementView() {
         onPageChange={setPage}
         totalUsers={totalUsers}
         onBlockUser={handleBlockUser}
+        currentUserId={currentUserId}
       />
     </div>
   );

@@ -5,7 +5,7 @@ import {
   CreateAuctionOutput,
   SellerAuctionListItem,
   BrowseAuctionListItem,
-  AuctionDetail,
+  AuctionWithRoom,
   UpdateAuctionInput,
   UpdateAuctionOutput,
 } from '@/types/auction.type';
@@ -18,6 +18,7 @@ export const auctionService = {
   ): Promise<ApiResponse<CreateAuctionOutput>> => {
     try {
       const cookieStorage = await cookies();
+
       const res = await fetch(buildApiUrl(API_ENDPOINTS.auction.create), {
         method: 'POST',
         headers: {
@@ -27,13 +28,20 @@ export const auctionService = {
         credentials: 'include',
         body: JSON.stringify(input),
       });
+
+      console.log(res);
+
       if (!res.ok) {
         const err = await res.json();
+        console.log(err);
         throw new Error(err.message ?? 'Failed to create auction');
       }
+
       const data = await res.json();
+      console.log(data);
       return { success: true, data: data.data };
     } catch (error: unknown) {
+      console.log(error);
       return {
         success: false,
         data: null,
@@ -56,10 +64,12 @@ export const auctionService = {
           cache: 'no-store',
         }
       );
+
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.message ?? 'Failed to fetch auctions');
       }
+
       const data = await res.json();
       return { success: true, data: data.data };
     } catch (error: unknown) {
@@ -78,6 +88,7 @@ export const auctionService = {
     try {
       const cookieStorage = await cookies();
       const search = new URLSearchParams();
+
       if (params?.category) search.set('category', params.category);
       if (params?.auctionType) search.set('auctionType', params.auctionType);
       const q = search.toString();
@@ -114,11 +125,13 @@ export const auctionService = {
     }
   },
 
-  getAuctionById: async (id: string): Promise<ApiResponse<AuctionDetail>> => {
+  getAuctionForSeller: async (
+    id: string
+  ): Promise<ApiResponse<AuctionWithRoom>> => {
     try {
       const cookieStorage = await cookies();
       const res = await fetch(
-        buildApiUrl(API_ENDPOINTS.auction.getAuctionById(id)),
+        buildApiUrl(API_ENDPOINTS.auction.getAuctionForSeller(id)),
         {
           method: 'GET',
           headers: { Cookie: cookieStorage.toString() },
@@ -128,7 +141,74 @@ export const auctionService = {
       );
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.message ?? 'Failed to fetch auction');
+        throw new Error(getErrorMessage(err) ?? 'Failed to fetch auction');
+      }
+      const data = await res.json();
+      return { success: true, data: data.data };
+    } catch (error: unknown) {
+      return {
+        success: false,
+        data: null,
+        error: getErrorMessage(error),
+      };
+    }
+  },
+
+  getAuctionForUser: async (
+    id: string
+  ): Promise<ApiResponse<AuctionWithRoom>> => {
+    try {
+      const cookieStorage = await cookies();
+      const res = await fetch(
+        buildApiUrl(API_ENDPOINTS.auction.getAuctionForUser(id)),
+        {
+          method: 'GET',
+          headers: { Cookie: cookieStorage.toString() },
+          credentials: 'include',
+          cache: 'no-store',
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(getErrorMessage(err) ?? 'Failed to fetch auction');
+      }
+      const data = await res.json();
+      return { success: true, data: data.data };
+    } catch (error: unknown) {
+      return {
+        success: false,
+        data: null,
+        error: getErrorMessage(error),
+      };
+    }
+  },
+
+  placeBid: async (
+    id: string,
+    amount: number
+  ): Promise<
+    ApiResponse<{
+      id: string;
+      auctionId: string;
+      userId: string;
+      amount: number;
+      createdAt: string;
+    }>
+  > => {
+    try {
+      const cookieStorage = await cookies();
+      const res = await fetch(buildApiUrl(API_ENDPOINTS.auction.placeBid(id)), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: cookieStorage.toString(),
+        },
+        credentials: 'include',
+        body: JSON.stringify({ amount }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message ?? 'Failed to place bid');
       }
       const data = await res.json();
       return { success: true, data: data.data };
@@ -189,6 +269,33 @@ export const auctionService = {
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.message ?? 'Failed to publish auction');
+      }
+
+      const data = await res.json();
+      return { success: true, data: data.data };
+    } catch (error: unknown) {
+      return {
+        success: false,
+        data: null,
+        error: getErrorMessage(error),
+      };
+    }
+  },
+
+  end: async (
+    id: string
+  ): Promise<ApiResponse<{ id: string; status: string }>> => {
+    try {
+      const cookieStorage = await cookies();
+      const res = await fetch(buildApiUrl(API_ENDPOINTS.auction.end(id)), {
+        method: 'POST',
+        headers: { Cookie: cookieStorage.toString() },
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message ?? 'Failed to end auction');
       }
 
       const data = await res.json();

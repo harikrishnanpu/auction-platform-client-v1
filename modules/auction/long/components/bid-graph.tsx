@@ -1,6 +1,6 @@
 'use client';
 
-import { Bid } from '../types/auction.types';
+import { Bid } from '../../../../types/auction.types';
 
 interface BidGraphProps {
   bids: Bid[];

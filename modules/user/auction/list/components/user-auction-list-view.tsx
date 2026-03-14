@@ -12,13 +12,14 @@ export function UserAuctionListView() {
     setSearch,
     setCategory,
     setTypeFilter,
-    queryFilters,
     categoryOptions,
     typeOptions,
   } = useAuctionListFilters();
 
-  const { auctions, isLoading, isError, error } =
-    useAuctionListData(queryFilters);
+  const { auctions, isLoading, isError, error } = useAuctionListData(
+    filters.category,
+    filters.typeFilter || undefined
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">

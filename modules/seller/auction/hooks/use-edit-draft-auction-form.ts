@@ -16,6 +16,7 @@ import {
   updateAuctionFormSchema,
   type UpdateAuctionFormValues,
 } from '../schemas/update-auction.schema';
+import { publishAuctionValidationSchema } from '../schemas/publish-auction.schema';
 
 function toFormValues(a: AuctionDetail): UpdateAuctionFormValues {
   return {
@@ -108,6 +109,23 @@ export function useEditDraftAuctionForm(
 
   const handlePublish = useCallback(async () => {
     if (!auction) return;
+
+    const validation = publishAuctionValidationSchema.safeParse(auction);
+
+    if (!validation.success) {
+      const first = validation.error.issues[0];
+      const message =
+        first.path.length > 0
+          ? `${first.path.join('.')}: ${first.message}`
+          : first.message;
+
+      toast.error(message);
+      form.setError('root', {
+        message: message,
+      });
+      return;
+    }
+
     setPublishing(true);
     try {
       const result = await publishAuctionAction(auctionId);
@@ -156,7 +174,7 @@ function useAuctionById(
   useEffect(() => {
     if (initialAuction != null) return;
     let cancelled = false;
-    getAuctionByIdAction(auctionId).then((res) => {
+    getAuctionByIdAction(auctionId, 'seller').then((res) => {
       if (cancelled) return;
       if (res.success && res.data) setData(res.data);
       else setData(null);

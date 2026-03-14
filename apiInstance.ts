@@ -37,9 +37,12 @@ export const API_ENDPOINTS = {
     create: '/auction',
     getSellerAuctions: '/auction',
     getBrowse: '/auction/browse',
-    getAuctionById: (id: string) => `/auction/${id}`,
+    getAuctionForSeller: (id: string) => `/auction/seller/${id}`,
+    getAuctionForUser: (id: string) => `/auction/user/${id}`,
+    placeBid: (id: string) => `/auction/${id}/bid`,
     update: (id: string) => `/auction/${id}`,
     publish: (id: string) => `/auction/${id}/publish`,
+    end: (id: string) => `/auction/${id}/end`,
     generateUploadUrl: '/auction/upload-url',
   },
 

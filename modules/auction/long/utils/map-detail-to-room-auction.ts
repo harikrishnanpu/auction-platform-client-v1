@@ -1,6 +1,6 @@
 import { getAuctionImageUrl } from '@/lib/auction-utils';
 import type { AuctionDetail } from '@/types/auction.type';
-import type { Auction, AuctionMedia } from '../types/auction.types';
+import type { Auction, AuctionMedia } from '../../../../types/auction.types';
 
 export function mapDetailToRoomAuction(detail: AuctionDetail): Auction {
   const sortedAssets = [...detail.assets].sort(
@@ -30,5 +30,6 @@ export function mapDetailToRoomAuction(detail: AuctionDetail): Auction {
     extensionCount: detail.extensionCount ?? 0,
     maxExtensions: detail.maxExtensionCount ?? 3,
     winnerId: detail.winnerId ?? null,
+    antiSnipeThresholdSeconds: detail.antiSnipSeconds ?? 60,
   };
 }

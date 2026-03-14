@@ -98,6 +98,29 @@ export interface AuctionDetail {
   winnerId: string | null;
 }
 
+export interface AuctionRoomData {
+  bids: {
+    id: string;
+    auctionId: string;
+    userId: string;
+    amount: number;
+    createdAt: string;
+  }[];
+  participants: {
+    id: string;
+    auctionId: string;
+    userId: string;
+    userName: string;
+    joinedAt: string;
+  }[];
+  lastBidTime: string | null;
+}
+
+export interface AuctionWithRoom {
+  auction: AuctionDetail;
+  room: AuctionRoomData;
+}
+
 export interface UpdateAuctionInput {
   auctionType?: AuctionType;
   title: string;

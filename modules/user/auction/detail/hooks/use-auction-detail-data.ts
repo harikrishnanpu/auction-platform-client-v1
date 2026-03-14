@@ -3,7 +3,7 @@
 import { useAuctionByIdQuery } from '@/modules/auction/hooks';
 
 export function useAuctionDetailData(auctionId: string | null | undefined) {
-  const query = useAuctionByIdQuery({ auctionId, enabled: Boolean(auctionId) });
+  const query = useAuctionByIdQuery(auctionId, 'user', Boolean(auctionId));
 
   return {
     auction: query.data ?? null,

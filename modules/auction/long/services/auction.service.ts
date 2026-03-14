@@ -1,5 +1,5 @@
 import api from '@/lib/axios';
-import { Auction, AuctionMedia } from '../types/auction.types';
+import { Auction, AuctionMedia } from '../../../../types/auction.types';
 
 interface AuctionApiAsset {
   id?: string;

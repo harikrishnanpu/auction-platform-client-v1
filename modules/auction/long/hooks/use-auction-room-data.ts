@@ -1,29 +1,39 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useAuctionByIdQuery } from '@/modules/auction/hooks';
+import { useQuery } from '@tanstack/react-query';
+import { getAuctionWithRoomAction } from '@/actions/auction/auction.actions';
+import { auctionKeys } from '@/modules/auction/hooks/query-keys';
 import { mapDetailToRoomAuction } from '../utils/map-detail-to-room-auction';
-import type { Auction } from '../types/auction.types';
+import type { Auction } from '../../../../types/auction.types';
+import type { AuctionViewMode } from '@/actions/auction/auction.actions';
 
-export interface UseAuctionRoomDataOptions {
-  auctionId: string | null | undefined;
-  enabled?: boolean;
-}
+export function useAuctionRoomData(
+  auctionId: string | null | undefined,
+  mode: AuctionViewMode,
+  enabled = true
+) {
+  const id = auctionId ?? '';
 
-export function useAuctionRoomData(options: UseAuctionRoomDataOptions) {
-  const { auctionId, enabled = true } = options;
-  const query = useAuctionByIdQuery({
-    auctionId,
-    enabled: Boolean(auctionId) && enabled,
+  const query = useQuery({
+    queryKey: auctionKeys.room(id, mode),
+    queryFn: async () => {
+      const result = await getAuctionWithRoomAction(id, mode);
+      if (!result.success || !result.data) {
+        throw new Error(result.error ?? 'Failed to load auction');
+      }
+      return result.data;
+    },
+    enabled: Boolean(id) && enabled,
   });
 
-  const roomAuction: Auction | null = useMemo(() => {
-    if (!query.data) return null;
-    return mapDetailToRoomAuction(query.data);
-  }, [query.data]);
+  const auction: Auction | null = query.data?.auction
+    ? mapDetailToRoomAuction(query.data.auction)
+    : null;
+  const room = query.data?.room ?? null;
 
   return {
-    auction: roomAuction,
+    auction,
+    room,
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,

@@ -31,7 +31,7 @@ export function SellerAuctionDetailView({
 
   useEffect(() => {
     let cancelled = false;
-    getAuctionByIdAction(auctionId).then((res) => {
+    getAuctionByIdAction(auctionId, 'seller').then((res) => {
       if (cancelled) return;
       if (res.success && res.data) setAuction(res.data);
       else setError(res.error ?? 'Failed to load auction');

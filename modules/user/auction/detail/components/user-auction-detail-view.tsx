@@ -27,7 +27,6 @@ export function UserAuctionDetailView({
   );
 
   const handlePlaceBid = (amount: number) => {
-    // TODO: wire to real bid API when ready
     console.log('Place bid', amount);
   };
 

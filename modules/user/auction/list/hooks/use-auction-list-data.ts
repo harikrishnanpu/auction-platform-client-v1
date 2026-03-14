@@ -1,12 +1,9 @@
 'use client';
 
-import {
-  useBrowseAuctionsQuery,
-  type BrowseAuctionsFilters,
-} from '@/modules/auction/hooks';
+import { useBrowseAuctionsQuery } from '@/modules/auction/hooks';
 
-export function useAuctionListData(filters: BrowseAuctionsFilters) {
-  const query = useBrowseAuctionsQuery({ filters, enabled: true });
+export function useAuctionListData(category?: string, auctionType?: string) {
+  const query = useBrowseAuctionsQuery(category, auctionType, true);
 
   return {
     auctions: query.data ?? [],
