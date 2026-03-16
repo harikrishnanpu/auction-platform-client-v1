@@ -1,11 +1,19 @@
 'use client';
 
+import { useEffect, useCallback, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useForm, type Resolver } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Save, Send, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  updateAuctionAction,
+  publishAuctionAction,
+} from '@/actions/auction/auction.actions';
 import {
   AUCTION_CATEGORIES,
   AUCTION_CONDITIONS,
@@ -13,7 +21,64 @@ import {
   getAuctionTypeLabel,
 } from '@/lib/auction-utils';
 import type { AuctionDetail } from '@/types/auction.type';
-import { useEditDraftAuctionForm } from '../hooks/use-edit-draft-auction-form';
+import { getErrorMessage } from '@/utils/get-app-error';
+import { toast } from 'sonner';
+import {
+  updateAuctionFormSchema,
+  type UpdateAuctionFormValues,
+} from '../schemas/update-auction.schema';
+import { publishAuctionValidationSchema } from '../schemas/publish-auction.schema';
+
+function toFormValues(a: AuctionDetail): UpdateAuctionFormValues {
+  return {
+    auctionType: a.auctionType,
+    title: a.title,
+    description: a.description ?? '',
+    category: a.category,
+    condition: a.condition,
+    startPrice: a.startPrice,
+    minIncrement: a.minIncrement,
+    startAt: a.startAt.slice(0, 16),
+    endAt: a.endAt.slice(0, 16),
+    antiSnipSeconds: a.antiSnipSeconds ?? 60,
+    maxExtensionCount: a.maxExtensionCount ?? 3,
+    bidCooldownSeconds: a.bidCooldownSeconds ?? 10,
+  };
+}
+
+function getDummyAuction(auctionId: string): AuctionDetail {
+  const now = new Date();
+  const startAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const endAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  return {
+    id: auctionId,
+    sellerId: 'dummy-seller-id',
+    auctionType: 'LONG',
+    title: 'Dummy Draft Auction',
+    description: 'Sample description for edit.',
+    category: 'Watches',
+    condition: 'Used - Good',
+    startPrice: 5000,
+    minIncrement: 100,
+    startAt: startAt.toISOString(),
+    endAt: endAt.toISOString(),
+    status: 'DRAFT',
+    assets: [
+      {
+        id: 'asset-1',
+        auctionId,
+        fileKey: 'dummy/key.jpg',
+        position: 0,
+        assetType: 'IMAGE',
+      },
+    ],
+    antiSnipSeconds: 60,
+    extensionCount: 0,
+    maxExtensionCount: 3,
+    bidCooldownSeconds: 10,
+    winnerId: null,
+  };
+}
 
 export interface EditDraftAuctionFormProps {
   auctionId: string;
@@ -26,32 +91,101 @@ export function EditDraftAuctionForm({
   initialAuction = null,
   error: initialError = null,
 }: EditDraftAuctionFormProps) {
-  const {
-    form,
-    auction,
-    loading,
-    publishing,
-    handleSave,
-    handlePublish,
-    handleDelete,
-    sortedAssets,
-  } = useEditDraftAuctionForm(auctionId, initialAuction);
+  const router = useRouter();
+  const auction = initialAuction ?? getDummyAuction(auctionId);
+  const sortedAssets = [...auction.assets].sort(
+    (a, b) => a.position - b.position
+  );
+  const [publishing, setPublishing] = useState(false);
+
+  const form = useForm<UpdateAuctionFormValues>({
+    resolver: zodResolver(
+      updateAuctionFormSchema
+    ) as Resolver<UpdateAuctionFormValues>,
+    defaultValues: toFormValues(auction),
+    mode: 'onBlur',
+  });
+
+  useEffect(() => {
+    form.reset(toFormValues(auction));
+  }, [auction.id, form]);
+
+  const handleSave = useCallback(
+    async (data: UpdateAuctionFormValues) => {
+      if (auction.status !== 'DRAFT') {
+        toast.error('Only draft auctions can be edited.');
+        return;
+      }
+      try {
+        const result = await updateAuctionAction(auctionId, {
+          auctionType: data.auctionType,
+          title: data.title.trim(),
+          description: data.description?.trim() ?? '',
+          category: data.category.trim(),
+          condition: data.condition.trim(),
+          startPrice: data.startPrice,
+          minIncrement: data.minIncrement,
+          startAt: new Date(data.startAt).toISOString(),
+          endAt: new Date(data.endAt).toISOString(),
+          antiSnipSeconds: data.antiSnipSeconds,
+          maxExtensionCount: data.maxExtensionCount,
+          bidCooldownSeconds: data.bidCooldownSeconds,
+        });
+        if (!result.success || !result.data) {
+          form.setError('root', {
+            message: result.error ?? 'Failed to update auction',
+          });
+          return;
+        }
+        toast.success('Auction updated.');
+        router.push(`/seller/auction/${auctionId}`);
+      } catch (err) {
+        form.setError('root', {
+          message: getErrorMessage(err) ?? 'Something went wrong',
+        });
+      }
+    },
+    [auction.status, auctionId, form, router]
+  );
+
+  const handlePublish = useCallback(async () => {
+    const validation = publishAuctionValidationSchema.safeParse(auction);
+    if (!validation.success) {
+      const first = validation.error.issues[0];
+      const message =
+        first.path.length > 0
+          ? `${first.path.join('.')}: ${first.message}`
+          : first.message;
+      toast.error(message);
+      form.setError('root', { message });
+      return;
+    }
+    setPublishing(true);
+    try {
+      const result = await publishAuctionAction(auctionId);
+      if (!result.success) {
+        toast.error(result.error ?? 'Failed to publish auction');
+        return;
+      }
+      toast.success('Auction published. It is now live.');
+      router.push(`/seller/auction/${auctionId}`);
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setPublishing(false);
+    }
+  }, [auction, auctionId, form, router]);
+
+  const handleDelete = useCallback(() => {
+    toast.info('Delete coming soon.');
+  }, []);
 
   const error = initialError;
-
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = form;
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
 
   if (error || !auction) {
     return (

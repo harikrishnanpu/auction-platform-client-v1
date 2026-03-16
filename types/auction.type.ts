@@ -66,7 +66,6 @@ export interface SellerAuctionListItem {
   winnerId: string | null;
 }
 
-/** Browse (user) list item - same shape as seller list from API */
 export type BrowseAuctionListItem = SellerAuctionListItem;
 
 export interface AuctionAssetDto {

@@ -1,14 +1,63 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Auction } from '../../../../types/auction.types';
-import { useAuctionRoom } from '../hooks/use-auction-room';
+import type {
+  Auction,
+  Bid,
+  ChatMessage,
+  Participant,
+} from '@/types/auction.types';
 import { BidGraph } from './bid-graph';
 import { toast } from 'sonner';
 import useUserStore from '@/store/user.store';
-import { PaymentModal } from '@/modules/profile/components/payment-modal';
 import { endAuctionAction } from '@/actions/auction/auction.actions';
 import { Loader2, Flag, Trophy } from 'lucide-react';
+
+const DUMMY_BIDS: Bid[] = [
+  {
+    id: 'bid-1',
+    auctionId: 'dummy',
+    userId: 'user-1',
+    amount: 5200,
+    createdAt: new Date(Date.now() - 60000).toISOString(),
+  },
+  {
+    id: 'bid-2',
+    auctionId: 'dummy',
+    userId: 'user-2',
+    amount: 5500,
+    createdAt: new Date(Date.now() - 30000).toISOString(),
+  },
+];
+
+const DUMMY_MESSAGES: ChatMessage[] = [
+  {
+    id: 'msg-1',
+    userId: 'user-1',
+    message: 'Good luck everyone!',
+    createdAt: new Date(Date.now() - 120000).toISOString(),
+    username: 'Bidder1',
+  },
+];
+
+const DUMMY_PARTICIPANTS: Participant[] = [
+  {
+    id: 'p-1',
+    auctionId: 'dummy',
+    userId: 'user-1',
+    userName: 'Bidder1',
+    joinedAt: new Date(Date.now() - 300000).toISOString(),
+    isOnline: true,
+  },
+  {
+    id: 'p-2',
+    auctionId: 'dummy',
+    userId: 'user-2',
+    userName: 'Bidder2',
+    joinedAt: new Date(Date.now() - 120000).toISOString(),
+    isOnline: true,
+  },
+];
 
 interface AuctionRoomViewProps {
   auction: Auction;
@@ -24,23 +73,35 @@ export const AuctionRoomView = ({
   const isWinner =
     auction.status === 'ENDED' && user?.id === (auction.winnerId ?? null);
   const canPay = isWinner && auction.completionStatus !== 'PAID';
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [endingAuction, setEndingAuction] = useState(false);
 
-  const {
-    bids,
-    messages,
-    participants,
-    error,
-    errorCode,
-    endTimeOverride,
-    lastBidTime,
-    statusOverride,
-    pausedOverride,
-    isLoading: roomLoading,
-    placeBid,
-    sendMessage,
-  } = useAuctionRoom(auction.auctionId, isSeller ? 'seller' : 'user');
+  const bids = DUMMY_BIDS;
+  const messages = DUMMY_MESSAGES;
+  const participants = DUMMY_PARTICIPANTS;
+  const error: string | null = null;
+  const errorCode: string | null = null;
+  const endTimeOverride: string | null = null;
+  const lastBidTime: string | null =
+    DUMMY_BIDS[DUMMY_BIDS.length - 1]?.createdAt ?? null;
+  const statusOverride: string | null = null;
+  const pausedOverride: boolean | null = null;
+  const roomLoading = false;
+  const placeBid = async (
+    amount: number
+  ): Promise<{ success: boolean; message?: string }> => {
+    void amount;
+    toast.info(
+      'Bidding uses dummy data. Connect to server to place real bids.'
+    );
+    return { success: false, message: 'Dummy mode' };
+  };
+  const sendMessage = async (
+    text: string
+  ): Promise<{ success: boolean; message?: string }> => {
+    void text;
+    toast.info('Chat uses dummy data. Connect to server to send messages.');
+    return { success: false, message: 'Dummy mode' };
+  };
   const nextBidAmount = useMemo(
     () =>
       (bids.length > 0
@@ -282,7 +343,7 @@ export const AuctionRoomView = ({
           </div>
           {canPay && (
             <button
-              onClick={() => setShowPaymentModal(true)}
+              onClick={() => {}}
               className="px-5 py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold flex items-center gap-2 shadow-md"
             >
               <Trophy className="w-4 h-4" />
@@ -526,18 +587,6 @@ export const AuctionRoomView = ({
           </div>
         </div>
       </div>
-
-      {showPaymentModal && (
-        <PaymentModal
-          auction={{
-            id: auction.auctionId,
-            title: auction.title,
-            currentPrice: highestBid,
-          }}
-          onClose={() => setShowPaymentModal(false)}
-          onSuccess={onAuctionRefetch}
-        />
-      )}
     </main>
   );
 };

@@ -3,9 +3,5 @@ export default function UserLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <section>
-      <main className="flex-1">{children}</main>
-    </section>
-  );
+  return <main>{children}</main>;
 }

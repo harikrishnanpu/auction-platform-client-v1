@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent } from '../../../components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Mail, Phone, MapPin, Shield } from 'lucide-react';
 import useUserStore from '@/store/user.store';
 import { InfoGroup } from '@/components/ui/info-group/InfoGroup';

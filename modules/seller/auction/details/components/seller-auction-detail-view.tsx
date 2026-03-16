@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Loader2,
@@ -10,13 +9,46 @@ import {
   Tag,
   IndianRupee,
 } from 'lucide-react';
-import { getAuctionByIdAction } from '@/actions/auction/auction.actions';
 import { AuctionDetail } from '@/types/auction.type';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuctionStatusBadge } from '@/components/auction/auction-status-badge';
 import { AuctionTypeBadge } from '@/components/auction/auction-type-badge';
 import { getAuctionImageUrl } from '@/lib/auction-utils';
+
+function getDummyAuction(auctionId: string): AuctionDetail {
+  const now = new Date();
+  const startAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const endAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  return {
+    id: auctionId,
+    sellerId: 'dummy-seller-id',
+    auctionType: 'LONG',
+    title: 'Dummy Auction Detail',
+    description: 'Sample description for this auction.',
+    category: 'Watches',
+    condition: 'Used - Good',
+    startPrice: 5000,
+    minIncrement: 100,
+    startAt: startAt.toISOString(),
+    endAt: endAt.toISOString(),
+    status: 'DRAFT',
+    assets: [
+      {
+        id: 'asset-1',
+        auctionId,
+        fileKey: 'dummy/key.jpg',
+        position: 0,
+        assetType: 'IMAGE',
+      },
+    ],
+    antiSnipSeconds: 60,
+    extensionCount: 0,
+    maxExtensionCount: 3,
+    bidCooldownSeconds: 10,
+    winnerId: null,
+  };
+}
 
 export interface SellerAuctionDetailViewProps {
   auctionId: string;
@@ -25,22 +57,9 @@ export interface SellerAuctionDetailViewProps {
 export function SellerAuctionDetailView({
   auctionId,
 }: SellerAuctionDetailViewProps) {
-  const [auction, setAuction] = useState<AuctionDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    getAuctionByIdAction(auctionId, 'seller').then((res) => {
-      if (cancelled) return;
-      if (res.success && res.data) setAuction(res.data);
-      else setError(res.error ?? 'Failed to load auction');
-      setLoading(false);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [auctionId]);
+  const auction = getDummyAuction(auctionId);
+  const loading = false;
+  const error: string | null = null;
 
   if (loading) {
     return (

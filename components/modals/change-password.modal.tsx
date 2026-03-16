@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   changePasswordSchema,
   ChangePasswordFormValues,
-} from '@/modules/profile/schemes/changeprofilePassword.schema';
+} from '@/modules/user/profile/schemes/changeprofilePassword.schema';
 import { UserInfo as User, AuthProvider } from '@/types/user.type';
 import { toast } from 'sonner';
 import { Loader2, Key, AlertCircle } from 'lucide-react';

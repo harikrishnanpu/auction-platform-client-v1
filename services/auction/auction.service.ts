@@ -1,4 +1,5 @@
 import { API_ENDPOINTS, buildApiUrl } from '@/apiInstance';
+import { apiFetch } from '@/lib/fetch';
 import { ApiResponse } from '@/types/api.index';
 import {
   CreateAuctionInput,
@@ -10,44 +11,22 @@ import {
   UpdateAuctionOutput,
 } from '@/types/auction.type';
 import { getErrorMessage } from '@/utils/get-app-error';
-import { cookies } from 'next/headers';
+import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
 
 export const auctionService = {
   create: async (
-    input: CreateAuctionInput
+    input: CreateAuctionInput,
+    cookies: ReadonlyRequestCookies
   ): Promise<ApiResponse<CreateAuctionOutput>> => {
-    try {
-      const cookieStorage = await cookies();
-
-      const res = await fetch(buildApiUrl(API_ENDPOINTS.auction.create), {
+    return await apiFetch<CreateAuctionOutput>(
+      buildApiUrl(API_ENDPOINTS.auction.create),
+      {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: cookieStorage.toString(),
-        },
-        credentials: 'include',
         body: JSON.stringify(input),
-      });
-
-      console.log(res);
-
-      if (!res.ok) {
-        const err = await res.json();
-        console.log(err);
-        throw new Error(err.message ?? 'Failed to create auction');
-      }
-
-      const data = await res.json();
-      console.log(data);
-      return { success: true, data: data.data };
-    } catch (error: unknown) {
-      console.log(error);
-      return {
-        success: false,
-        data: null,
-        error: getErrorMessage(error),
-      };
-    }
+      },
+      cookies,
+      'no-store'
+    );
   },
 
   getSellerAuctions: async (): Promise<

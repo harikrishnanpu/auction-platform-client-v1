@@ -1,9 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Gavel, Loader2, Pencil, Eye } from 'lucide-react';
-import { getSellerAuctionsAction } from '@/actions/auction/auction.actions';
 import { SellerAuctionListItem } from '@/types/auction.type';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,21 +9,54 @@ import { AuctionStatusBadge } from '@/components/auction/auction-status-badge';
 import { AuctionTypeBadge } from '@/components/auction/auction-type-badge';
 import { getAuctionImageUrl } from '@/lib/auction-utils';
 
-export function SellerAuctionListView() {
-  const [auctions, setAuctions] = useState<SellerAuctionListItem[]>([]);
-  const [loading, setLoading] = useState(true);
+const DUMMY_AUCTIONS: SellerAuctionListItem[] = [
+  {
+    id: 'dummy-1',
+    sellerId: 'dummy-seller',
+    auctionType: 'LONG',
+    title: 'Sample Long Auction',
+    description: 'Dummy description',
+    category: 'Watches',
+    condition: 'Used - Good',
+    startPrice: 5000,
+    minIncrement: 100,
+    startAt: new Date().toISOString(),
+    endAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'DRAFT',
+    assetCount: 1,
+    primaryImageKey: 'dummy/key.jpg',
+    antiSnipSeconds: 60,
+    extensionCount: 0,
+    maxExtensionCount: 3,
+    bidCooldownSeconds: 10,
+    winnerId: null,
+  },
+  {
+    id: 'dummy-2',
+    sellerId: 'dummy-seller',
+    auctionType: 'LIVE',
+    title: 'Sample Live Auction',
+    description: 'Dummy description',
+    category: 'Electronics',
+    condition: 'New',
+    startPrice: 10000,
+    minIncrement: 500,
+    startAt: new Date().toISOString(),
+    endAt: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'ACTIVE',
+    assetCount: 2,
+    primaryImageKey: 'dummy/key2.jpg',
+    antiSnipSeconds: 60,
+    extensionCount: 0,
+    maxExtensionCount: 3,
+    bidCooldownSeconds: 10,
+    winnerId: null,
+  },
+];
 
-  useEffect(() => {
-    let cancelled = false;
-    getSellerAuctionsAction().then((res) => {
-      if (cancelled) return;
-      if (res.success && res.data) setAuctions(res.data.auctions);
-      setLoading(false);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+export function SellerAuctionListView() {
+  const auctions = DUMMY_AUCTIONS;
+  const loading = false;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">

@@ -2,37 +2,37 @@ import Link from 'next/link';
 
 export function HeroSection() {
   return (
-    <section className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-8 md:p-16 mb-20 shadow-lg border border-white/50 dark:border-white/10 relative overflow-hidden flex flex-col lg:flex-row items-center gap-12">
+    <section className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-6 md:p-10 mb-16 shadow-lg border border-white/50 dark:border-white/10 relative overflow-hidden flex flex-col lg:flex-row items-center gap-8">
       <div className="lg:w-1/2 z-10 relative">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold mb-6 uppercase tracking-wider">
+        <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-semibold mb-4 uppercase tracking-[0.2em]">
           <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></span>
           Next-Gen Auction Platform
         </div>
-        <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-900 dark:text-white mb-4 leading-snug tracking-tight">
           Bidding Reimagined <br />
           <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-500 to-purple-600">
             For the Future.
           </span>
         </h1>
-        <p className="text-gray-600 dark:text-gray-300 mb-8 text-lg leading-relaxed max-w-lg">
+        <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm md:text-base leading-relaxed max-w-lg">
           Experience the worlds most reliable, secure, and scalable auction
           infrastructure. Real-time updates with zero latency.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Link
-            className="bg-gray-900 text-white px-8 py-4 text-sm uppercase tracking-widest font-semibold rounded-xl hover:bg-gray-800 transition-all flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            className="bg-gray-900 text-white px-6 py-3 text-xs md:text-sm uppercase tracking-[0.25em] font-medium rounded-xl hover:bg-gray-800 transition-all flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             href="/login"
           >
             Get Started / Login
           </Link>
           <Link
-            className="bg-transparent border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white px-8 py-4 text-sm uppercase tracking-widest font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-all flex items-center justify-center"
+            className="bg-transparent border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white px-6 py-3 text-xs md:text-sm uppercase tracking-[0.25em] font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-all flex items-center justify-center"
             href="#"
           >
             Contact Us
           </Link>
         </div>
-        <div className="mt-8 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+        <div className="mt-6 flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400">
           <div className="flex -space-x-2">
             <div className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white dark:border-gray-800"></div>
             <div className="w-8 h-8 rounded-full bg-gray-300 border-2 border-white dark:border-gray-800"></div>

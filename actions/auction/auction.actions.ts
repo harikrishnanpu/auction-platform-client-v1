@@ -12,11 +12,13 @@ import {
   UpdateAuctionInput,
   UpdateAuctionOutput,
 } from '@/types/auction.type';
+import { cookies } from 'next/headers';
 
 export async function createAuctionAction(
   input: CreateAuctionInput
 ): Promise<ApiResponse<CreateAuctionOutput>> {
-  return auctionService.create(input);
+  const cookieStorage = await cookies();
+  return await auctionService.create(input, cookieStorage);
 }
 
 export async function getSellerAuctionsAction(): Promise<
@@ -31,8 +33,6 @@ export async function getBrowseAuctionsAction(params?: {
 }): Promise<ApiResponse<{ auctions: BrowseAuctionListItem[] }>> {
   return auctionService.getBrowse(params);
 }
-
-export type AuctionViewMode = 'seller' | 'user';
 
 export async function getAuctionByIdAction(
   id: string,
