@@ -7,7 +7,7 @@ import {
   CheckCircle,
   Loader2,
 } from 'lucide-react';
-import { Button } from '@/components/ui/buttons/button';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface LivenessCheckProps {

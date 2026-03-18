@@ -1,9 +1,11 @@
-import { SellerAuctionListView } from '@/modules/seller/auction/list/components/seller-auction-list-view';
+import { ComingSoon } from '@/components/coming-soon';
 
 export default function SellerAuctionListPage() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans antialiased">
-      <SellerAuctionListView />
-    </div>
+    <ComingSoon
+      title="No content"
+      description="Seller auctions list is coming soon."
+      homeHref="/seller/dashboard"
+    />
   );
 }

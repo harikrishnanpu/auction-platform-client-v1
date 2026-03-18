@@ -1,6 +1,6 @@
 import { API_ENDPOINTS, buildApiUrl } from '@/apiInstance';
-import { ChangePasswordFormValues } from '@/modules/profile/schemes/changeprofilePassword.schema';
-import { EditProfileFormValues } from '@/modules/profile/schemes/editProfile.schema';
+import { ChangePasswordFormValues } from '@/modules/user/profile/schemes/changeprofilePassword.schema';
+import { EditProfileFormValues } from '@/modules/user/profile/schemes/editProfile.schema';
 import { ApiResponse } from '@/types/api.index';
 import { UserInfo } from '@/types/user.type';
 import { getErrorMessage } from '@/utils/get-app-error';

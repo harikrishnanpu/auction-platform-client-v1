@@ -1,9 +1,10 @@
-// import { UserAuctionListView } from '@/modules/user/auction/list/components/user-auction-list-view';
+import { ComingSoon } from '@/components/coming-soon';
 
 export default function AuctionsPage() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans antialiased">
-      {/* <UserAuctionListView /> */}
-    </div>
+    <ComingSoon
+      title="No content"
+      description="Auctions browsing is coming soon."
+    />
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { use } from 'react';
-import { SellerAuctionDetailView } from '@/modules/seller/auction/details/components/seller-auction-detail-view';
+import { ComingSoon } from '@/components/coming-soon';
 
 export default function SellerAuctionDetailPage({
   params,
@@ -11,5 +11,11 @@ export default function SellerAuctionDetailPage({
   const resolvedParams = use(params);
   const id = resolvedParams.id;
   if (!id) return null;
-  return <SellerAuctionDetailView auctionId={id} />;
+  return (
+    <ComingSoon
+      title="No content"
+      description={`Seller auction ${id} page is coming soon.`}
+      homeHref="/seller/dashboard"
+    />
+  );
 }

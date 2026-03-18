@@ -14,12 +14,12 @@ import {
   createAuctionAction,
   generateAuctionUploadUrlAction,
 } from '@/actions/auction/auction.actions';
-import {
-  AUCTION_CATEGORIES,
-  AUCTION_CONDITIONS,
-  getAuctionTypeLabel,
-} from '@/lib/auction-utils';
-import type { AuctionType, AuctionAssetForm } from '@/types/auction.type';
+import { AUCTION_CONDITIONS, getAuctionTypeLabel } from '@/lib/auction-utils';
+import type {
+  AuctionAssetForm,
+  AuctionCategory,
+  AuctionType,
+} from '@/types/auction.type';
 import { getErrorMessage } from '@/utils/get-app-error';
 import { toast } from 'sonner';
 import {
@@ -27,6 +27,7 @@ import {
   type CreateAuctionFormValues,
 } from '../schemas/create-auction.schema';
 import { AuctionTypeSelector } from './auction-type-selector';
+import { SellerCategorySelect } from './category-select';
 
 const VALID_TYPES: AuctionType[] = ['LONG', 'LIVE', 'SEALED'];
 
@@ -53,7 +54,11 @@ const defaultValues: CreateAuctionFormValues = {
   bidCooldownSeconds: 10,
 };
 
-export function CreateAuctionContainer() {
+export function CreateAuctionContainer({
+  categories,
+}: {
+  categories: AuctionCategory[];
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const typeParam = searchParams.get('type');
@@ -213,6 +218,7 @@ export function CreateAuctionContainer() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = form;
+  const categoryValue = form.watch('category');
 
   if (!auctionType) {
     return (
@@ -306,23 +312,16 @@ export function CreateAuctionContainer() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="category">Category</Label>
-                  <select
+                  <SellerCategorySelect
                     id="category"
-                    {...register('category')}
-                    className="mt-1 w-full h-12 rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="">Select category</option>
-                    {AUCTION_CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.category && (
-                    <p className="text-destructive text-xs mt-1">
-                      {errors.category.message}
-                    </p>
-                  )}
+                    value={categoryValue}
+                    categories={categories}
+                    onChange={(v) =>
+                      form.setValue('category', v, { shouldValidate: true })
+                    }
+                    error={errors.category?.message}
+                    disabled={isSubmitting}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="condition">Condition</Label>

@@ -1,14 +1,10 @@
-import { getBrowseAuctionsAction } from '@/actions/auction/auction.actions';
-import { DashboardView } from '@/modules/user/home/components/dashboard-view';
+import { ComingSoon } from '@/components/coming-soon';
 
 export default async function HomePage() {
-  const auctions = await getBrowseAuctionsAction({});
-
   return (
-    <DashboardView
-      auctions={auctions.data?.auctions ?? []}
-      loading={false}
-      error={auctions.error ?? null}
+    <ComingSoon
+      title="No content"
+      description="User auction browsing is coming soon."
     />
   );
 }

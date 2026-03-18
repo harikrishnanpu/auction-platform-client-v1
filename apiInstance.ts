@@ -35,15 +35,9 @@ export const API_ENDPOINTS = {
 
   auction: {
     create: '/auction',
-    getSellerAuctions: '/auction',
-    getBrowse: '/auction/browse',
-    getAuctionForSeller: (id: string) => `/auction/seller/${id}`,
-    getAuctionForUser: (id: string) => `/auction/user/${id}`,
-    placeBid: (id: string) => `/auction/${id}/bid`,
-    update: (id: string) => `/auction/${id}`,
-    publish: (id: string) => `/auction/${id}/publish`,
-    end: (id: string) => `/auction/${id}/end`,
     generateUploadUrl: '/auction/upload-url',
+    getAuctionCategories: '/auction/categories',
+    requestAuctionCategory: '/auction/request',
   },
 
   admin: {
@@ -54,6 +48,16 @@ export const API_ENDPOINTS = {
     getAdminSeller: '/admin/sellers',
     approveSellerKyc: '/admin/sellers',
     rejectSellerKyc: '/admin/sellers',
+    updateAuctionCategory: (categoryId: string) =>
+      `/admin/auction-categories/${categoryId}`,
+    approveAuctionCategoryRequest: (requestId: string) =>
+      `/admin/auction-categories/${requestId}/approve`,
+    rejectAuctionCategoryRequest: (requestId: string) =>
+      `/admin/auction-categories/requests/${requestId}/reject`,
+    ChangeAuctionCategoryStatus: (categoryId: string) =>
+      `/admin/auction-categories/${categoryId}/status`,
+    getAuctionCategoryRequests: '/admin/category-requests',
+    getAllAuctionCategories: '/admin/auction-categories',
   },
 } as const;
 
