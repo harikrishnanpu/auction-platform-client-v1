@@ -21,16 +21,19 @@ export const apiFetch = async <T>(
     });
 
     if (!response.ok) {
+      console.log(response);
       const error = await response.json();
       throw new Error(error.message);
     }
 
+    const responseData = await response.json();
+
     return {
       success: true,
-      data: await response.json(),
+      data: responseData.data,
     };
   } catch (error: unknown) {
-    console.error(error);
+    console.log('ERROR IN API FETCH', error);
     return {
       success: false,
       data: null,

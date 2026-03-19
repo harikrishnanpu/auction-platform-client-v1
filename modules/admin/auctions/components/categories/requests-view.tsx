@@ -17,17 +17,13 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { AuctionCategory, AuctionCategoryStatus } from '@/types/auction.type';
+import { EditCategoryModal, RejectReasonModal } from './category-modals';
 import {
-  AuctionCategory,
-  AuctionCategoryRequest,
-  AuctionCategoryStatus,
-} from '@/types/auction.type';
-import { flattenCategoryTree } from './category-utils';
-import {
-  CategoryParentOption,
-  EditCategoryModal,
-  RejectReasonModal,
-} from './category-modals';
+  normalizeCategoryStatus,
+  useCategoryParentOptions,
+  useCategoryTableFilters,
+} from './use-admin-categories';
 
 function StatusBadge({ status }: { status: AuctionCategoryStatus }) {
   if (status === 'APPROVED')
@@ -57,25 +53,19 @@ export function AdminAuctionCategoryRequestsView({
   categories,
   error,
 }: {
-  requests: AuctionCategoryRequest[];
+  requests: AuctionCategory[];
   categories: AuctionCategory[];
   error?: string | null;
 }) {
-  console.log(requests);
-
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
-  const [rejecting, setRejecting] = useState<AuctionCategoryRequest | null>(
-    null
-  );
+  const [rejecting, setRejecting] = useState<AuctionCategory | null>(null);
   const [editOpen, setEditOpen] = useState(false);
-  const [editing, setEditing] = useState<AuctionCategoryRequest | null>(null);
-  const [query, setQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<
-    'ALL' | AuctionCategoryStatus
-  >('ALL');
+  const [editing, setEditing] = useState<AuctionCategory | null>(null);
+  const { query, setQuery, statusFilter, setStatusFilter, filteredItems } =
+    useCategoryTableFilters(requests);
 
   const approve = useCallback(
     async (id: string) => {
@@ -95,7 +85,7 @@ export function AdminAuctionCategoryRequestsView({
     [router]
   );
 
-  const openReject = useCallback((r: AuctionCategoryRequest) => {
+  const openReject = useCallback((r: AuctionCategory) => {
     setRejecting(r);
     setRejectOpen(true);
   }, []);
@@ -105,7 +95,7 @@ export function AdminAuctionCategoryRequestsView({
     setRejecting(null);
   }, []);
 
-  const openEdit = useCallback((r: AuctionCategoryRequest) => {
+  const openEdit = useCallback((r: AuctionCategory) => {
     setEditing(r);
     setEditOpen(true);
   }, []);
@@ -120,25 +110,9 @@ export function AdminAuctionCategoryRequestsView({
     [router, startTransition]
   );
 
-  const parentOptions: CategoryParentOption[] = useMemo(() => {
-    const rows = flattenCategoryTree(categories);
-    return rows.map((r) => ({ id: r.id, label: r.pathLabel }));
-  }, [categories]);
+  const { parentOptions } = useCategoryParentOptions(categories);
 
-  const filteredRequests = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return requests.filter((r) => {
-      const status = r.status;
-      const okStatus = statusFilter === 'ALL' ? true : status === statusFilter;
-      if (!okStatus) return false;
-      if (!q) return true;
-      return (
-        r.name.toLowerCase().includes(q) || r.slug.toLowerCase().includes(q)
-      );
-    });
-  }, [requests, query, statusFilter]);
-
-  const columns: Column<AuctionCategoryRequest>[] = useMemo(
+  const columns: Column<AuctionCategory>[] = useMemo(
     () => [
       {
         header: 'Requested category',
@@ -153,13 +127,13 @@ export function AdminAuctionCategoryRequestsView({
       },
       {
         header: 'Status',
-        cell: (r) => <StatusBadge status={r.status} />,
+        cell: (r) => <StatusBadge status={normalizeCategoryStatus(r.status)} />,
       },
       {
         header: 'Actions',
         className: 'text-right',
         cell: (r) => {
-          const status = r.status;
+          const status = normalizeCategoryStatus(r.status);
           const disabled =
             isPending ||
             busyId === r.id ||
@@ -275,19 +249,19 @@ export function AdminAuctionCategoryRequestsView({
             {error ? (
               <span className="text-red-600 dark:text-red-400">{error}</span>
             ) : (
-              <span>{filteredRequests.length} requests</span>
+              <span>{filteredItems.length} requests</span>
             )}
           </div>
         </div>
       </div>
 
       <DataTable
-        data={filteredRequests}
+        data={filteredItems}
         columns={columns}
         loading={false}
         page={1}
         totalPages={1}
-        totalItems={filteredRequests.length}
+        totalItems={filteredItems.length}
         onPageChange={() => {}}
         emptyMessage={
           error ? 'Could not load requests.' : 'No category requests found.'

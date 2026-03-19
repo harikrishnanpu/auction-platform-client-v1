@@ -1,6 +1,6 @@
 import { API_ENDPOINTS, buildApiUrl } from '@/apiInstance';
 import { ApiResponse } from '@/types/api.index';
-import { AuctionCategory, AuctionCategoryRequest } from '@/types/auction.type';
+import { AuctionCategory } from '@/types/auction.type';
 import { getErrorMessage } from '@/utils/get-app-error';
 
 export const adminAuctionCategoryService = {
@@ -33,7 +33,7 @@ export const adminAuctionCategoryService = {
 
   getCategoryRequests: async (
     cookieString: string
-  ): Promise<ApiResponse<{ categories: AuctionCategoryRequest[] }>> => {
+  ): Promise<ApiResponse<{ categories: AuctionCategory[] }>> => {
     try {
       const res = await fetch(
         buildApiUrl(API_ENDPOINTS.admin.getAuctionCategoryRequests),
@@ -51,11 +51,7 @@ export const adminAuctionCategoryService = {
       if (!response.success)
         throw new Error(response.error ?? response.message);
 
-      const categories: AuctionCategoryRequest[] =
-        response.data?.categories ??
-        response.data?.requests ??
-        response.data ??
-        [];
+      const categories: AuctionCategory[] = response.data?.categories ?? [];
       return { success: true, data: { categories } };
     } catch (err: unknown) {
       return { success: false, data: null, error: getErrorMessage(err) };

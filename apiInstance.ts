@@ -37,7 +37,6 @@ export const API_ENDPOINTS = {
     create: '/auction',
     generateUploadUrl: '/auction/upload-url',
     getAuctionCategories: '/auction/categories',
-    requestAuctionCategory: '/auction/request',
   },
 
   admin: {
@@ -48,16 +47,22 @@ export const API_ENDPOINTS = {
     getAdminSeller: '/admin/sellers',
     approveSellerKyc: '/admin/sellers',
     rejectSellerKyc: '/admin/sellers',
+    viewKycDocument: (documentId: string) => `/admin/kyc/${documentId}/view`,
     updateAuctionCategory: (categoryId: string) =>
       `/admin/auction-categories/${categoryId}`,
     approveAuctionCategoryRequest: (requestId: string) =>
       `/admin/auction-categories/${requestId}/approve`,
     rejectAuctionCategoryRequest: (requestId: string) =>
-      `/admin/auction-categories/requests/${requestId}/reject`,
+      `/admin/auction-categories/${requestId}/reject`,
     ChangeAuctionCategoryStatus: (categoryId: string) =>
       `/admin/auction-categories/${categoryId}/status`,
     getAuctionCategoryRequests: '/admin/category-requests',
     getAllAuctionCategories: '/admin/auction-categories',
+  },
+
+  seller: {
+    getAllSellerAuctionCategoryRequests: '/seller/auction-category-requests',
+    requestAuctionCategory: '/seller/auction-category/request',
   },
 } as const;
 

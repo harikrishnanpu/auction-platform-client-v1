@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 
 import { AuctionCategory } from '@/types/auction.type';
-import { flattenCategoryTree } from '@/modules/admin/auctions/components/categories/category-utils';
 
 export function SellerCategorySelect({
   id,
@@ -25,11 +24,12 @@ export function SellerCategorySelect({
 }) {
   const options = useMemo(() => {
     const verified = categories.filter((c) => c.isVerified);
-    return flattenCategoryTree(verified).map((c) => ({
-      value: c.name,
-      label: c.pathLabel,
-      depth: c.depth,
-    }));
+    return verified
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((c) => ({
+        value: c.name,
+        label: c.name,
+      }));
   }, [categories]);
 
   return (
@@ -44,7 +44,7 @@ export function SellerCategorySelect({
         <option value="">{placeholder}</option>
         {options.map((o) => (
           <option key={o.label} value={o.value}>
-            {`${'— '.repeat(o.depth)}${o.label}`}
+            {o.label}
           </option>
         ))}
       </select>

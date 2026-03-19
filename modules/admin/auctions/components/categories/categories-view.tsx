@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Edit, FolderTree, Inbox, RefreshCw } from 'lucide-react';
+import { Edit, Inbox, RefreshCw } from 'lucide-react';
 
 import {
   setAuctionCategoryStatusAction,
@@ -16,9 +16,13 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { AuctionCategory, AuctionCategoryStatus } from '@/types/auction.type';
-import { flattenCategoryTree, FlattenedCategoryRow } from './category-utils';
-import { CategoryParentOption, EditCategoryModal } from './category-modals';
+import { EditCategoryModal } from './category-modals';
 import { toast } from 'sonner';
+import {
+  normalizeCategoryStatus,
+  useCategoryParentOptions,
+  useCategoryTableFilters,
+} from './use-admin-categories';
 
 function StatusBadge({ isActive }: { isActive: boolean }) {
   return (
@@ -50,33 +54,14 @@ export function AdminAuctionCategoriesView({
   const [refreshing, setRefreshing] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
-  const [editing, setEditing] = useState<FlattenedCategoryRow | null>(null);
-  const [query, setQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<
-    'ALL' | AuctionCategoryStatus
-  >('ALL');
+  const [editing, setEditing] = useState<AuctionCategory | null>(null);
 
-  const rows = useMemo(() => flattenCategoryTree(categories), [categories]);
-  const filteredRows = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return rows.filter((r) => {
-      const okStatus =
-        statusFilter === 'ALL' ? true : r.status === statusFilter;
-      if (!okStatus) return false;
-      if (!q) return true;
-      return (
-        r.name.toLowerCase().includes(q) ||
-        r.slug.toLowerCase().includes(q) ||
-        r.pathLabel.toLowerCase().includes(q)
-      );
-    });
-  }, [rows, query, statusFilter]);
+  const { query, setQuery, statusFilter, setStatusFilter, filteredItems } =
+    useCategoryTableFilters(categories);
+  const { parentOptions, parentNameById } =
+    useCategoryParentOptions(categories);
 
-  const parentOptions: CategoryParentOption[] = useMemo(() => {
-    return rows.map((r) => ({ id: r.id, label: r.pathLabel }));
-  }, [rows]);
-
-  const openEdit = useCallback((row: FlattenedCategoryRow) => {
+  const openEdit = useCallback((row: AuctionCategory) => {
     setEditing(row);
     setEditOpen(true);
   }, []);
@@ -87,7 +72,7 @@ export function AdminAuctionCategoriesView({
   }, []);
 
   const toggleStatus = useCallback(
-    async (row: FlattenedCategoryRow) => {
+    async (row: AuctionCategory) => {
       setBusyId(row.id);
       const newStatus = row.isActive ? false : true;
       const res = await setAuctionCategoryStatusAction(row.id, newStatus);
@@ -103,25 +88,15 @@ export function AdminAuctionCategoriesView({
     [router, startTransition]
   );
 
-  const columns: Column<FlattenedCategoryRow>[] = useMemo(
+  const columns: Column<AuctionCategory>[] = useMemo(
     () => [
       {
         header: 'Category',
         cell: (row) => (
-          <div className="min-w-[240px]">
-            <div
-              className="flex items-center gap-2"
-              style={{ paddingLeft: `${row.depth * 14}px` }}
-            >
-              <FolderTree className="size-4 text-muted-foreground shrink-0" />
-              <div className="min-w-0">
-                <div className="font-semibold text-foreground truncate">
-                  {row.name}
-                </div>
-                <div className="text-xs text-muted-foreground truncate">
-                  {row.pathLabel}
-                </div>
-              </div>
+          <div className="min-w-[220px]">
+            <div className="font-semibold text-foreground">{row.name}</div>
+            <div className="text-xs text-muted-foreground font-mono">
+              {row.id}
             </div>
           </div>
         ),
@@ -139,10 +114,20 @@ export function AdminAuctionCategoriesView({
         cell: (row) => <StatusBadge isActive={row.isActive} />,
       },
       {
+        header: 'Request status',
+        cell: (row) => (
+          <Badge variant="secondary">
+            {normalizeCategoryStatus(row.status)}
+          </Badge>
+        ),
+      },
+      {
         header: 'Parent',
         cell: (row) => (
           <span className="text-sm text-muted-foreground">
-            {row.parentId ? 'Child' : 'Root'}
+            {row.parentId
+              ? (parentNameById.get(row.parentId) ?? 'Unknown')
+              : 'Root'}
           </span>
         ),
       },
@@ -174,7 +159,7 @@ export function AdminAuctionCategoriesView({
         ),
       },
     ],
-    [busyId, isPending, openEdit, toggleStatus]
+    [busyId, isPending, openEdit, parentNameById, toggleStatus]
   );
 
   const handleRefresh = async () => {
@@ -258,19 +243,19 @@ export function AdminAuctionCategoriesView({
             {error ? (
               <span className="text-red-600 dark:text-red-400">{error}</span>
             ) : (
-              <span>{filteredRows.length} categories</span>
+              <span>{filteredItems.length} categories</span>
             )}
           </div>
         </div>
       </div>
 
       <DataTable
-        data={filteredRows}
+        data={filteredItems}
         columns={columns}
         loading={false}
         page={1}
         totalPages={1}
-        totalItems={filteredRows.length}
+        totalItems={filteredItems.length}
         onPageChange={() => {}}
         emptyMessage={
           error ? 'Could not load categories.' : 'No categories found yet.'

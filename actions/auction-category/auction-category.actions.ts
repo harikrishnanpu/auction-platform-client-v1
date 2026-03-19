@@ -12,11 +12,3 @@ export const getAuctionCategoriesForSellerAction = async (): Promise<
   const cookieStore = await cookies();
   return auctionCategoryService.getAll(cookieStore.toString());
 };
-
-export const requestAuctionCategoryAction = async (input: {
-  name: string;
-  parentId?: string | null;
-}): Promise<ApiResponse<null>> => {
-  const cookieStore = await cookies();
-  return auctionCategoryService.request(input, cookieStore.toString());
-};

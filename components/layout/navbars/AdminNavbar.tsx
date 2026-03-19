@@ -112,13 +112,15 @@ export function AdminNavbar() {
                 className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none"
               >
                 <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden border border-gray-300 shadow-sm">
-                  <Image
-                    alt="Admin"
-                    className="h-full w-full object-cover"
-                    src={user?.avatar_url ?? ''}
-                    width={32}
-                    height={32}
-                  />
+                  {user?.avatar_url && (
+                    <Image
+                      alt="Admin"
+                      className="h-full w-full object-cover"
+                      src={user?.avatar_url ?? ''}
+                      width={32}
+                      height={32}
+                    />
+                  )}
                 </div>
                 <ChevronDown
                   size={14}

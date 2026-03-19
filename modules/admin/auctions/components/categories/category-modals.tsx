@@ -26,7 +26,7 @@ import { getErrorMessage } from '@/utils/get-app-error';
 
 export type CategoryParentOption = {
   id: string;
-  label: string;
+  name: string;
 };
 
 export function EditCategoryModal({
@@ -68,7 +68,7 @@ export function EditCategoryModal({
   const parentValue = parentId ?? '__root__';
   const parentLabel = useMemo(() => {
     if (parentId === null) return 'Root';
-    return parentOptions.find((o) => o.id === parentId)?.label ?? 'Unknown';
+    return parentOptions.find((o) => o.id === parentId)?.name ?? 'Unknown';
   }, [parentId, parentOptions]);
 
   const handleSave = async () => {
@@ -126,7 +126,7 @@ export function EditCategoryModal({
                 <SelectItem value="__root__">Root</SelectItem>
                 {parentOptions.map((o) => (
                   <SelectItem key={o.id} value={o.id}>
-                    {o.label}
+                    {o.name}
                   </SelectItem>
                 ))}
               </SelectContent>

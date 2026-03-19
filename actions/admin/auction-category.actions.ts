@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 
 import { adminAuctionCategoryService } from '@/services/admin/auction-category.service';
 import { ApiResponse } from '@/types/api.index';
-import { AuctionCategory, AuctionCategoryRequest } from '@/types/auction.type';
+import { AuctionCategory } from '@/types/auction.type';
 
 export const getAdminAuctionCategoriesAction = async (): Promise<
   ApiResponse<{ categories: AuctionCategory[] }>
@@ -14,7 +14,7 @@ export const getAdminAuctionCategoriesAction = async (): Promise<
 };
 
 export const getAuctionCategoryRequestsAction = async (): Promise<
-  ApiResponse<{ categories: AuctionCategoryRequest[] }>
+  ApiResponse<{ categories: AuctionCategory[] }>
 > => {
   const cookieStore = await cookies();
   return adminAuctionCategoryService.getCategoryRequests(

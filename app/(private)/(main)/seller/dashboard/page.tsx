@@ -1,11 +1,5 @@
-import { ComingSoon } from '@/components/coming-soon';
+import SellerDashboardView from '@/modules/seller/dashboard/components/seller-dashboard-view';
 
 export default function SellerDashboardPage() {
-  return (
-    <ComingSoon
-      title="No content"
-      description="Seller dashboard is coming soon."
-      homeHref="/"
-    />
-  );
+  return <SellerDashboardView />;
 }

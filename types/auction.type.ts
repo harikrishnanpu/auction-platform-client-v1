@@ -34,16 +34,8 @@ export interface AuctionCategory {
   isVerified: boolean;
   isActive: boolean;
   status: AuctionCategoryStatus;
-}
-
-export interface AuctionCategoryRequest {
-  id: string;
-  name: string;
-  slug: string;
-  parentId?: string | null;
-  isActive: boolean;
-  isVerified: boolean;
-  status: AuctionCategoryStatus;
+  rejectionReason?: string;
+  submittedBy: string;
 }
 
 export interface CreateAuctionOutput {
