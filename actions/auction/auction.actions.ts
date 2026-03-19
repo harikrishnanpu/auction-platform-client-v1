@@ -4,7 +4,11 @@ import { cookies } from 'next/headers';
 
 import { auctionService } from '@/services/auction/auction.service';
 import { ApiResponse } from '@/types/api.index';
-import { CreateAuctionInput, CreateAuctionOutput } from '@/types/auction.type';
+import {
+  CreateAuctionInput,
+  CreateAuctionOutput,
+  IAuctionDto,
+} from '@/types/auction.type';
 
 export async function createAuctionAction(
   input: CreateAuctionInput
@@ -27,4 +31,11 @@ export async function generateAuctionUploadUrlAction({
     fileName,
     fileSize,
   });
+}
+
+export async function getSellerAuctionsAction(): Promise<
+  ApiResponse<{ auctions: IAuctionDto[] }>
+> {
+  const cookieStore = await cookies();
+  return auctionService.getSellerAuctions(cookieStore);
 }

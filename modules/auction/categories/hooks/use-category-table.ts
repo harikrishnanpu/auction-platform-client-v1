@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { AuctionCategory, AuctionCategoryStatus } from '@/types/auction.type';
-import { CategoryParentOption } from './category-modals';
+import { CategoryParentOption } from '@/modules/admin/auctions/components/categories/category-modals';
 
 export function normalizeCategoryStatus(
   status: unknown
@@ -50,11 +50,7 @@ export function useCategoryTableFilters(items: AuctionCategory[]) {
 
 export function useCategoryParentOptions(categories: AuctionCategory[]) {
   const parentOptions = useMemo<CategoryParentOption[]>(
-    () =>
-      categories.map((c) => ({
-        id: c.id,
-        name: c.name,
-      })),
+    () => categories.map((c) => ({ id: c.id, name: c.name })),
     [categories]
   );
 

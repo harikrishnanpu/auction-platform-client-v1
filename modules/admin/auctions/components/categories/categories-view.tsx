@@ -22,7 +22,7 @@ import {
   normalizeCategoryStatus,
   useCategoryParentOptions,
   useCategoryTableFilters,
-} from './use-admin-categories';
+} from '@/modules/auction/categories/hooks/use-category-table';
 
 function StatusBadge({ isActive }: { isActive: boolean }) {
   return (

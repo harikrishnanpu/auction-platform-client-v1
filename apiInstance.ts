@@ -63,6 +63,7 @@ export const API_ENDPOINTS = {
   seller: {
     getAllSellerAuctionCategoryRequests: '/seller/auction-category-requests',
     requestAuctionCategory: '/seller/auction-category/request',
+    getSellerAuctions: '/seller/auctions',
   },
 } as const;
 

@@ -79,7 +79,7 @@ export function useSellerMyCategoryRequests(requests: AuctionCategory[]) {
     return (requests ?? []).map((r) => ({
       ...r,
       status: normalizeCategoryStatus(r.status),
-      rejectionReason: r.rejectionReason ?? r.rejection_reason_message ?? '',
+      rejectionReason: r.rejectionReason ?? '',
     }));
   }, [requests]);
 

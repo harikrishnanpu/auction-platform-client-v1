@@ -65,7 +65,7 @@ export function SellerAuctionCategoriesTable({
                 </TableCell>
               ) : null}
               <TableCell className="text-xs text-muted-foreground">
-                {r.submittedBy ?? r.sellerName ?? r.sellerId ?? '-'}
+                {r.submittedBy || '-'}
               </TableCell>
             </TableRow>
           ))}

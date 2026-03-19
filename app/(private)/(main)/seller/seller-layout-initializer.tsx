@@ -35,7 +35,9 @@ export default function SellerLayoutInitializer({
     if (kycData) {
       const kyc = normalizeKyc(kycData.kyc);
       setKycData(kyc, kycData.status);
-    } else if (error) {
+    } else {
+      // If we don't have KYC data (or the request failed), treat it as "not verified yet"
+      // to avoid leaving the store in an indeterminate "null" state.
       setKycData(null, KycStatusEnum.PENDING);
     }
   }, [kycData, error, setKycData]);
