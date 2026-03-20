@@ -12,6 +12,7 @@ import {
 } from '@/actions/auction/auction.actions';
 import type { AuctionAssetForm, AuctionType } from '@/types/auction.type';
 import { getErrorMessage } from '@/utils/get-app-error';
+import { datetimeLocalToISO } from '@/lib/datetime-local';
 import {
   createAuctionFormSchema,
   type CreateAuctionFormValues,
@@ -209,8 +210,8 @@ export function useCreateAuctionForm() {
           condition: data.condition.trim(),
           startPrice: data.startPrice,
           minIncrement: data.minIncrement,
-          startAt: new Date(data.startAt).toISOString(),
-          endAt: new Date(data.endAt).toISOString(),
+          startAt: datetimeLocalToISO(data.startAt),
+          endAt: datetimeLocalToISO(data.endAt),
           antiSnipSeconds: data.antiSnipSeconds,
           maxExtensionCount: data.maxExtensionCount,
           bidCooldownSeconds: data.bidCooldownSeconds,

@@ -22,6 +22,22 @@ export interface CreateAuctionInput {
   }[];
 }
 
+export interface UpdateAuctionDraftInput {
+  auctionType?: AuctionType;
+  title: string;
+  description: string;
+  categoryId: string;
+  condition: string;
+  startPrice: number;
+  minIncrement: number;
+  startAt: string; // ISO datetime string
+  endAt: string; // ISO datetime string
+  antiSnipSeconds?: number;
+  maxExtensionCount?: number;
+  bidCooldownSeconds?: number;
+  assets?: AuctionAssetForm[];
+}
+
 export interface IAuctionDto {
   id: string;
   sellerId: string;
@@ -29,7 +45,7 @@ export interface IAuctionDto {
   status: AuctionStatus;
   title: string;
   description: string;
-  category: string;
+  category: AuctionCategory;
   condition: string;
   startPrice: number;
   minIncrement: number;
@@ -63,24 +79,28 @@ export interface AuctionCategory {
   submittedBy: string;
 }
 
-export interface CreateAuctionOutput {
-  id: string;
-  sellerId: string;
-  auctionType: AuctionType;
-  title: string;
-  description: string;
-  category: string;
-  condition: string;
-  startPrice: number;
-  minIncrement: number;
-  startAt: string;
-  endAt: string;
-  status: string;
-  assetCount: number;
-}
-
 export interface AuctionAssetForm {
   fileKey: string;
   position?: number;
   assetType?: 'IMAGE' | 'VIDEO';
+}
+
+export interface IGetAllSellerAuctionsFilter {
+  status: AuctionStatus | 'ALL';
+  auctionType: AuctionType | 'ALL';
+  categoryId: string | 'ALL';
+  page: number;
+  limit: number;
+  sort: string;
+  order: 'asc' | 'desc';
+  search: string;
+}
+
+export interface IGetAllSellerAuctionsResponse {
+  auctions: IAuctionDto[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  currentPage: number;
 }

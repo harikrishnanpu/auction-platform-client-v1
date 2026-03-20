@@ -1,53 +1,23 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, Clock, Gavel, Layers, Plus } from 'lucide-react';
+import { Layers, Plus } from 'lucide-react';
 
+import { getSellerAuctionsAction } from '@/actions/auction/auction.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { SellerAuctionsCards } from '@/modules/seller/auction/components/seller-auctions-cards';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { SellerAuctionsSimpleTable } from '@/modules/seller/auction/components/seller-auctions-simple-table';
+  SellerAuctionListSkeleton,
+  SellerListingSectionSkeleton,
+} from '@/modules/seller/components/seller-shell-skeleton';
 import useKycStore from '@/store/kyc.store';
 import { KycStatusEnum } from '@/types/kyc.type';
-import type { IAuctionDto } from '@/types/auction.type';
-import { getSellerAuctionsAction } from '@/actions/auction/auction.actions';
-
-function StatCard({
-  icon,
-  label,
-  value,
-  description,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: number;
-  description: string;
-}) {
-  return (
-    <Card className="rounded-2xl">
-      <CardHeader className="space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center justify-center rounded-lg bg-muted p-2">
-              {icon}
-            </span>
-            <CardTitle className="text-base">{label}</CardTitle>
-          </div>
-          <Badge variant="outline">{value}</Badge>
-        </div>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-    </Card>
-  );
-}
+import type {
+  IAuctionDto,
+  IGetAllSellerAuctionsFilter,
+} from '@/types/auction.type';
 
 export default function SellerDashboardView() {
   const kycStatus = useKycStore((s) => s.kycStatus);
@@ -74,7 +44,18 @@ export default function SellerDashboardView() {
       setAuctionsError(null);
 
       try {
-        const res = await getSellerAuctionsAction();
+        const filter: IGetAllSellerAuctionsFilter = {
+          status: 'ALL',
+          auctionType: 'ALL',
+          categoryId: 'ALL',
+          page: 1,
+          limit: 5,
+          sort: 'startAt',
+          order: 'desc',
+          search: '',
+        };
+
+        const res = await getSellerAuctionsAction(filter);
         if (cancelled) return;
 
         if (res.success && res.data?.auctions) {
@@ -100,172 +81,102 @@ export default function SellerDashboardView() {
     };
   }, [kycStatusEnum]);
 
-  const stats = useMemo(() => {
-    const total = auctions.length;
-    const drafts = auctions.filter((a) => a.status === 'DRAFT').length;
-    const published = auctions.filter((a) => a.status === 'PUBLISHED').length;
-    return { total, drafts, published };
-  }, [auctions]);
-
   const showKycSkeleton = kycStatusEnum === null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="text-3xl font-bold font-serif text-foreground leading-tight">
-            Seller Dashboard
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage your auctions and track their status.
-          </p>
-        </div>
+    <div className="min-h-[calc(100vh-4rem)] bg-background">
+      <div className="mx-auto max-w-5xl space-y-4 px-3 py-4 sm:px-4">
+        <header className="flex flex-col gap-3 border-b border-border/60 pb-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold tracking-tight text-foreground">
+              Seller
+            </h1>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              Auctions and listings
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <Button asChild variant="ghost" size="sm" className="h-8 text-xs">
+              <Link href="/seller/auction/categories">
+                <Layers className="size-3.5" />
+                Categories
+              </Link>
+            </Button>
+            <Button asChild size="sm" className="h-8 text-xs">
+              <Link href="/seller/auction/create">
+                <Plus className="size-3.5" />
+                New auction
+              </Link>
+            </Button>
+          </div>
+        </header>
 
-        <div className="flex gap-3">
-          <Button asChild variant="outline" className="rounded-xl">
-            <Link href="/seller/auction/categories">
-              <Layers className="size-4" />
-              Categories
-            </Link>
-          </Button>
-          <Button asChild className="rounded-xl">
-            <Link href="/seller/auction/create">
-              <Plus className="size-4" />
-              Create Auction
-            </Link>
-          </Button>
-        </div>
-      </div>
-
-      {showKycSkeleton ? (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, idx) => (
-              <div
-                key={idx}
-                className="rounded-2xl border border-border bg-white/60 p-6 animate-pulse"
+        {showKycSkeleton ? (
+          <SellerListingSectionSkeleton />
+        ) : kycStatusEnum !== KycStatusEnum.APPROVED ? (
+          <div className="rounded-lg border border-border/70 bg-muted/10 px-3 py-6 text-center">
+            <p className="text-xs text-muted-foreground">
+              Verify your seller account to manage auctions.
+            </p>
+            <div className="mt-2 flex items-center justify-center gap-2">
+              <Badge variant="outline" className="text-[10px]">
+                {kycStatusEnum ?? '—'}
+              </Badge>
+            </div>
+            <Button asChild className="mt-4 h-8 text-xs" size="sm">
+              <Link href="/seller/kyc">Seller KYC</Link>
+            </Button>
+          </div>
+        ) : (
+          <section className="rounded-lg border border-border/70 bg-card/20">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-3 py-2.5">
+              <div>
+                <h2 className="text-[15px] font-semibold tracking-tight text-foreground">
+                  Latest auctions
+                </h2>
+                <p className="text-[11px] text-muted-foreground">
+                  Showing 5 newest auctions by start time.
+                </p>
+              </div>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
               >
-                <div className="h-4 w-28 bg-muted rounded" />
-                <div className="mt-4 h-8 w-14 bg-muted rounded" />
-                <div className="mt-3 h-3 w-40 bg-muted rounded" />
-              </div>
-            ))}
-          </div>
-
-          <Card className="rounded-2xl">
-            <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div className="space-y-2">
-                <div className="h-5 w-36 bg-muted rounded animate-pulse" />
-                <div className="h-3 w-64 bg-muted rounded animate-pulse" />
-              </div>
-              <div className="h-7 w-28 bg-muted rounded animate-pulse" />
-            </CardHeader>
-            <div className="h-px w-full bg-border" />
-            <CardContent className="pt-5 space-y-4">
-              <div className="rounded-xl border border-dashed border-border bg-background/50 p-4 animate-pulse">
-                <div className="h-5 w-56 bg-muted rounded" />
-                <div className="mt-3 h-4 w-72 bg-muted rounded" />
-              </div>
-              <div className="rounded-xl border border-border bg-background/50 animate-pulse">
-                <div className="h-44 w-full" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      ) : kycStatusEnum !== KycStatusEnum.APPROVED ? (
-        <Card className="rounded-2xl">
-          <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-            <div className="space-y-1">
-              <CardTitle className="text-lg">Auction Listing</CardTitle>
-              <CardDescription>
-                Complete seller verification to view and manage auctions.
-              </CardDescription>
+                <Link href="/seller/auctions">View all auctions</Link>
+              </Button>
             </div>
-            <Badge variant="secondary" className="bg-muted">
-              KYC required
-            </Badge>
-          </CardHeader>
-          <div className="h-px w-full bg-border" />
-          <CardContent className="pt-5 space-y-4">
-            <div className="rounded-xl border border-border bg-background/50 p-4 text-center">
-              <div className="font-semibold text-foreground">
-                Your KYC status: {kycStatusEnum ?? '-'}
-              </div>
-              <div className="text-sm text-muted-foreground mt-1">
-                Once approved, your auctions and stats will appear here.
-              </div>
-              <div className="mt-4">
-                <Button asChild className="rounded-xl">
-                  <Link href="/seller/kyc">View KYC status</Link>
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StatCard
-              icon={<Gavel className="size-4" />}
-              label="Total auctions"
-              value={stats.total}
-              description="All auctions created by you."
-            />
-            <StatCard
-              icon={<Clock className="size-4" />}
-              label="Drafts"
-              value={stats.drafts}
-              description="Auctions saved but not published."
-            />
-            <StatCard
-              icon={<CheckCircle2 className="size-4" />}
-              label="Published"
-              value={stats.published}
-              description="Auctions visible to buyers."
-            />
-          </div>
 
-          <Card className="rounded-2xl">
-            <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div className="space-y-1">
-                <CardTitle className="text-lg">Auction Listing</CardTitle>
-                <CardDescription>Your latest auctions.</CardDescription>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button asChild variant="outline" className="rounded-xl">
-                  <Link href="/seller/auction">All auctions</Link>
-                </Button>
-                <Badge variant="secondary" className="bg-muted">
-                  Coming soon
-                </Badge>
-              </div>
-            </CardHeader>
-            <div className="h-px w-full bg-border" />
-            <CardContent className="pt-5 space-y-4">
+            <div className="p-3">
               {auctionsLoading ? (
-                <div className="rounded-xl border border-border bg-background/50 p-4 space-y-3">
-                  <div className="h-4 w-52 bg-muted rounded animate-pulse" />
-                  <div className="h-4 w-64 bg-muted rounded animate-pulse" />
-                  <div className="h-4 w-56 bg-muted rounded animate-pulse" />
-                  <div className="h-4 w-48 bg-muted rounded animate-pulse" />
-                </div>
+                <SellerAuctionListSkeleton count={5} />
               ) : auctionsError ? (
-                <div className="rounded-xl border border-border bg-background/50 p-4 text-center">
-                  <div className="font-semibold text-destructive">
+                <div className="rounded-md border border-destructive/25 bg-destructive/5 px-3 py-6 text-center">
+                  <p className="text-xs font-medium text-destructive">
                     {auctionsError}
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    Try refreshing the page.
-                  </div>
+                  </p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Refresh and try again.
+                  </p>
                 </div>
               ) : (
-                <SellerAuctionsSimpleTable auctions={auctions} limit={5} />
+                <SellerAuctionsCards
+                  auctions={auctions}
+                  limit={5}
+                  className="mx-auto max-w-3xl"
+                  sortMode="none"
+                  emptyAction={
+                    <Button asChild className="h-8 text-xs" size="sm">
+                      <Link href="/seller/auction/create">Create auction</Link>
+                    </Button>
+                  }
+                />
               )}
-            </CardContent>
-          </Card>
-        </>
-      )}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,11 +1,5 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { redirect } from 'next/navigation';
 
 export default function SellerAuctionListPage() {
-  return (
-    <ComingSoon
-      title="No content"
-      description="Seller auctions list is coming soon."
-      homeHref="/seller/dashboard"
-    />
-  );
+  redirect('/seller/auctions');
 }

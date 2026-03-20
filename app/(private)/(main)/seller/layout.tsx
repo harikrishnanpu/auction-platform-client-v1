@@ -1,4 +1,7 @@
+import { Suspense } from 'react';
+
 import { getKycStatusAction } from '@/actions/kyc/kyc.action';
+import { SellerShellSkeleton } from '@/modules/seller/components/seller-shell-skeleton';
 import SellerLayoutInitializer from './seller-layout-initializer';
 
 export default async function SellerLayout({
@@ -10,7 +13,7 @@ export default async function SellerLayout({
 
   return (
     <SellerLayoutInitializer kycData={data} error={error}>
-      {children}
+      <Suspense fallback={<SellerShellSkeleton />}>{children}</Suspense>
     </SellerLayoutInitializer>
   );
 }

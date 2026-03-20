@@ -37,6 +37,9 @@ export const API_ENDPOINTS = {
     create: '/auction',
     generateUploadUrl: '/auction/upload-url',
     getAuctionCategories: '/auction/categories',
+    getAuctionById: (id: string) => `/auction/${id}`,
+    updateAuction: (id: string) => `/auction/${id}`,
+    publishAuction: (id: string) => `/auction/${id}/publish`,
   },
 
   admin: {
@@ -64,6 +67,7 @@ export const API_ENDPOINTS = {
     getAllSellerAuctionCategoryRequests: '/seller/auction-category-requests',
     requestAuctionCategory: '/seller/auction-category/request',
     getSellerAuctions: '/seller/auctions',
+    getSellerAuctionById: (id: string) => `/seller/auctions/${id}`,
   },
 } as const;
 

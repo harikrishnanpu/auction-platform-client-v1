@@ -1,18 +1,36 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { getAuctionCategoriesForSellerAction } from '@/actions/auction-category/auction-category.actions';
+import { getSellerAuctionByIdAction } from '@/actions/auction/auction.actions';
+import { SellerAuctionEditDraftContainer } from '@/modules/seller/auction/components/seller-auction-edit-draft-container';
 
 export default async function EditSellerAuctionPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const id = params.id;
-  if (!id) return null;
+  const resolvedParams = await params;
+  const id = resolvedParams.id;
+
+  const auctionRes = await getSellerAuctionByIdAction(id);
+  if (!auctionRes.success || !auctionRes.data) return null;
+
+  if (auctionRes.data.status !== 'DRAFT') {
+    // Only draft auctions can be edited.
+    return null;
+  }
+
+  const categoriesRes = await getAuctionCategoriesForSellerAction();
+  const categories = categoriesRes.success
+    ? (categoriesRes.data?.categories ?? [])
+    : [];
 
   return (
-    <ComingSoon
-      title="No content"
-      description={`Editing seller auction ${id} is coming soon.`}
-      homeHref="/seller/dashboard"
-    />
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-5xl px-3 py-6">
+        <SellerAuctionEditDraftContainer
+          auction={auctionRes.data}
+          categories={categories}
+        />
+      </div>
+    </div>
   );
 }
