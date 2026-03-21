@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { AuctionCategory, AuctionCategoryStatus } from '@/types/auction.type';
 import { CategoryParentOption } from '@/modules/admin/auctions/components/categories/category-modals';
@@ -17,14 +17,24 @@ export function normalizeCategoryStatus(
   return AuctionCategoryStatus.PENDING;
 }
 
+const CATEGORY_SEARCH_DEBOUNCE_MS = 400;
+
 export function useCategoryTableFilters(items: AuctionCategory[]) {
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<
     'ALL' | AuctionCategoryStatus
   >('ALL');
 
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      setDebouncedQuery(query.trim());
+    }, CATEGORY_SEARCH_DEBOUNCE_MS);
+    return () => window.clearTimeout(t);
+  }, [query]);
+
   const filteredItems = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery.toLowerCase();
     return items.filter((c) => {
       const status = normalizeCategoryStatus(c.status);
       const statusOk = statusFilter === 'ALL' ? true : status === statusFilter;
@@ -37,7 +47,7 @@ export function useCategoryTableFilters(items: AuctionCategory[]) {
         parent.toLowerCase().includes(q)
       );
     });
-  }, [items, query, statusFilter]);
+  }, [items, debouncedQuery, statusFilter]);
 
   return {
     query,

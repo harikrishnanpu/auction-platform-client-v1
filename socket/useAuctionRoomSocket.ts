@@ -6,6 +6,11 @@ import { io, type Socket } from 'socket.io-client';
 import { env } from '@/env';
 import type { IAuctionDto } from '@/types/auction.type';
 
+import {
+  AUCTION_SOCKET_EVENTS,
+  type AuctionSocketControlEvent,
+} from './socket.events';
+
 export type AuctionRoomMode = 'SELLER' | 'USER' | 'ADMIN';
 
 export interface IAuctionRoomBid {
@@ -92,8 +97,6 @@ export function useAuctionRoomSocket({
   useEffect(() => {
     if (!auctionId) return;
 
-    // Socket.IO is mounted at server root (`/socket.io`), but NEXT_PUBLIC_API_URL includes `/api/v1`.
-    // Strip it so the connection goes to `http://host:port` (not `/api/v1`).
     const socketBaseUrl = env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, '');
 
     const socket = io(socketBaseUrl, {
@@ -118,7 +121,7 @@ export function useAuctionRoomSocket({
       setConnectionState('error');
     });
 
-    socket.on('auction:joined', (joined: AuctionJoinedEvent) => {
+    socket.on(AUCTION_SOCKET_EVENTS.JOINED, (joined: AuctionJoinedEvent) => {
       setSnapshot(joined);
       const maybeChat = (
         joined as AuctionJoinedEvent & {
@@ -131,7 +134,7 @@ export function useAuctionRoomSocket({
     });
 
     socket.on(
-      'auction:participantsUpdated',
+      AUCTION_SOCKET_EVENTS.PARTICIPANTS_UPDATED,
       (participants: IAuctionRoomParticipant[]) => {
         setSnapshot((prev) => {
           if (!prev) return prev;
@@ -140,24 +143,30 @@ export function useAuctionRoomSocket({
       }
     );
 
-    socket.on('auction:chatMessage', (msg: IAuctionRoomChatMessage) => {
-      setChatMessages((prev) => {
-        const exists = prev.some((m) => m.id === msg.id);
-        if (exists) return prev;
-        return [...prev, msg].slice(-50);
-      });
-    });
+    socket.on(
+      AUCTION_SOCKET_EVENTS.CHAT_MESSAGE,
+      (msg: IAuctionRoomChatMessage) => {
+        setChatMessages((prev) => {
+          const exists = prev.some((m) => m.id === msg.id);
+          if (exists) return prev;
+          return [...prev, msg].slice(-50);
+        });
+      }
+    );
 
-    socket.on('auction:bidPlaced', (bid: IAuctionRoomBid) => {
+    socket.on(AUCTION_SOCKET_EVENTS.BID_PLACED, (bid: IAuctionRoomBid) => {
+      console.log('bid is', bid);
       setSnapshot((prev) => {
         if (!prev) return prev;
 
         const maxLiveFeed = mode === 'ADMIN' ? 10000 : 10;
+
         const nextLiveFeed = (() => {
           const exists = prev.liveFeed.some((b) => b.id === bid.id);
           if (exists) return prev.liveFeed;
           return [bid, ...prev.liveFeed].slice(0, maxLiveFeed);
         })();
+
         return {
           ...prev,
           currentBid: bid,
@@ -166,32 +175,35 @@ export function useAuctionRoomSocket({
       });
     });
 
-    socket.on('auction:updated', (payload: IAuctionUpdatedPayload) => {
-      setSnapshot((prev) => {
-        if (!prev) return prev;
-        if (payload.auctionId !== auctionId) return prev;
+    socket.on(
+      AUCTION_SOCKET_EVENTS.UPDATED,
+      (payload: IAuctionUpdatedPayload) => {
+        setSnapshot((prev) => {
+          if (!prev) return prev;
+          if (payload.auctionId !== auctionId) return prev;
 
-        return {
-          ...prev,
-          auction: {
-            ...prev.auction,
-            ...(payload.endAt ? { endAt: new Date(payload.endAt) } : {}),
-            ...(payload.status
-              ? { status: payload.status as unknown as IAuctionDto['status'] }
-              : {}),
-          },
-        };
-      });
-    });
+          return {
+            ...prev,
+            auction: {
+              ...prev.auction,
+              ...(payload.endAt ? { endAt: new Date(payload.endAt) } : {}),
+              ...(payload.status
+                ? { status: payload.status as unknown as IAuctionDto['status'] }
+                : {}),
+            },
+          };
+        });
+      }
+    );
 
-    socket.on('auction:error', (payload: { message?: string }) => {
+    socket.on(AUCTION_SOCKET_EVENTS.ERROR, (payload: { message?: string }) => {
       const message = payload?.message ?? 'Socket error';
       setError(message);
       setConnectionState('error');
     });
 
     socket.emit(
-      'auction:join',
+      AUCTION_SOCKET_EVENTS.JOIN,
       { auctionId, mode },
       (ack?: { success: boolean; error?: string }) => {
         if (ack?.success === false) {
@@ -211,15 +223,34 @@ export function useAuctionRoomSocket({
   }, [auctionId, mode]);
 
   const placeBid = useCallback(
-    (amount: number) => {
-      socketRef.current?.emit('auction:placeBid', { auctionId, amount });
+    (amount: number): Promise<{ success: boolean; error?: string }> => {
+      const socket = socketRef.current;
+      if (!socket) {
+        return Promise.resolve({ success: false, error: 'Not connected' });
+      }
+      return new Promise((resolve) => {
+        socket.emit(
+          AUCTION_SOCKET_EVENTS.PLACE_BID,
+          { auctionId, amount },
+          (ack?: SocketControlAck) => {
+            if (ack?.success === false) {
+              resolve({
+                success: false,
+                error: ack.error ?? 'Bid failed',
+              });
+              return;
+            }
+            resolve({ success: true });
+          }
+        );
+      });
     },
     [auctionId]
   );
 
   const sendChatMessage = useCallback(
     (message: string) => {
-      socketRef.current?.emit('auction:sendChatMessage', {
+      socketRef.current?.emit(AUCTION_SOCKET_EVENTS.SEND_CHAT, {
         auctionId,
         message,
       });
@@ -229,7 +260,7 @@ export function useAuctionRoomSocket({
 
   const emitAuctionControl = useCallback(
     (
-      event: 'auction:pause' | 'auction:resume' | 'auction:end'
+      event: AuctionSocketControlEvent
     ): Promise<{ success: boolean; error?: string }> => {
       const socket = socketRef.current;
       if (!socket) {
@@ -252,17 +283,17 @@ export function useAuctionRoomSocket({
   );
 
   const pauseAuction = useCallback(
-    () => emitAuctionControl('auction:pause'),
+    () => emitAuctionControl(AUCTION_SOCKET_EVENTS.PAUSE),
     [emitAuctionControl]
   );
 
   const resumeAuction = useCallback(
-    () => emitAuctionControl('auction:resume'),
+    () => emitAuctionControl(AUCTION_SOCKET_EVENTS.RESUME),
     [emitAuctionControl]
   );
 
   const endAuction = useCallback(
-    () => emitAuctionControl('auction:end'),
+    () => emitAuctionControl(AUCTION_SOCKET_EVENTS.END),
     [emitAuctionControl]
   );
 

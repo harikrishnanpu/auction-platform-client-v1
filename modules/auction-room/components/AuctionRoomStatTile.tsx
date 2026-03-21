@@ -20,7 +20,7 @@ export function AuctionRoomStatTile({
   return (
     <div
       className={cn(
-        'rounded-xl border border-border/60 bg-card/50 p-3 shadow-sm transition-colors hover:bg-card/80',
+        'rounded-lg border border-border/60 bg-card/50 p-2 shadow-sm transition-colors hover:bg-card/80',
         className
       )}
     >
@@ -29,7 +29,7 @@ export function AuctionRoomStatTile({
           {label}
         </p>
         {icon ? (
-          <span className="text-muted-foreground/70 [&_svg]:size-4">
+          <span className="text-muted-foreground/70 [&_svg]:size-3.5">
             {icon}
           </span>
         ) : null}

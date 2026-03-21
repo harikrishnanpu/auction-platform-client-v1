@@ -72,12 +72,13 @@ export function SellerAuctionFilters({
       </CardHeader>
 
       <CardContent className="pt-0">
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <div className="sm:col-span-2">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+          <div className="md:col-span-2 xl:col-span-3">
             <SearchInput
               placeholder="Search title..."
               value={filters.search}
               onChange={(v) => onUpdate('search', v)}
+              debounceMs={500}
             />
           </div>
 

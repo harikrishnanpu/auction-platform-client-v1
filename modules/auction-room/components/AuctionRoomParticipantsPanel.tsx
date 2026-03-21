@@ -13,7 +13,7 @@ import {
 import { formatAuctionDateTime } from '@/lib/auction-utils';
 import { cn } from '@/lib/utils';
 
-import type { IAuctionRoomParticipant } from '../realtime/useAuctionRoomSocket';
+import type { IAuctionRoomParticipant } from '../../../socket/useAuctionRoomSocket';
 
 type AuctionRoomParticipantsPanelProps = {
   participants: IAuctionRoomParticipant[];
@@ -27,22 +27,21 @@ export function AuctionRoomParticipantsPanel({
   return (
     <Card
       className={cn(
-        'rounded-xl border-border/60 bg-card/70 shadow-sm',
-        // Card defaults are a bit roomy; keep this one compact.
-        'py-3 gap-3',
+        'rounded-lg border-border/60 bg-card/70 shadow-sm',
+        'py-2 gap-2',
         className
       )}
     >
-      <CardHeader className="pb-1">
-        <div className="flex items-center gap-2">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Users className="size-4" aria-hidden />
+      <CardHeader className="px-3 pb-1 pt-2">
+        <div className="flex items-center gap-1.5">
+          <span className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <Users className="size-3.5" aria-hidden />
           </span>
           <div className="min-w-0">
-            <CardTitle className="text-sm font-semibold">
+            <CardTitle className="text-xs font-semibold">
               Participants
             </CardTitle>
-            <CardDescription className="text-xs">
+            <CardDescription className="text-[10px] leading-tight">
               {participants.length === 1
                 ? '1 participant'
                 : `${participants.length} participants`}
@@ -50,17 +49,17 @@ export function AuctionRoomParticipantsPanel({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="px-3 pb-3 pt-0">
         {participants.length === 0 ? (
-          <div className="rounded-lg border border-border/50 bg-background/50 px-3 py-4 text-center text-xs text-muted-foreground">
+          <div className="rounded-md border border-border/50 bg-background/50 px-2 py-3 text-center text-[11px] text-muted-foreground">
             No participants yet.
           </div>
         ) : (
-          <ul className="max-h-52 space-y-2 overflow-y-auto pr-1">
+          <ul className="max-h-44 space-y-1.5 overflow-y-auto pr-1">
             {participants.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-background/40 px-3 py-2"
+                className="flex items-center justify-between gap-2 rounded-md border border-border/50 bg-background/40 px-2 py-1.5"
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-medium text-foreground">

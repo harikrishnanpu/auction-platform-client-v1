@@ -32,8 +32,8 @@ import { cn } from '@/lib/utils';
 const SORT_OPTIONS: FilterOption[] = [
   { label: 'Name', value: 'name' },
   { label: 'Email', value: 'email' },
-  { label: 'Date Joined', value: 'created_at' },
-  { label: 'Last Updated', value: 'updated_at' },
+  { label: 'Date Joined', value: 'createdAt' },
+  { label: 'Last Updated', value: 'updatedAt' },
 ];
 
 const LIMIT_OPTIONS: FilterOption[] = [
@@ -136,6 +136,7 @@ export function UserFilters({
           placeholder="Search by name or email…"
           value={filters.search}
           onChange={(v) => set('search', v)}
+          debounceMs={500}
           className="sm:max-w-sm"
         />
 
@@ -241,7 +242,7 @@ export function UserFilters({
                   value={filters.sort}
                   options={SORT_OPTIONS}
                   onChange={(v) => set('sort', v)}
-                  placeholder="Date Joined"
+                  placeholder="Date joined"
                 />
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-medium text-muted-foreground">

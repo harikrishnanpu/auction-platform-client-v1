@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 import type { IAuctionDto, AuctionType } from '@/types/auction.type';
 import {
@@ -12,10 +13,12 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 import { useAuctionRoomCountdown } from '../hooks/useAuctionRoomCountdown';
-import type { AuctionRoomMode } from '../realtime/useAuctionRoomSocket';
-import { useAuctionRoomSocket } from '../realtime/useAuctionRoomSocket';
+import { useBidCooldown } from '../hooks/useBidCooldown';
+import type { AuctionRoomMode } from '../../../socket/useAuctionRoomSocket';
+import { useAuctionRoomSocket } from '../../../socket/useAuctionRoomSocket';
 import {
   auctionStatusLabel,
+  isAuctionActiveForBidding,
   isAuctionEndedByStatus,
 } from '../utils/auction-room.utils';
 
@@ -68,7 +71,12 @@ export function AuctionRoom({
   const [actionError, setActionError] = useState<string | null>(null);
 
   const [bidAmount, setBidAmount] = useState('');
+  const [placingBid, setPlacingBid] = useState(false);
   const [chatDraft, setChatDraft] = useState('');
+  const {
+    remainingSeconds: cooldownRemainingSeconds,
+    start: startBidCooldown,
+  } = useBidCooldown();
 
   const nextBidMin = useMemo(() => {
     if (!auction) return null;
@@ -80,6 +88,9 @@ export function AuctionRoom({
 
   const endCountdown = useAuctionRoomCountdown(auction?.endAt);
   const auctionStatusStr = (auction?.status as unknown as string) ?? null;
+  const isAuctionActive = isAuctionActiveForBidding(
+    auctionStatusStr ?? undefined
+  );
   const isAuctionEnded = isAuctionEndedByStatus(
     auctionStatusStr ?? undefined,
     endCountdown
@@ -90,15 +101,26 @@ export function AuctionRoom({
     return Number.isFinite(n) ? n : null;
   }, [bidAmount]);
 
-  const onSubmitBid = useCallback(() => {
-    if (parsedBid == null) return;
-    placeBid(parsedBid);
-    setBidAmount('');
-  }, [parsedBid, placeBid]);
+  const onSubmitBid = useCallback(async () => {
+    if (parsedBid == null || !auction) return;
+    setPlacingBid(true);
+    try {
+      const res = await placeBid(parsedBid);
+      if (res.success) {
+        setBidAmount('');
+        startBidCooldown(auction.bidCooldownSeconds ?? 0);
+      } else {
+        toast.error(res.error ?? 'Could not place bid');
+      }
+    } finally {
+      setPlacingBid(false);
+    }
+  }, [parsedBid, placeBid, auction, startBidCooldown]);
 
   const canControlAuction = mode === 'SELLER' || mode === 'ADMIN';
 
   const lastSuggestedBidRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (mode !== 'USER') return;
     if (nextBidMin == null) return;
@@ -113,7 +135,7 @@ export function AuctionRoom({
 
     if (shouldReplace) {
       // Sync suggested minimum bid when empty or still matching last suggestion.
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional UX sync with server-driven nextBidMin
+
       setBidAmount(suggested);
     }
   }, [mode, nextBidMin, bidAmount]);
@@ -165,56 +187,92 @@ export function AuctionRoom({
 
   return (
     <div className="min-h-screen bg-linear-to-b from-amber-950/4 via-background to-background dark:from-amber-400/5">
-      <div className="mx-auto max-w-7xl px-4 pb-14 pt-6 sm:px-6 lg:px-8 lg:pb-16 lg:pt-8">
-        <div className="space-y-4">
+      <div className="mx-auto max-w-6xl px-3 pb-12 pt-5 sm:px-5 lg:pb-14 lg:pt-6">
+        <div className="space-y-3">
           {error ? <AuctionRoomAlert message={error} /> : null}
 
           <Sheet open={chatOpen} onOpenChange={setChatOpen}>
-            <header className="space-y-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0 flex-1 space-y-3">
-                  <h1 className="text-balance text-xl font-bold tracking-tight text-foreground sm:text-2xl lg:text-2xl">
-                    {auction?.title ?? (
-                      <span className="text-muted-foreground">
-                        Loading auction…
-                      </span>
-                    )}
-                  </h1>
-                  <AuctionRoomMetaBadges
-                    categoryName={categoryName}
-                    typeLabel={typeLabel}
-                    statusLabel={statusLabel}
-                    connectionSlot={
-                      <AuctionRoomConnectionStatus state={connectionState} />
-                    }
-                  />
-                </div>
-
-                <div className="flex items-start justify-end">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:items-start lg:gap-6 xl:gap-8">
+              <section className="min-w-0 space-y-2.5 lg:max-w-md">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 space-y-1.5">
+                    <h1 className="text-balance text-base font-semibold leading-snug tracking-tight text-foreground sm:text-lg">
+                      {auction?.title ?? (
+                        <span className="text-muted-foreground">
+                          Loading auction…
+                        </span>
+                      )}
+                    </h1>
+                    <AuctionRoomMetaBadges
+                      categoryName={categoryName}
+                      typeLabel={typeLabel}
+                      statusLabel={statusLabel}
+                      connectionSlot={
+                        <AuctionRoomConnectionStatus state={connectionState} />
+                      }
+                    />
+                  </div>
                   <SheetTrigger asChild>
                     <Button
                       size="xs"
                       variant="outline"
-                      className="h-8 rounded-xl px-3"
+                      className="h-7 shrink-0 rounded-lg px-2.5 text-xs"
                     >
                       Chat
                     </Button>
                   </SheetTrigger>
                 </div>
-              </div>
 
-              <AuctionRoomHero auction={auction} />
-            </header>
+                <AuctionRoomHero auction={auction} />
+
+                <AuctionRoomDetailsSection auction={auction} />
+              </section>
+
+              <aside className="min-w-0 space-y-3 lg:sticky lg:top-5">
+                <AuctionRoomBidPanel
+                  auction={auction}
+                  currentBidAmount={currentBid?.amount ?? null}
+                  nextBidMin={nextBidMin}
+                  endCountdown={endCountdown}
+                  isAuctionEnded={isAuctionEnded}
+                  isAuctionActive={isAuctionActive}
+                  canInteract={canInteract}
+                  showPlaceBid={mode === 'USER'}
+                  bidAmount={bidAmount}
+                  onBidAmountChange={setBidAmount}
+                  onSubmitBid={onSubmitBid}
+                  parsedBid={parsedBid}
+                  cooldownRemainingSeconds={cooldownRemainingSeconds}
+                  placingBid={placingBid}
+                />
+
+                {canControlAuction ? (
+                  <AuctionRoomSellerPanel
+                    auctionStatus={auctionStatusStr}
+                    canInteract={canInteract}
+                    isAuctionEnded={isAuctionEnded}
+                    actionBusy={actionBusy}
+                    actionError={actionError}
+                    onPause={handlePause}
+                    onResume={handleResume}
+                    onEnd={handleEnd}
+                  />
+                ) : null}
+
+                <AuctionRoomLiveBidFeed bids={liveFeed} mode={mode} />
+
+                <AuctionRoomParticipantsPanel participants={participants} />
+              </aside>
+            </div>
 
             <SheetContent
               side="left"
-              className="w-80 sm:max-w-sm p-0"
+              className="flex h-full w-[min(100vw,18rem)] flex-col gap-0 p-0 sm:max-w-[18rem]"
               onClick={(e) => {
-                // Keep focus inside sheet without affecting background.
                 e.stopPropagation();
               }}
             >
-              <div className="h-full p-2">
+              <div className="flex h-full min-h-0 flex-1 flex-col">
                 <AuctionRoomChatPanel
                   messages={chatMessages}
                   draft={chatDraft}
@@ -226,45 +284,6 @@ export function AuctionRoom({
               </div>
             </SheetContent>
           </Sheet>
-
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start xl:grid-cols-[minmax(0,1fr)_390px]">
-            <div className="space-y-4 lg:order-1">
-              <AuctionRoomDetailsSection auction={auction} />
-            </div>
-
-            <aside className="space-y-4 lg:order-2 lg:sticky lg:top-6">
-              <AuctionRoomBidPanel
-                auction={auction}
-                currentBidAmount={currentBid?.amount ?? null}
-                nextBidMin={nextBidMin}
-                endCountdown={endCountdown}
-                isAuctionEnded={isAuctionEnded}
-                canInteract={canInteract}
-                showPlaceBid={mode === 'USER'}
-                bidAmount={bidAmount}
-                onBidAmountChange={setBidAmount}
-                onSubmitBid={onSubmitBid}
-                parsedBid={parsedBid}
-              />
-
-              {canControlAuction ? (
-                <AuctionRoomSellerPanel
-                  auctionStatus={auctionStatusStr}
-                  canInteract={canInteract}
-                  isAuctionEnded={isAuctionEnded}
-                  actionBusy={actionBusy}
-                  actionError={actionError}
-                  onPause={handlePause}
-                  onResume={handleResume}
-                  onEnd={handleEnd}
-                />
-              ) : null}
-
-              <AuctionRoomLiveBidFeed bids={liveFeed} mode={mode} />
-
-              <AuctionRoomParticipantsPanel participants={participants} />
-            </aside>
-          </div>
         </div>
       </div>
     </div>

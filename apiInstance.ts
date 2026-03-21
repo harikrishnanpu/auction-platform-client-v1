@@ -58,6 +58,7 @@ export const API_ENDPOINTS = {
     viewKycDocument: (documentId: string) => `/admin/kyc/${documentId}/view`,
     updateAuctionCategory: (categoryId: string) =>
       `/admin/auction-categories/${categoryId}`,
+    createAuctionCategory: '/admin/auction-categories',
     approveAuctionCategoryRequest: (requestId: string) =>
       `/admin/auction-categories/${requestId}/approve`,
     rejectAuctionCategoryRequest: (requestId: string) =>

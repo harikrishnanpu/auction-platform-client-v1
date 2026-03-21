@@ -21,23 +21,23 @@ export function AuctionRoomMetaBadges({
   className,
 }: AuctionRoomMetaBadgesProps) {
   return (
-    <div className={cn('flex flex-wrap items-center gap-2', className)}>
+    <div className={cn('flex flex-wrap items-center gap-1.5', className)}>
       <Badge
         variant="secondary"
-        className="rounded-md border-0 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary"
+        className="rounded-md border-0 bg-primary/10 px-1.5 py-0 text-[10px] font-medium text-primary"
       >
         {categoryName}
       </Badge>
       <Badge
         variant="outline"
-        className="rounded-md px-2 py-0.5 text-[11px] font-medium"
+        className="rounded-md px-1.5 py-0 text-[10px] font-medium"
       >
         {typeLabel}
       </Badge>
       <Badge
         variant="outline"
         className={cn(
-          'rounded-md px-2 py-0.5 text-[11px] font-semibold',
+          'rounded-md px-1.5 py-0 text-[10px] font-semibold',
           statusLabel === 'Live' &&
             'border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300',
           statusLabel === 'Paused' &&

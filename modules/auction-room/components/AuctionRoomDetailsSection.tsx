@@ -23,21 +23,21 @@ export function AuctionRoomDetailsSection({
   auction,
 }: AuctionRoomDetailsSectionProps) {
   return (
-    <Card className="overflow-hidden rounded-xl border-border/60 bg-card/60 shadow-sm backdrop-blur-sm">
-      <CardHeader className="border-b border-border/50 bg-muted/20 pb-3">
-        <CardTitle className="text-sm font-semibold">Listing details</CardTitle>
-        <CardDescription className="text-xs text-muted-foreground">
-          Schedule, pricing, and item condition for this auction.
+    <Card className="overflow-hidden rounded-lg border-border/60 bg-card/60 shadow-sm backdrop-blur-sm">
+      <CardHeader className="border-b border-border/50 bg-muted/20 px-3 py-2">
+        <CardTitle className="text-xs font-semibold">Listing details</CardTitle>
+        <CardDescription className="text-[10px] text-muted-foreground">
+          Schedule, pricing, and condition.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-2 pt-4 sm:grid-cols-2">
+      <CardContent className="grid gap-1.5 px-3 pt-3 sm:grid-cols-2">
         <AuctionRoomStatTile label="Starts" icon={<CalendarClock />}>
-          <span className="font-mono text-xs sm:text-sm">
+          <span className="font-mono text-[11px] sm:text-xs">
             {auction?.startAt ? formatAuctionDateTime(auction.startAt) : '—'}
           </span>
         </AuctionRoomStatTile>
         <AuctionRoomStatTile label="Ends" icon={<Timer />}>
-          <span className="font-mono text-xs sm:text-sm">
+          <span className="font-mono text-[11px] sm:text-xs">
             {auction?.endAt ? formatAuctionDateTime(auction.endAt) : '—'}
           </span>
         </AuctionRoomStatTile>
@@ -50,11 +50,11 @@ export function AuctionRoomDetailsSection({
           {auction?.condition ?? '—'}
         </AuctionRoomStatTile>
       </CardContent>
-      <CardContent className="border-t border-border/50 bg-muted/10 pt-4 pb-4">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <CardContent className="border-t border-border/50 bg-muted/10 px-3 py-3">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Description
         </p>
-        <div className="mt-2 max-h-64 overflow-y-auto rounded-xl border border-border/50 bg-background/50 p-3 text-xs leading-relaxed text-foreground">
+        <div className="mt-1.5 max-h-48 overflow-y-auto rounded-lg border border-border/50 bg-background/50 p-2 text-[11px] leading-relaxed text-foreground">
           {auction?.description?.trim()
             ? auction.description
             : 'No description provided.'}

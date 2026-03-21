@@ -56,6 +56,17 @@ export const updateAuctionCategoryAction = async (
   );
 };
 
+export const createAuctionCategoryAction = async (input: {
+  name: string;
+  parentId: string | null;
+}): Promise<ApiResponse<null>> => {
+  const cookieStore = await cookies();
+  return adminAuctionCategoryService.createAuctionCategory(
+    input,
+    cookieStore.toString()
+  );
+};
+
 export const setAuctionCategoryStatusAction = async (
   categoryId: string,
   status: boolean

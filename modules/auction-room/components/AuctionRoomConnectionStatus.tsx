@@ -28,7 +28,7 @@ export function AuctionRoomConnectionStatus({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide',
+        'inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wide',
         state === 'connected' &&
           'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
         state === 'connecting' &&
@@ -39,7 +39,7 @@ export function AuctionRoomConnectionStatus({
       )}
     >
       <Icon
-        className={cn('size-3.5', state === 'connecting' && 'animate-spin')}
+        className={cn('size-3', state === 'connecting' && 'animate-spin')}
         aria-hidden
       />
       {copy[state]}

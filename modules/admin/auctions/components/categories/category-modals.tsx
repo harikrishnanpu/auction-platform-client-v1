@@ -39,6 +39,7 @@ export function EditCategoryModal({
   disabled,
   onClose,
   onSave,
+  successMessage = 'Category updated',
 }: {
   isOpen: boolean;
   title?: string;
@@ -52,6 +53,7 @@ export function EditCategoryModal({
     name: string;
     parentId: string | null;
   }) => Promise<{ success: boolean; error?: string | null }>;
+  successMessage?: string;
 }) {
   const [name, setName] = useState(initialName);
   const [parentId, setParentId] = useState<string | null>(
@@ -83,7 +85,7 @@ export function EditCategoryModal({
         toast.error(res.error ?? 'Failed to update category');
         return;
       }
-      toast.success('Category updated');
+      toast.success(successMessage);
       onClose();
     } catch (e: unknown) {
       toast.error(getErrorMessage(e) ?? 'Failed to update category');

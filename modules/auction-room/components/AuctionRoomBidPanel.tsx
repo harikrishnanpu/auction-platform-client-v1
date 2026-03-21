@@ -2,8 +2,8 @@
 
 import { Gavel, Hourglass } from 'lucide-react';
 
+import { PlaceBidButton } from '@/components/auction/place-bid-button';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Card,
@@ -22,12 +22,15 @@ type AuctionRoomBidPanelProps = {
   nextBidMin: number | null;
   endCountdown: string | null;
   isAuctionEnded: boolean;
+  isAuctionActive: boolean;
   canInteract: boolean;
   showPlaceBid: boolean;
   bidAmount: string;
   onBidAmountChange: (value: string) => void;
   onSubmitBid: () => void;
   parsedBid: number | null;
+  cooldownRemainingSeconds: number;
+  placingBid: boolean;
 };
 
 export function AuctionRoomBidPanel({
@@ -36,44 +39,50 @@ export function AuctionRoomBidPanel({
   nextBidMin,
   endCountdown,
   isAuctionEnded,
+  isAuctionActive,
   canInteract,
   showPlaceBid,
   bidAmount,
   onBidAmountChange,
   onSubmitBid,
   parsedBid,
+  cooldownRemainingSeconds,
+  placingBid,
 }: AuctionRoomBidPanelProps) {
-  const bidDisabled =
+  const inputDisabled = !canInteract || isAuctionEnded || !isAuctionActive;
+
+  const bidInvalid =
     parsedBid == null ||
     (nextBidMin != null && parsedBid < nextBidMin) ||
     isAuctionEnded ||
-    !canInteract;
+    !canInteract ||
+    !isAuctionActive;
 
   return (
     <Card
       className={cn(
-        'rounded-xl border-border/60 shadow-md',
+        'rounded-lg border-border/60 shadow-sm',
         'bg-linear-to-br from-card via-card to-amber-500/4 dark:to-amber-400/6'
       )}
     >
-      <CardHeader className="space-y-1 pb-2">
+      <CardHeader className="space-y-0 pb-2">
         <div className="flex items-center gap-2">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Gavel className="size-4" aria-hidden />
+          <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Gavel className="size-3.5" aria-hidden />
           </span>
           <div>
-            <CardTitle className="text-sm font-semibold tracking-tight">
+            <CardTitle className="text-xs font-semibold tracking-tight">
               Current bid
             </CardTitle>
-            <CardDescription className="text-xs">
+            <CardDescription className="text-[10px] leading-tight">
               Live updates as bids arrive
             </CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         <div>
-          <p className="text-3xl font-bold tabular-nums tracking-tight text-foreground sm:text-4xl">
+          <p className="text-2xl font-bold tabular-nums tracking-tight text-foreground sm:text-3xl">
             {currentBidAmount != null
               ? formatAuctionPrice(currentBidAmount)
               : '—'}
@@ -88,15 +97,15 @@ export function AuctionRoomBidPanel({
           ) : null}
         </div>
 
-        <div className="grid gap-2 rounded-xl border border-border/60 bg-background/60 p-3">
-          <div className="flex items-center justify-between gap-3">
-            <span className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Hourglass className="size-4 shrink-0" aria-hidden />
+        <div className="grid gap-1.5 rounded-lg border border-border/60 bg-background/60 p-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Hourglass className="size-3.5 shrink-0" aria-hidden />
               Time left
             </span>
             <span
               className={cn(
-                'font-mono text-base font-semibold tabular-nums',
+                'font-mono text-sm font-semibold tabular-nums',
                 endCountdown &&
                   endCountdown !== '0:00' &&
                   endCountdown.length <= 5 &&
@@ -106,21 +115,21 @@ export function AuctionRoomBidPanel({
               {isAuctionEnded ? 'Ended' : (endCountdown ?? '—')}
             </span>
           </div>
-          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-            <Badge variant="outline" className="font-normal">
+          <div className="flex flex-wrap gap-1.5 text-[10px] text-muted-foreground">
+            <Badge variant="outline" className="px-1.5 py-0 font-normal">
               Anti-snipe {auction?.antiSnipSeconds ?? 0}s
             </Badge>
-            <Badge variant="outline" className="font-normal">
+            <Badge variant="outline" className="px-1.5 py-0 font-normal">
               Cooldown {auction?.bidCooldownSeconds ?? 0}s
             </Badge>
-            <Badge variant="outline" className="font-normal">
-              Max extensions {auction?.maxExtensionCount ?? 0}
+            <Badge variant="outline" className="px-1.5 py-0 font-normal">
+              Max ext. {auction?.maxExtensionCount ?? 0}
             </Badge>
           </div>
         </div>
 
         {showPlaceBid ? (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Input
               inputMode="decimal"
               placeholder={
@@ -130,17 +139,15 @@ export function AuctionRoomBidPanel({
               }
               value={bidAmount}
               onChange={(e) => onBidAmountChange(e.target.value)}
-              disabled={!canInteract || isAuctionEnded}
-              className="h-10 rounded-lg border-border/80 bg-background text-sm tabular-nums"
+              disabled={inputDisabled}
+              className="h-9 rounded-md border-border/80 bg-background text-xs tabular-nums"
             />
-            <Button
-              size="sm"
+            <PlaceBidButton
+              disabled={bidInvalid}
+              cooldownRemainingSeconds={cooldownRemainingSeconds}
+              pending={placingBid}
               onClick={onSubmitBid}
-              disabled={bidDisabled}
-              className="h-10 w-full rounded-lg text-sm font-semibold shadow-sm"
-            >
-              Place bid
-            </Button>
+            />
           </div>
         ) : null}
       </CardContent>

@@ -3,12 +3,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { ArrowLeft, Gavel, Loader2 } from 'lucide-react';
 
-import type { AuctionCategory, IAuctionDto } from '@/types/auction.type';
+import type {
+  AuctionAssetType,
+  AuctionCategory,
+  IAuctionDto,
+} from '@/types/auction.type';
 import { SellerCategorySelect } from './category-select';
 import { AUCTION_CONDITIONS, getAuctionTypeLabel } from '@/lib/auction-utils';
 import { Input } from '@/components/ui/input';
@@ -27,6 +31,7 @@ import {
 } from '@/actions/auction/auction.actions';
 import type { UpdateAuctionDraftInput } from '@/types/auction.type';
 import { isoToDatetimeLocal, datetimeLocalToISO } from '@/lib/datetime-local';
+import { getErrorMessage } from '@/utils/get-app-error';
 import type { AuctionAssetEditorItem } from './seller-auction-assets-editor';
 import { SellerAuctionAssetsEditor } from './seller-auction-assets-editor';
 
@@ -44,7 +49,7 @@ export function SellerAuctionEditDraftContainer({
       id: `${a.fileKey}-${i}`,
       fileKey: a.fileKey,
       position: a.position ?? i,
-      assetType: a.assetType,
+      assetType: a.assetType as AuctionAssetType,
       status: 'done',
     }))
   );
@@ -62,7 +67,9 @@ export function SellerAuctionEditDraftContainer({
   const typeLabel = getAuctionTypeLabel(auctionType);
 
   const form = useForm<CreateAuctionFormValues>({
-    resolver: zodResolver(createAuctionFormSchema),
+    resolver: zodResolver(
+      createAuctionFormSchema
+    ) as Resolver<CreateAuctionFormValues>,
     mode: 'onBlur',
     defaultValues: {
       title: auction.title ?? '',
@@ -118,6 +125,7 @@ export function SellerAuctionEditDraftContainer({
         return next;
       });
 
+      setUploadError(null);
       const item = assets[index];
       if (!item?.file || item.status !== 'idle') return;
 
@@ -154,7 +162,9 @@ export function SellerAuctionEditDraftContainer({
           return next;
         });
       } catch (err: unknown) {
-        toast.error(err instanceof Error ? err.message : 'Upload failed');
+        const msg = getErrorMessage(err) ?? 'Upload failed';
+        setUploadError(msg);
+        toast.error(msg);
         setAssets((prev) => {
           const next = [...prev];
           if (next[index]) next[index] = { ...next[index], status: 'error' };
@@ -170,25 +180,31 @@ export function SellerAuctionEditDraftContainer({
       const removed = prev[index];
       if (removed?.previewUrl) URL.revokeObjectURL(removed.previewUrl);
       const next = prev.filter((_, i) => i !== index);
-      // Re-number positions to keep stable ordering.
       return next.map((a, i) => ({ ...a, position: a.position ?? i }));
     });
   }, []);
 
   const [submitting, setSubmitting] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const submit = useMemo(
     () =>
       form.handleSubmit(async (data) => {
         if (submitting) return;
 
+        form.clearErrors('root');
+
         const uploadedAssets = assets.filter((a) => a.fileKey);
         if (uploadedAssets.length === 0) {
-          toast.error('At least one asset is required.');
+          const msg = 'At least one image or video is required.';
+          toast.error(msg);
+          form.setError('root', { message: msg });
           return;
         }
         if (assets.some((a) => a.status === 'uploading')) {
-          toast.error('Please wait for uploads to finish.');
+          const msg = 'Please wait for uploads to finish.';
+          toast.error(msg);
+          form.setError('root', { message: msg });
           return;
         }
 
@@ -216,12 +232,18 @@ export function SellerAuctionEditDraftContainer({
 
           const res = await updateSellerAuctionDraftAction(auction.id, payload);
           if (!res.success) {
-            toast.error(res.error ?? 'Failed to update draft');
+            const msg = res.error ?? 'Failed to update draft';
+            form.setError('root', { message: msg });
+            toast.error(msg);
             return;
           }
 
           toast.success('Draft updated.');
           router.push(`/seller/auction/${auction.id}/draft`);
+        } catch (err) {
+          const msg = getErrorMessage(err) ?? 'Something went wrong';
+          form.setError('root', { message: msg });
+          toast.error(msg);
         } finally {
           setSubmitting(false);
         }
@@ -230,19 +252,26 @@ export function SellerAuctionEditDraftContainer({
   );
 
   const onPublish = useCallback(async () => {
+    form.clearErrors('root');
     setSubmitting(true);
     try {
       const res = await publishSellerAuctionAction(auction.id);
       if (!res.success) {
-        toast.error(res.error ?? 'Failed to publish draft');
+        const msg = res.error ?? 'Failed to publish draft';
+        form.setError('root', { message: msg });
+        toast.error(msg);
         return;
       }
       toast.success('Auction published.');
       router.push(`/seller/auction/${auction.id}`);
+    } catch (err) {
+      const msg = getErrorMessage(err) ?? 'Something went wrong';
+      form.setError('root', { message: msg });
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
-  }, [auction.id, router]);
+  }, [auction.id, form, router]);
 
   return (
     <div className="space-y-6">
@@ -289,7 +318,7 @@ export function SellerAuctionEditDraftContainer({
       </div>
 
       {form.formState.errors.root ? (
-        <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-destructive text-sm">
+        <div className="rounded-lg bg-destructive/10 p-3 text-destructive text-sm">
           {form.formState.errors.root.message}
         </div>
       ) : null}
@@ -325,6 +354,11 @@ export function SellerAuctionEditDraftContainer({
                 disabled={submitting}
                 className="mt-1 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
+              {form.formState.errors.description ? (
+                <p className="text-destructive text-xs mt-1">
+                  {form.formState.errors.description.message}
+                </p>
+              ) : null}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -375,6 +409,11 @@ export function SellerAuctionEditDraftContainer({
                   disabled={submitting}
                   className="mt-1"
                 />
+                {form.formState.errors.startPrice ? (
+                  <p className="text-destructive text-xs mt-1">
+                    {form.formState.errors.startPrice.message}
+                  </p>
+                ) : null}
               </div>
               <div>
                 <Label htmlFor="minIncrement">Min increment (₹)</Label>
@@ -386,6 +425,11 @@ export function SellerAuctionEditDraftContainer({
                   disabled={submitting}
                   className="mt-1"
                 />
+                {form.formState.errors.minIncrement ? (
+                  <p className="text-destructive text-xs mt-1">
+                    {form.formState.errors.minIncrement.message}
+                  </p>
+                ) : null}
               </div>
             </div>
 
@@ -433,6 +477,11 @@ export function SellerAuctionEditDraftContainer({
                   disabled={submitting}
                   className="mt-1"
                 />
+                {form.formState.errors.antiSnipSeconds ? (
+                  <p className="text-destructive text-xs mt-1">
+                    {form.formState.errors.antiSnipSeconds.message}
+                  </p>
+                ) : null}
               </div>
               <div>
                 <Label htmlFor="maxExtensionCount">Max extensions</Label>
@@ -444,6 +493,11 @@ export function SellerAuctionEditDraftContainer({
                   disabled={submitting}
                   className="mt-1"
                 />
+                {form.formState.errors.maxExtensionCount ? (
+                  <p className="text-destructive text-xs mt-1">
+                    {form.formState.errors.maxExtensionCount.message}
+                  </p>
+                ) : null}
               </div>
               <div>
                 <Label htmlFor="bidCooldownSeconds">
@@ -457,6 +511,11 @@ export function SellerAuctionEditDraftContainer({
                   disabled={submitting}
                   className="mt-1"
                 />
+                {form.formState.errors.bidCooldownSeconds ? (
+                  <p className="text-destructive text-xs mt-1">
+                    {form.formState.errors.bidCooldownSeconds.message}
+                  </p>
+                ) : null}
               </div>
             </div>
           </CardContent>
@@ -474,6 +533,9 @@ export function SellerAuctionEditDraftContainer({
               onUploadOne={uploadOne}
               onRemoveOne={removeAsset}
             />
+            {uploadError ? (
+              <p className="mt-3 text-sm text-destructive">{uploadError}</p>
+            ) : null}
             <p className="mt-3 text-[11px] text-muted-foreground">
               Existing media can be removed; new media can be uploaded.
             </p>

@@ -47,3 +47,8 @@ export function isAuctionEndedByStatus(
   if (s === 'ENDED' || s === 'SOLD' || s === 'COMPLETED') return true;
   return endCountdown === '0:00';
 }
+
+/** Only ACTIVE auctions accept bids (paused/draft/etc. do not). */
+export function isAuctionActiveForBidding(status: string | undefined): boolean {
+  return (status ?? '').toUpperCase() === 'ACTIVE';
+}

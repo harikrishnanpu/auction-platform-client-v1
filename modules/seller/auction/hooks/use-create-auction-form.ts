@@ -171,17 +171,22 @@ export function useCreateAuctionForm() {
 
   const onSubmit = useCallback(
     async (data: CreateAuctionFormValues) => {
+      form.clearErrors('root');
       if (!auctionType) return;
 
       const withKeys = assets.filter((a) => a.fileKey);
 
       if (assets.length > 0 && withKeys.length === 0) {
-        toast.error('Please upload all selected files first.');
+        const msg = 'Please upload all selected files first.';
+        toast.error(msg);
+        form.setError('root', { message: msg });
         return;
       }
 
       if (assets.some((a) => a.status === 'uploading')) {
-        toast.error('Please wait for uploads to finish.');
+        const msg = 'Please wait for uploads to finish.';
+        toast.error(msg);
+        form.setError('root', { message: msg });
         return;
       }
 
@@ -194,10 +199,9 @@ export function useCreateAuctionForm() {
         }));
 
       if (assetDtos.length === 0) {
-        toast.error('Atleast One Asset Needed');
-        form.setError('root', {
-          message: 'Atleast One Asset Needed',
-        });
+        const msg = 'At least one image or video is required.';
+        toast.error(msg);
+        form.setError('root', { message: msg });
         return;
       }
 
@@ -219,18 +223,18 @@ export function useCreateAuctionForm() {
         });
 
         if (!result.success || !result.data) {
-          form.setError('root', {
-            message: result.error ?? 'Failed to create auction',
-          });
+          const msg = result.error ?? 'Failed to create auction';
+          form.setError('root', { message: msg });
+          toast.error(msg);
           return;
         }
 
         toast.success('Auction created as draft.');
         router.push(`/seller/auction/${result.data.id}`);
       } catch (err) {
-        form.setError('root', {
-          message: getErrorMessage(err) ?? 'Something went wrong',
-        });
+        const msg = getErrorMessage(err) ?? 'Something went wrong';
+        form.setError('root', { message: msg });
+        toast.error(msg);
       }
     },
     [assets, auctionType, form, router]

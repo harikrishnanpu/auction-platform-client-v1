@@ -148,6 +148,33 @@ export const adminAuctionCategoryService = {
     }
   },
 
+  createAuctionCategory: async (
+    input: { name: string; parentId: string | null },
+    cookieString: string
+  ): Promise<ApiResponse<null>> => {
+    try {
+      const res = await fetch(
+        buildApiUrl(API_ENDPOINTS.admin.createAuctionCategory),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Cookie: cookieString },
+          credentials: 'include',
+          cache: 'no-store',
+          body: JSON.stringify(input),
+        }
+      );
+
+      const response = await res.json();
+      if (!res.ok) throw new Error(response.error ?? response.message);
+      if (!response.success)
+        throw new Error(response.error ?? response.message);
+
+      return { success: true, data: null };
+    } catch (err: unknown) {
+      return { success: false, data: null, error: getErrorMessage(err) };
+    }
+  },
+
   changeAuctionCategoryStatus: async (
     categoryId: string,
     status: boolean,

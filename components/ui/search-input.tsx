@@ -17,7 +17,7 @@ export function SearchInput({
   value: controlledValue,
   onChange,
   className,
-  debounceMs = 400,
+  debounceMs = 500,
 }: SearchInputProps) {
   const [internalValue, setInternalValue] = useState(controlledValue ?? '');
 

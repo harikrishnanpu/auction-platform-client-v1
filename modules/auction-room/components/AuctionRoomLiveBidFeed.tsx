@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import type {
   AuctionRoomMode,
   IAuctionRoomBid,
-} from '../realtime/useAuctionRoomSocket';
+} from '../../../socket/useAuctionRoomSocket';
 
 type AuctionRoomLiveBidFeedProps = {
   bids: IAuctionRoomBid[];
@@ -27,27 +27,27 @@ export function AuctionRoomLiveBidFeed({
   mode,
 }: AuctionRoomLiveBidFeedProps) {
   return (
-    <Card className="rounded-xl border-border/60 bg-card/70 shadow-sm">
-      <CardHeader className="pb-1">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="size-4 text-muted-foreground" aria-hidden />
-          <CardTitle className="text-sm font-semibold">Bid activity</CardTitle>
+    <Card className="rounded-lg border-border/60 bg-card/70 shadow-sm">
+      <CardHeader className="px-3 py-2 pb-1">
+        <div className="flex items-center gap-1.5">
+          <TrendingUp className="size-3.5 text-muted-foreground" aria-hidden />
+          <CardTitle className="text-xs font-semibold">Bid activity</CardTitle>
         </div>
-        <CardDescription className="text-xs">
-          Most recent bids on this lot
+        <CardDescription className="text-[10px] leading-tight">
+          Most recent bids
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 pb-3">
         <ul
           className={cn(
-            'space-y-2',
+            'space-y-1.5',
             mode === 'ADMIN'
-              ? 'max-h-80 overflow-y-auto pr-1'
-              : 'max-h-64 overflow-y-auto pr-1'
+              ? 'max-h-72 overflow-y-auto pr-1'
+              : 'max-h-52 overflow-y-auto pr-1'
           )}
         >
           {bids.length === 0 ? (
-            <li className="rounded-xl border border-dashed border-border/80 bg-muted/20 px-4 py-8 text-center text-sm text-muted-foreground">
+            <li className="rounded-lg border border-dashed border-border/80 bg-muted/20 px-3 py-6 text-center text-xs text-muted-foreground">
               No bids yet. Be the first when the room opens.
             </li>
           ) : (
@@ -55,7 +55,7 @@ export function AuctionRoomLiveBidFeed({
               <li
                 key={b.id}
                 className={cn(
-                  'flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 transition-colors',
+                  'flex items-center justify-between gap-2 rounded-lg border px-2 py-1.5 transition-colors',
                   index === 0
                     ? 'border-primary/25 bg-primary/5'
                     : 'border-border/50 bg-background/40'

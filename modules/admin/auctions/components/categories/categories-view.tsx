@@ -3,11 +3,12 @@
 import { useCallback, useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Edit, Inbox, RefreshCw } from 'lucide-react';
+import { Edit, Inbox, Plus, RefreshCw } from 'lucide-react';
 
 import {
   setAuctionCategoryStatusAction,
   updateAuctionCategoryAction,
+  createAuctionCategoryAction,
 } from '@/actions/admin/auction-category.actions';
 import { Button } from '@/components/ui/button';
 import { DataTable, Column } from '@/components/ui/data-table';
@@ -55,6 +56,7 @@ export function AdminAuctionCategoriesView({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editing, setEditing] = useState<AuctionCategory | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const { query, setQuery, statusFilter, setStatusFilter, filteredItems } =
     useCategoryTableFilters(categories);
@@ -69,6 +71,14 @@ export function AdminAuctionCategoriesView({
   const closeEdit = useCallback(() => {
     setEditOpen(false);
     setEditing(null);
+  }, []);
+
+  const openCreate = useCallback(() => {
+    setCreateOpen(true);
+  }, []);
+
+  const closeCreate = useCallback(() => {
+    setCreateOpen(false);
   }, []);
 
   const toggleStatus = useCallback(
@@ -183,6 +193,17 @@ export function AdminAuctionCategoriesView({
           </div>
 
           <div className="flex items-center gap-2">
+            {activeTab === 'categories' ? (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={openCreate}
+                className="gap-2"
+              >
+                <Plus className="size-4" />
+                Create
+              </Button>
+            ) : null}
             <Button
               variant="outline"
               size="sm"
@@ -281,6 +302,34 @@ export function AdminAuctionCategoriesView({
           return { success: true };
         }}
       />
+
+      {activeTab === 'categories' ? (
+        <EditCategoryModal
+          isOpen={createOpen}
+          title="Create category"
+          description="Create a new auction category. Status will be set to approved and verified."
+          initialName=""
+          initialParentId={null}
+          parentOptions={parentOptions}
+          disabled={isPending || !!busyId}
+          onClose={closeCreate}
+          successMessage="Category created"
+          onSave={async (input) => {
+            const res = await createAuctionCategoryAction({
+              name: input.name,
+              parentId: input.parentId,
+            });
+            if (!res.success)
+              return {
+                success: false,
+                error: res.error ?? 'Failed to create category',
+              };
+
+            startTransition(() => router.refresh());
+            return { success: true };
+          }}
+        />
+      ) : null}
     </div>
   );
 }
