@@ -40,6 +40,11 @@ export const API_ENDPOINTS = {
     getAuctionById: (id: string) => `/auction/${id}`,
     updateAuction: (id: string) => `/auction/${id}`,
     publishAuction: (id: string) => `/auction/${id}/publish`,
+    pauseAuction: (id: string) => `/auction/${id}/pause`,
+    resumeAuction: (id: string) => `/auction/${id}/resume`,
+    endAuction: (id: string) => `/auction/${id}/end`,
+    getLatestAuctions: '/auction/auctions/latest',
+    getBrowseAuctions: '/auction/auctions',
   },
 
   admin: {
@@ -57,6 +62,7 @@ export const API_ENDPOINTS = {
       `/admin/auction-categories/${requestId}/approve`,
     rejectAuctionCategoryRequest: (requestId: string) =>
       `/admin/auction-categories/${requestId}/reject`,
+    getAdminAuctions: '/admin/auctions',
     ChangeAuctionCategoryStatus: (categoryId: string) =>
       `/admin/auction-categories/${categoryId}/status`,
     getAuctionCategoryRequests: '/admin/category-requests',

@@ -104,3 +104,15 @@ export interface IGetAllSellerAuctionsResponse {
   totalPages: number;
   currentPage: number;
 }
+
+export interface IGetBrowseAuctionsFilter {
+  auctionType: AuctionType | 'ALL';
+  categoryId: string | 'ALL';
+  page: number;
+  limit: number;
+  sort: string;
+  order: 'asc' | 'desc';
+  search: string;
+}
+
+export type IGetBrowseAuctionsResponse = IGetAllSellerAuctionsResponse;

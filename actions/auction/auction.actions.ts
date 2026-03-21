@@ -8,6 +8,8 @@ import {
   CreateAuctionInput,
   IGetAllSellerAuctionsFilter,
   IGetAllSellerAuctionsResponse,
+  IGetBrowseAuctionsFilter,
+  IGetBrowseAuctionsResponse,
   IAuctionDto,
   UpdateAuctionDraftInput,
 } from '@/types/auction.type';
@@ -49,6 +51,20 @@ export async function getSellerAuctionByIdAction(
   return auctionService.getSellerAuctionById(cookieStore, id);
 }
 
+export async function getLatestAuctionsAction(
+  limit: number
+): Promise<ApiResponse<IGetBrowseAuctionsResponse>> {
+  const cookieStore = await cookies();
+  return auctionService.getLatestAuctions(cookieStore, limit);
+}
+
+export async function getBrowseAuctionsAction(
+  filter: IGetBrowseAuctionsFilter
+): Promise<ApiResponse<IGetBrowseAuctionsResponse>> {
+  const cookieStore = await cookies();
+  return auctionService.getBrowseAuctions(cookieStore, filter);
+}
+
 export async function updateSellerAuctionDraftAction(
   id: string,
   input: UpdateAuctionDraftInput
@@ -62,4 +78,25 @@ export async function publishSellerAuctionAction(
 ): Promise<ApiResponse<{ id: string; status: string }>> {
   const cookieStore = await cookies();
   return auctionService.publishSellerAuction(cookieStore, id);
+}
+
+export async function pauseAuctionAction(
+  id: string
+): Promise<ApiResponse<{ id: string; status: string }>> {
+  const cookieStore = await cookies();
+  return auctionService.pauseAuction(cookieStore, id);
+}
+
+export async function resumeAuctionAction(
+  id: string
+): Promise<ApiResponse<{ id: string; status: string }>> {
+  const cookieStore = await cookies();
+  return auctionService.resumeAuction(cookieStore, id);
+}
+
+export async function endAuctionAction(
+  id: string
+): Promise<ApiResponse<{ id: string; status: string }>> {
+  const cookieStore = await cookies();
+  return auctionService.endAuction(cookieStore, id);
 }

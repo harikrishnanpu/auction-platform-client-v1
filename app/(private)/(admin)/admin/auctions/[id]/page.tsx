@@ -1,0 +1,16 @@
+import { AuctionRoom } from '@/modules/auction-room/components/AuctionRoom';
+
+export default async function AdminAuctionRoomPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = await params;
+  const id = resolvedParams.id;
+
+  return (
+    <div className="min-h-[60vh] bg-background">
+      <AuctionRoom auctionId={id} mode="ADMIN" />
+    </div>
+  );
+}

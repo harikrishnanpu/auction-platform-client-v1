@@ -5,6 +5,8 @@ import {
   CreateAuctionInput,
   IGetAllSellerAuctionsFilter,
   IGetAllSellerAuctionsResponse,
+  IGetBrowseAuctionsFilter,
+  IGetBrowseAuctionsResponse,
   IAuctionDto,
   UpdateAuctionDraftInput,
 } from '@/types/auction.type';
@@ -101,6 +103,84 @@ export const auctionService = {
     );
   },
 
+  getLatestAuctions: async (
+    cookieStore: ReadonlyRequestCookies,
+    limit: number
+  ): Promise<ApiResponse<IGetBrowseAuctionsResponse>> => {
+    const query = buildQuery({ limit });
+    const url = `${buildApiUrl(API_ENDPOINTS.auction.getLatestAuctions)}?${query}`;
+
+    return apiFetch<IGetBrowseAuctionsResponse>(
+      url,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+      cookieStore,
+      'no-store'
+    );
+  },
+
+  getBrowseAuctions: async (
+    cookieStore: ReadonlyRequestCookies,
+    filter: IGetBrowseAuctionsFilter
+  ): Promise<ApiResponse<IGetBrowseAuctionsResponse>> => {
+    const query = buildQuery({
+      auctionType: filter.auctionType,
+      categoryId: filter.categoryId,
+      page: filter.page,
+      limit: filter.limit,
+      sort: filter.sort,
+      order: filter.order,
+      search: filter.search,
+    });
+
+    const url = `${buildApiUrl(API_ENDPOINTS.auction.getBrowseAuctions)}?${query}`;
+
+    return apiFetch<IGetBrowseAuctionsResponse>(
+      url,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+      cookieStore,
+      'no-store'
+    );
+  },
+
+  getAdminAuctions: async (
+    cookieStore: ReadonlyRequestCookies,
+    filter: IGetBrowseAuctionsFilter
+  ): Promise<ApiResponse<IGetBrowseAuctionsResponse>> => {
+    const query = buildQuery({
+      auctionType: filter.auctionType,
+      categoryId: filter.categoryId,
+      page: filter.page,
+      limit: filter.limit,
+      sort: filter.sort,
+      order: filter.order,
+      search: filter.search,
+    });
+
+    const url = `${buildApiUrl(API_ENDPOINTS.admin.getAdminAuctions)}?${query}`;
+
+    return apiFetch<IGetBrowseAuctionsResponse>(
+      url,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+      cookieStore,
+      'no-store'
+    );
+  },
+
   getSellerAuctionById: async (
     cookieStore: ReadonlyRequestCookies,
     id: string
@@ -155,6 +235,57 @@ export const auctionService = {
   ): Promise<ApiResponse<{ id: string; status: string }>> => {
     return apiFetch<{ id: string; status: string }>(
       buildApiUrl(API_ENDPOINTS.auction.publishAuction(id)),
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+      cookieStore,
+      'no-store'
+    );
+  },
+
+  pauseAuction: async (
+    cookieStore: ReadonlyRequestCookies,
+    id: string
+  ): Promise<ApiResponse<{ id: string; status: string }>> => {
+    return apiFetch<{ id: string; status: string }>(
+      buildApiUrl(API_ENDPOINTS.auction.pauseAuction(id)),
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+      cookieStore,
+      'no-store'
+    );
+  },
+
+  resumeAuction: async (
+    cookieStore: ReadonlyRequestCookies,
+    id: string
+  ): Promise<ApiResponse<{ id: string; status: string }>> => {
+    return apiFetch<{ id: string; status: string }>(
+      buildApiUrl(API_ENDPOINTS.auction.resumeAuction(id)),
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+      cookieStore,
+      'no-store'
+    );
+  },
+
+  endAuction: async (
+    cookieStore: ReadonlyRequestCookies,
+    id: string
+  ): Promise<ApiResponse<{ id: string; status: string }>> => {
+    return apiFetch<{ id: string; status: string }>(
+      buildApiUrl(API_ENDPOINTS.auction.endAuction(id)),
       {
         method: 'POST',
         headers: {

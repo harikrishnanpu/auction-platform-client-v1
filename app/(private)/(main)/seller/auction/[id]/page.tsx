@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { getSellerAuctionByIdAction } from '@/actions/auction/auction.actions';
-import { SellerAuctionDetailView } from '@/modules/seller/auction/components/seller-auction-detail-view';
+import { AuctionRoom } from '@/modules/auction-room/components/AuctionRoom';
 
 export default async function SellerAuctionDetailPage({
   params,
@@ -20,10 +20,8 @@ export default async function SellerAuctionDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-5xl px-3 py-6">
-        <SellerAuctionDetailView auction={res.data} />
-      </div>
+    <div className="bg-background">
+      <AuctionRoom auctionId={id} mode="SELLER" initialAuction={res.data} />
     </div>
   );
 }
