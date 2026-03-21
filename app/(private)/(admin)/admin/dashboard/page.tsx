@@ -46,6 +46,25 @@ export default function AdminDashboard() {
             </div>
           </div>
         </Link>
+
+        <Link
+          href="/admin/auctions"
+          className="block p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow group"
+        >
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg group-hover:bg-green-100 dark:group-hover:bg-green-900/30 transition-colors">
+              <Store size={24} />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                All Auctions
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Manage sellers and KYC verification
+              </p>
+            </div>
+          </div>
+        </Link>
       </div>
     </div>
   );

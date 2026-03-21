@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { SellerTable } from './seller-table';
 import {
   blockUserAction,
@@ -19,12 +19,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { SearchInput } from '@/components/ui/search-input';
 
 const LIMIT_OPTIONS = [5, 10, 20, 50] as const;
 
 export function SellerManagementView() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [search, setSearch] = useState('');
   const [pendingOnly, setPendingOnly] = useState(false);
   const [sellers, setSellers] = useState<SellerInfo[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,6 +57,15 @@ export function SellerManagementView() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const filteredSellers = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return sellers;
+    return sellers.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q)
+    );
+  }, [sellers, search]);
 
   const handleLimitChange = (value: string) => {
     setLimit(Number(value));
@@ -94,6 +105,25 @@ export function SellerManagementView() {
         <p className="text-sm text-muted-foreground mt-1">
           Manage sellers, KYC verification, and platform access.
         </p>
+        <p className="text-xs text-muted-foreground mt-2">
+          Sorted by join date (newest first).
+        </p>
+      </div>
+
+      <div className="mb-4">
+        <SearchInput
+          placeholder="Search current page by name or email…"
+          value={search}
+          onChange={setSearch}
+          debounceMs={500}
+          className="max-w-md"
+        />
+        {search.trim() ? (
+          <p className="text-xs text-muted-foreground mt-2">
+            {filteredSellers.length} match
+            {filteredSellers.length !== 1 ? 'es' : ''} on this page
+          </p>
+        ) : null}
       </div>
 
       <div className="flex flex-wrap items-center gap-4 mb-4">
@@ -133,7 +163,7 @@ export function SellerManagementView() {
       </div>
 
       <SellerTable
-        sellers={sellers}
+        sellers={filteredSellers}
         loading={loading}
         page={page}
         totalPages={totalPages}

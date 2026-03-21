@@ -1,10 +1,12 @@
 export type AuctionType = 'LONG' | 'LIVE' | 'SEALED';
+export type AuctionAssetType = 'IMAGE' | 'VIDEO';
+export type AuctionStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED';
 
 export interface CreateAuctionInput {
   auctionType: AuctionType;
   title: string;
   description: string;
-  category: string;
+  categoryId: string;
   condition: string;
   startPrice: number;
   minIncrement: number;
@@ -16,24 +18,65 @@ export interface CreateAuctionInput {
   assets?: {
     fileKey: string;
     position?: number;
-    assetType?: 'IMAGE' | 'VIDEO';
+    assetType?: AuctionAssetType;
   }[];
 }
 
-export interface CreateAuctionOutput {
-  id: string;
-  sellerId: string;
-  auctionType: AuctionType;
+export interface UpdateAuctionDraftInput {
+  auctionType?: AuctionType;
   title: string;
   description: string;
-  category: string;
+  categoryId: string;
   condition: string;
   startPrice: number;
   minIncrement: number;
-  startAt: string;
-  endAt: string;
-  status: string;
-  assetCount: number;
+  startAt: string; // ISO datetime string
+  endAt: string; // ISO datetime string
+  antiSnipSeconds?: number;
+  maxExtensionCount?: number;
+  bidCooldownSeconds?: number;
+  assets?: AuctionAssetForm[];
+}
+
+export interface IAuctionDto {
+  id: string;
+  sellerId: string;
+  auctionType: AuctionType;
+  status: AuctionStatus;
+  title: string;
+  description: string;
+  category: AuctionCategory;
+  condition: string;
+  startPrice: number;
+  minIncrement: number;
+  startAt: Date;
+  endAt: Date;
+  antiSnipSeconds: number;
+  maxExtensionCount: number;
+  bidCooldownSeconds: number;
+  assets?: {
+    fileKey: string;
+    position?: number;
+    assetType?: AuctionAssetType;
+  }[];
+}
+
+export enum AuctionCategoryStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+export interface AuctionCategory {
+  id: string;
+  name: string;
+  slug: string;
+  parentId: string | null;
+  isVerified: boolean;
+  isActive: boolean;
+  status: AuctionCategoryStatus;
+  rejectionReason?: string;
+  submittedBy: string;
 }
 
 export interface AuctionAssetForm {
@@ -42,116 +85,34 @@ export interface AuctionAssetForm {
   assetType?: 'IMAGE' | 'VIDEO';
 }
 
-export type AuctionStatus = 'DRAFT' | 'ACTIVE' | 'ENDED' | 'SOLD' | 'CANCELLED';
-
-export interface SellerAuctionListItem {
-  id: string;
-  sellerId: string;
-  auctionType: AuctionType;
-  title: string;
-  description: string;
-  category: string;
-  condition: string;
-  startPrice: number;
-  minIncrement: number;
-  startAt: string;
-  endAt: string;
-  status: AuctionStatus;
-  assetCount: number;
-  primaryImageKey?: string;
-  antiSnipSeconds: number;
-  extensionCount: number;
-  maxExtensionCount: number;
-  bidCooldownSeconds: number;
-  winnerId: string | null;
+export interface IGetAllSellerAuctionsFilter {
+  status: AuctionStatus | 'ALL';
+  auctionType: AuctionType | 'ALL';
+  categoryId: string | 'ALL';
+  page: number;
+  limit: number;
+  sort: string;
+  order: 'asc' | 'desc';
+  search: string;
 }
 
-/** Browse (user) list item - same shape as seller list from API */
-export type BrowseAuctionListItem = SellerAuctionListItem;
-
-export interface AuctionAssetDto {
-  id: string;
-  auctionId: string;
-  fileKey: string;
-  position: number;
-  assetType: string;
+export interface IGetAllSellerAuctionsResponse {
+  auctions: IAuctionDto[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  currentPage: number;
 }
 
-export interface AuctionDetail {
-  id: string;
-  sellerId: string;
-  auctionType: AuctionType;
-  title: string;
-  description: string;
-  category: string;
-  condition: string;
-  startPrice: number;
-  minIncrement: number;
-  startAt: string;
-  endAt: string;
-  status: AuctionStatus;
-  assets: AuctionAssetDto[];
-  antiSnipSeconds: number;
-  extensionCount: number;
-  maxExtensionCount: number;
-  bidCooldownSeconds: number;
-  winnerId: string | null;
+export interface IGetBrowseAuctionsFilter {
+  auctionType: AuctionType | 'ALL';
+  categoryId: string | 'ALL';
+  page: number;
+  limit: number;
+  sort: string;
+  order: 'asc' | 'desc';
+  search: string;
 }
 
-export interface AuctionRoomData {
-  bids: {
-    id: string;
-    auctionId: string;
-    userId: string;
-    amount: number;
-    createdAt: string;
-  }[];
-  participants: {
-    id: string;
-    auctionId: string;
-    userId: string;
-    userName: string;
-    joinedAt: string;
-  }[];
-  lastBidTime: string | null;
-}
-
-export interface AuctionWithRoom {
-  auction: AuctionDetail;
-  room: AuctionRoomData;
-}
-
-export interface UpdateAuctionInput {
-  auctionType?: AuctionType;
-  title: string;
-  description: string;
-  category: string;
-  condition: string;
-  startPrice: number;
-  minIncrement: number;
-  startAt: string;
-  endAt: string;
-  antiSnipSeconds?: number;
-  maxExtensionCount?: number;
-  bidCooldownSeconds?: number;
-}
-
-export interface UpdateAuctionOutput {
-  id: string;
-  sellerId: string;
-  auctionType: AuctionType;
-  title: string;
-  description: string;
-  category: string;
-  condition: string;
-  startPrice: number;
-  minIncrement: number;
-  startAt: string;
-  endAt: string;
-  status: string;
-  antiSnipSeconds: number;
-  extensionCount: number;
-  maxExtensionCount: number;
-  bidCooldownSeconds: number;
-  winnerId: string | null;
-}
+export type IGetBrowseAuctionsResponse = IGetAllSellerAuctionsResponse;

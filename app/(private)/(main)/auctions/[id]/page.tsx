@@ -1,18 +1,38 @@
-'use client';
+import { AuctionRoom } from '@/modules/auction-room/components/AuctionRoom';
+import { redirect } from 'next/navigation';
 
-import { use } from 'react';
-import { UserAuctionDetailView } from '@/modules/user/auction/detail/components/user-auction-detail-view';
+import { authGetSesssion } from '@/actions/auth/auth.actions';
+import { getSellerAuctionByIdAction } from '@/actions/auction/auction.actions';
+import { UserRole } from '@/types/user.type';
 
-export default function UserAuctionDetailPage({
+export default async function UserAuctionDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
-  if (!id) return null;
+  const resolvedParams = await params;
+  const id = resolvedParams.id;
+
+  const sessionRes = await authGetSesssion();
+  if (sessionRes.success && sessionRes.data) {
+    const authUser = sessionRes.data;
+    const isSellerRole = authUser.roles?.includes(UserRole.SELLER) ?? false;
+
+    if (isSellerRole) {
+      const sellerAuctionRes = await getSellerAuctionByIdAction(id);
+      if (
+        sellerAuctionRes.success &&
+        sellerAuctionRes.data &&
+        sellerAuctionRes.data.sellerId === authUser.id
+      ) {
+        redirect(`/seller/auction/${id}`);
+      }
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans antialiased">
-      <UserAuctionDetailView auctionId={id} />
+    <div className="bg-background">
+      <AuctionRoom auctionId={id} mode="USER" />
     </div>
   );
 }

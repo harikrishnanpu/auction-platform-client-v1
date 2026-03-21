@@ -6,30 +6,34 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  AUCTION_CATEGORIES,
-  AUCTION_CONDITIONS,
-  getAuctionTypeLabel,
-} from '@/lib/auction-utils';
-import { AuctionTypeSelector } from './auction-type-selector';
+import { AUCTION_CONDITIONS, getAuctionTypeLabel } from '@/lib/auction-utils';
+import type { AuctionCategory } from '@/types/auction.type';
 import { useCreateAuctionForm } from '../hooks/use-create-auction-form';
+import { AuctionTypeSelector } from './auction-type-selector';
+import { SellerCategorySelect } from './category-select';
+import Image from 'next/image';
 
-export function CreateAuctionContainer() {
+export function CreateAuctionContainer({
+  categories,
+}: {
+  categories: AuctionCategory[];
+}) {
   const {
     form,
     auctionType,
+    categoryValue,
     assets,
     uploadError,
     handleSelectType,
+    handleCategoryChange,
     handleAddFiles,
     uploadOne,
     removeAsset,
-    onSubmit,
+    submit,
   } = useCreateAuctionForm();
 
   const {
     register,
-    handleSubmit,
     formState: { errors, isSubmitting },
   } = form;
 
@@ -38,7 +42,7 @@ export function CreateAuctionContainer() {
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans antialiased">
         <main className="grow max-w-4xl mx-auto px-4 sm:px-6 py-8 w-full">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold font-serif text-slate-900 dark:text-white mb-2">
+            <h1 className="text-3xl font-bold  text-slate-900 dark:text-white mb-2">
               Create Auction
             </h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm">
@@ -74,7 +78,7 @@ export function CreateAuctionContainer() {
               Change type
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold font-serif text-slate-900 dark:text-white mb-2 mt-2">
+          <h1 className="text-3xl font-bold  text-slate-900 dark:text-white mb-2 mt-2">
             Creating {typeLabel} auction
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm">
@@ -82,7 +86,7 @@ export function CreateAuctionContainer() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={submit}>
           {errors.root && (
             <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
               {errors.root.message}
@@ -90,7 +94,11 @@ export function CreateAuctionContainer() {
           )}
           <Card className="rounded-2xl mb-6">
             <CardHeader>
-              <CardTitle className="text-lg font-serif">Details</CardTitle>
+              <CardTitle className="text-lg ">Auction details</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Add details and media. You can save as draft and publish when
+                ready.
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -98,7 +106,7 @@ export function CreateAuctionContainer() {
                 <Input
                   id="title"
                   {...register('title')}
-                  placeholder="e.g. Vintage Rolex Submariner"
+                  placeholder="Auction title"
                   className="mt-1"
                 />
                 {errors.title && (
@@ -125,23 +133,14 @@ export function CreateAuctionContainer() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="category">Category</Label>
-                  <select
+                  <SellerCategorySelect
                     id="category"
-                    {...register('category')}
-                    className="mt-1 w-full h-12 rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="">Select category</option>
-                    {AUCTION_CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.category && (
-                    <p className="text-destructive text-xs mt-1">
-                      {errors.category.message}
-                    </p>
-                  )}
+                    value={categoryValue}
+                    categories={categories}
+                    onChange={handleCategoryChange}
+                    error={errors.categoryId?.message}
+                    disabled={isSubmitting}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="condition">Condition</Label>
@@ -170,7 +169,6 @@ export function CreateAuctionContainer() {
                   <Input
                     id="startPrice"
                     type="number"
-                    min={0}
                     step="any"
                     {...register('startPrice')}
                     placeholder="0"
@@ -187,7 +185,6 @@ export function CreateAuctionContainer() {
                   <Input
                     id="minIncrement"
                     type="number"
-                    min={0}
                     step="any"
                     {...register('minIncrement')}
                     placeholder="0"
@@ -236,7 +233,6 @@ export function CreateAuctionContainer() {
                   <Input
                     id="antiSnipSeconds"
                     type="number"
-                    min={0}
                     step={1}
                     {...register('antiSnipSeconds')}
                     placeholder="60"
@@ -256,7 +252,6 @@ export function CreateAuctionContainer() {
                   <Input
                     id="maxExtensionCount"
                     type="number"
-                    min={0}
                     step={1}
                     {...register('maxExtensionCount')}
                     placeholder="3"
@@ -275,7 +270,6 @@ export function CreateAuctionContainer() {
                   <Input
                     id="bidCooldownSeconds"
                     type="number"
-                    min={0}
                     step={1}
                     {...register('bidCooldownSeconds')}
                     placeholder="10"
@@ -293,7 +287,7 @@ export function CreateAuctionContainer() {
 
           <Card className="rounded-2xl mb-6">
             <CardHeader>
-              <CardTitle className="text-lg font-serif">Media</CardTitle>
+              <CardTitle className="text-lg ">Media</CardTitle>
               <p className="text-sm text-muted-foreground">
                 Upload images or video. First file will be the primary.
               </p>
@@ -323,8 +317,25 @@ export function CreateAuctionContainer() {
                 {assets.map((item, index) => (
                   <div
                     key={index}
-                    className="relative w-24 h-24 rounded-lg border border-border overflow-hidden bg-muted/30"
+                    className="relative w-24 h-24 rounded-lg border border-border overflow-hidden bg-muted/30 shrink-0"
                   >
+                    {item.assetType === 'IMAGE' ? (
+                      <Image
+                        src={item.previewUrl}
+                        alt="Asset preview"
+                        width={100}
+                        height={100}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <video
+                        src={item.previewUrl}
+                        className="w-full h-full object-cover"
+                        muted
+                        preload="metadata"
+                        playsInline
+                      />
+                    )}
                     {item.status === 'uploading' && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                         <Loader2 className="h-6 w-6 text-white animate-spin" />
@@ -344,7 +355,7 @@ export function CreateAuctionContainer() {
                       <button
                         type="button"
                         onClick={() => uploadOne(index)}
-                        className="absolute inset-0 flex items-center justify-center bg-blue-500/20 text-blue-600 text-xs hover:bg-blue-500/30"
+                        className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-xs hover:bg-black/50"
                       >
                         Upload
                       </button>
@@ -362,24 +373,34 @@ export function CreateAuctionContainer() {
             </CardContent>
           </Card>
 
-          <div className="flex gap-3">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Gavel className="h-4 w-4" />
-                  Create draft
-                </>
-              )}
-            </Button>
-            <Button type="button" variant="outline" asChild>
-              <Link href="/seller/dashboard">Cancel</Link>
-            </Button>
-          </div>
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle className="text-lg ">Submit draft</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Review details and media, then create your draft auction.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-3">
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Gavel className="h-4 w-4" />
+                      Create draft
+                    </>
+                  )}
+                </Button>
+                <Button type="button" variant="outline" asChild>
+                  <Link href="/seller/dashboard">Cancel</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </form>
       </main>
     </div>

@@ -6,7 +6,7 @@ import { User, Settings, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import useUserStore from '@/store/user.store';
-import { AvatarUpload } from '@/modules/profile/components/avatar-upload';
+import { AvatarUpload } from '@/modules/user/profile/components/avatar-upload';
 import { useProfileModalStore } from '@/store/profile-modal.store';
 import { EditProfileModal } from '@/components/modals/edit-profile.modal';
 import { ChangePasswordModal } from '@/components/modals/change-password.modal';

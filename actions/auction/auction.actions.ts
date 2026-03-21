@@ -1,101 +1,24 @@
 'use server';
 
+import { cookies } from 'next/headers';
+
 import { auctionService } from '@/services/auction/auction.service';
 import { ApiResponse } from '@/types/api.index';
 import {
   CreateAuctionInput,
-  CreateAuctionOutput,
-  SellerAuctionListItem,
-  BrowseAuctionListItem,
-  AuctionDetail,
-  AuctionWithRoom,
-  UpdateAuctionInput,
-  UpdateAuctionOutput,
+  IGetAllSellerAuctionsFilter,
+  IGetAllSellerAuctionsResponse,
+  IGetBrowseAuctionsFilter,
+  IGetBrowseAuctionsResponse,
+  IAuctionDto,
+  UpdateAuctionDraftInput,
 } from '@/types/auction.type';
 
 export async function createAuctionAction(
   input: CreateAuctionInput
-): Promise<ApiResponse<CreateAuctionOutput>> {
-  return auctionService.create(input);
-}
-
-export async function getSellerAuctionsAction(): Promise<
-  ApiResponse<{ auctions: SellerAuctionListItem[] }>
-> {
-  return auctionService.getSellerAuctions();
-}
-
-export async function getBrowseAuctionsAction(params?: {
-  category?: string;
-  auctionType?: string;
-}): Promise<ApiResponse<{ auctions: BrowseAuctionListItem[] }>> {
-  return auctionService.getBrowse(params);
-}
-
-export type AuctionViewMode = 'seller' | 'user';
-
-export async function getAuctionByIdAction(
-  id: string,
-  mode: AuctionViewMode = 'user'
-): Promise<ApiResponse<AuctionDetail>> {
-  const fn =
-    mode === 'seller'
-      ? auctionService.getAuctionForSeller
-      : auctionService.getAuctionForUser;
-  const res = await fn(id);
-  if (res.success && res.data) {
-    return { success: true, data: res.data.auction };
-  }
-  return {
-    success: res.success,
-    data: null,
-    error: res.error,
-  };
-}
-
-export async function getAuctionWithRoomAction(
-  id: string,
-  mode: AuctionViewMode
-): Promise<ApiResponse<AuctionWithRoom>> {
-  const fn =
-    mode === 'seller'
-      ? auctionService.getAuctionForSeller
-      : auctionService.getAuctionForUser;
-  return fn(id);
-}
-
-export async function placeBidAction(
-  auctionId: string,
-  amount: number
-): Promise<
-  ApiResponse<{
-    id: string;
-    auctionId: string;
-    userId: string;
-    amount: number;
-    createdAt: string;
-  }>
-> {
-  return auctionService.placeBid(auctionId, amount);
-}
-
-export async function updateAuctionAction(
-  id: string,
-  input: UpdateAuctionInput
-): Promise<ApiResponse<UpdateAuctionOutput>> {
-  return auctionService.update(id, input);
-}
-
-export async function publishAuctionAction(
-  id: string
-): Promise<ApiResponse<{ id: string; status: string }>> {
-  return auctionService.publish(id);
-}
-
-export async function endAuctionAction(
-  id: string
-): Promise<ApiResponse<{ id: string; status: string }>> {
-  return auctionService.end(id);
+): Promise<ApiResponse<IGetAllSellerAuctionsResponse>> {
+  const cookieStore = await cookies();
+  return auctionService.create(input, cookieStore);
 }
 
 export async function generateAuctionUploadUrlAction({
@@ -112,4 +35,68 @@ export async function generateAuctionUploadUrlAction({
     fileName,
     fileSize,
   });
+}
+
+export async function getSellerAuctionsAction(
+  filter: IGetAllSellerAuctionsFilter
+): Promise<ApiResponse<IGetAllSellerAuctionsResponse>> {
+  const cookieStore = await cookies();
+  return auctionService.getSellerAuctions(cookieStore, filter);
+}
+
+export async function getSellerAuctionByIdAction(
+  id: string
+): Promise<ApiResponse<IAuctionDto>> {
+  const cookieStore = await cookies();
+  return auctionService.getSellerAuctionById(cookieStore, id);
+}
+
+export async function getLatestAuctionsAction(
+  limit: number
+): Promise<ApiResponse<IGetBrowseAuctionsResponse>> {
+  const cookieStore = await cookies();
+  return auctionService.getLatestAuctions(cookieStore, limit);
+}
+
+export async function getBrowseAuctionsAction(
+  filter: IGetBrowseAuctionsFilter
+): Promise<ApiResponse<IGetBrowseAuctionsResponse>> {
+  const cookieStore = await cookies();
+  return auctionService.getBrowseAuctions(cookieStore, filter);
+}
+
+export async function updateSellerAuctionDraftAction(
+  id: string,
+  input: UpdateAuctionDraftInput
+): Promise<ApiResponse<{ id: string }>> {
+  const cookieStore = await cookies();
+  return auctionService.updateSellerAuctionDraft(cookieStore, id, input);
+}
+
+export async function publishSellerAuctionAction(
+  id: string
+): Promise<ApiResponse<{ id: string; status: string }>> {
+  const cookieStore = await cookies();
+  return auctionService.publishSellerAuction(cookieStore, id);
+}
+
+export async function pauseAuctionAction(
+  id: string
+): Promise<ApiResponse<{ id: string; status: string }>> {
+  const cookieStore = await cookies();
+  return auctionService.pauseAuction(cookieStore, id);
+}
+
+export async function resumeAuctionAction(
+  id: string
+): Promise<ApiResponse<{ id: string; status: string }>> {
+  const cookieStore = await cookies();
+  return auctionService.resumeAuction(cookieStore, id);
+}
+
+export async function endAuctionAction(
+  id: string
+): Promise<ApiResponse<{ id: string; status: string }>> {
+  const cookieStore = await cookies();
+  return auctionService.endAuction(cookieStore, id);
 }

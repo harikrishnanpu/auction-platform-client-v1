@@ -5,10 +5,10 @@ export function FeaturesSection() {
     <section className="mb-24" id="features">
       <div className="flex flex-col md:flex-row justify-between items-end mb-12">
         <div className="max-w-2xl">
-          <h2 className="text-3xl md:text-4xl   font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-2xl md:text-3xl   font-semibold text-gray-900 dark:text-white mb-3">
             Engineered for Peak Performance
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
             Everything you need to run professional auctions at scale.
           </p>
         </div>
@@ -26,15 +26,15 @@ export function FeaturesSection() {
         {features.map((feature, idx) => (
           <div
             key={idx}
-            className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all"
+            className="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all"
           >
             <div className="mb-4 flex justify-center md:justify-start">
               {feature.icon}
             </div>
-            <h4 className="text-xl   font-bold text-gray-900 dark:text-white mb-2">
+            <h4 className="text-lg   font-semibold text-gray-900 dark:text-white mb-1.5">
               {feature.title}
             </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
               {feature.desc}
             </p>
           </div>

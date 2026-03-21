@@ -29,6 +29,7 @@ import { SellerInfo } from '@/services/admin/admin.service';
 import { toast } from 'sonner';
 import { AuthProvider, UserRole, UserStatus } from '@/types/user.type';
 import { KycStatusEnum } from '@/types/kyc.type';
+import { KycDocumentViewerModal } from './kyc-document-viewer-modal';
 
 const S3_BASE =
   'https://hammer-down-auction-platform.s3.ap-south-1.amazonaws.com';
@@ -140,6 +141,8 @@ export function SellerDetailView() {
   const [kycAction, setKycAction] = useState<'approve' | 'reject' | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [kycLoading, setKycLoading] = useState(false);
+  const [docOpen, setDocOpen] = useState(false);
+  const [activeDocId, setActiveDocId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!params.id) return;
@@ -299,6 +302,7 @@ export function SellerDetailView() {
   const canActOnKyc =
     kycStatus === KycStatusEnum.SUBMITTED ||
     kycStatus === KycStatusEnum.PENDING;
+  const activeDoc = kyc?.documents?.find((d) => d.id === activeDocId) ?? null;
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
@@ -510,11 +514,13 @@ export function SellerDetailView() {
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {kyc.documents.map((doc) => (
-                      <a
+                      <button
                         key={doc.id}
-                        href={`${S3_BASE}/${doc.documentUrl}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        type="button"
+                        onClick={() => {
+                          setActiveDocId(doc.id);
+                          setDocOpen(true);
+                        }}
                         className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:bg-accent transition group"
                       >
                         <FileText
@@ -530,7 +536,7 @@ export function SellerDetailView() {
                         >
                           {doc.documentStatus}
                         </span>
-                      </a>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -687,6 +693,15 @@ export function SellerDetailView() {
           </div>
         </div>
       )}
+
+      <KycDocumentViewerModal
+        isOpen={docOpen}
+        doc={activeDoc}
+        onClose={() => {
+          setDocOpen(false);
+          setActiveDocId(null);
+        }}
+      />
     </div>
   );
 }

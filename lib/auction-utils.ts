@@ -1,26 +1,4 @@
-import type { AuctionStatus, AuctionType } from '@/types/auction.type';
-
-const S3_BASE =
-  process.env.NEXT_PUBLIC_S3_BASE ??
-  'https://hammer-down-auction-platform.s3.ap-south-1.amazonaws.com';
-
-export function getAuctionImageUrl(key?: string | null): string {
-  if (!key) return 'https://placehold.co/200x200?text=Auction';
-  if (key.startsWith('http')) return key;
-  return `${S3_BASE}/${key}`;
-}
-
-export function getAuctionStatusLabel(status: string): string {
-  const map: Record<string, string> = {
-    DRAFT: 'Draft',
-    ACTIVE: 'Active',
-    ENDED: 'Ended',
-    SOLD: 'Sold',
-    CANCELLED: 'Cancelled',
-    UPCOMING: 'Upcoming',
-  };
-  return map[status] ?? status;
-}
+import type { AuctionType, IAuctionDto } from '@/types/auction.type';
 
 export function getAuctionTypeLabel(type: AuctionType): string {
   const map: Record<AuctionType, string> = {
@@ -31,22 +9,45 @@ export function getAuctionTypeLabel(type: AuctionType): string {
   return map[type] ?? type;
 }
 
-export function getBrowseStatusLabel(status: AuctionStatus): string {
-  if (status === 'ACTIVE') return 'Live';
-  if (status === 'ENDED' || status === 'SOLD') return 'Ended';
-  return getAuctionStatusLabel(status);
+/** Category name from nested DTO (defensive for partial API payloads). */
+export function getAuctionCategoryName(auction: IAuctionDto): string {
+  const c = auction.category;
+  if (c && typeof c === 'object' && typeof c.name === 'string' && c.name.trim())
+    return c.name.trim();
+  return '—';
 }
 
-export const AUCTION_CATEGORIES = [
-  'Watches',
-  'Textiles',
-  'Collectibles',
-  'Accessories',
-  'Jewelry',
-  'Art',
-  'Antiques',
-  'Other',
-] as const;
+export function formatAuctionDateTime(value: unknown): string {
+  const d = value instanceof Date ? value : new Date(String(value));
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+export function formatAuctionPrice(
+  amount: number,
+  currency: string = 'INR'
+): string {
+  return new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+const AUCTION_ASSET_BASE_URL =
+  'https://hammer-down-auction-platform.s3.ap-south-1.amazonaws.com';
+
+export function getAuctionAssetUrl(fileKey?: string): string {
+  if (!fileKey) return '';
+  if (fileKey.startsWith('http')) return fileKey;
+  return `${AUCTION_ASSET_BASE_URL}/${fileKey}`;
+}
 
 export const AUCTION_CONDITIONS = [
   'New',

@@ -1,32 +1,36 @@
-'use client';
+import { getAuctionCategoriesForSellerAction } from '@/actions/auction-category/auction-category.actions';
+import { getSellerAuctionByIdAction } from '@/actions/auction/auction.actions';
+import { SellerAuctionEditDraftContainer } from '@/modules/seller/auction/components/seller-auction-edit-draft-container';
 
-import { use } from 'react';
-import { EditDraftAuctionForm } from '@/modules/seller/auction/components/edit-draft-auction-form';
-
-export default function EditSellerAuctionPage({
+export default async function EditSellerAuctionPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const resolvedParams = use(params);
+  const resolvedParams = await params;
   const id = resolvedParams.id;
 
-  if (!id) return null;
+  const auctionRes = await getSellerAuctionByIdAction(id);
+  if (!auctionRes.success || !auctionRes.data) return null;
+
+  if (auctionRes.data.status !== 'DRAFT') {
+    // Only draft auctions can be edited.
+    return null;
+  }
+
+  const categoriesRes = await getAuctionCategoriesForSellerAction();
+  const categories = categoriesRes.success
+    ? (categoriesRes.data?.categories ?? [])
+    : [];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold font-serif text-slate-900 dark:text-white">
-            Edit Draft Auction
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Update the details of your draft auction. Media files cannot be
-            modified after initial creation.
-          </p>
-        </div>
-        <EditDraftAuctionForm auctionId={id} />
-      </main>
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-5xl px-3 py-6">
+        <SellerAuctionEditDraftContainer
+          auction={auctionRes.data}
+          categories={categories}
+        />
+      </div>
     </div>
   );
 }

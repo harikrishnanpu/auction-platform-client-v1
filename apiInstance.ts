@@ -35,15 +35,16 @@ export const API_ENDPOINTS = {
 
   auction: {
     create: '/auction',
-    getSellerAuctions: '/auction',
-    getBrowse: '/auction/browse',
-    getAuctionForSeller: (id: string) => `/auction/seller/${id}`,
-    getAuctionForUser: (id: string) => `/auction/user/${id}`,
-    placeBid: (id: string) => `/auction/${id}/bid`,
-    update: (id: string) => `/auction/${id}`,
-    publish: (id: string) => `/auction/${id}/publish`,
-    end: (id: string) => `/auction/${id}/end`,
     generateUploadUrl: '/auction/upload-url',
+    getAuctionCategories: '/auction/categories',
+    getAuctionById: (id: string) => `/auction/${id}`,
+    updateAuction: (id: string) => `/auction/${id}`,
+    publishAuction: (id: string) => `/auction/${id}/publish`,
+    pauseAuction: (id: string) => `/auction/${id}/pause`,
+    resumeAuction: (id: string) => `/auction/${id}/resume`,
+    endAuction: (id: string) => `/auction/${id}/end`,
+    getLatestAuctions: '/auction/auctions/latest',
+    getBrowseAuctions: '/auction/auctions',
   },
 
   admin: {
@@ -54,6 +55,26 @@ export const API_ENDPOINTS = {
     getAdminSeller: '/admin/sellers',
     approveSellerKyc: '/admin/sellers',
     rejectSellerKyc: '/admin/sellers',
+    viewKycDocument: (documentId: string) => `/admin/kyc/${documentId}/view`,
+    updateAuctionCategory: (categoryId: string) =>
+      `/admin/auction-categories/${categoryId}`,
+    createAuctionCategory: '/admin/auction-categories',
+    approveAuctionCategoryRequest: (requestId: string) =>
+      `/admin/auction-categories/${requestId}/approve`,
+    rejectAuctionCategoryRequest: (requestId: string) =>
+      `/admin/auction-categories/${requestId}/reject`,
+    getAdminAuctions: '/admin/auctions',
+    ChangeAuctionCategoryStatus: (categoryId: string) =>
+      `/admin/auction-categories/${categoryId}/status`,
+    getAuctionCategoryRequests: '/admin/category-requests',
+    getAllAuctionCategories: '/admin/auction-categories',
+  },
+
+  seller: {
+    getAllSellerAuctionCategoryRequests: '/seller/auction-category-requests',
+    requestAuctionCategory: '/seller/auction-category/request',
+    getSellerAuctions: '/seller/auctions',
+    getSellerAuctionById: (id: string) => `/seller/auctions/${id}`,
   },
 } as const;
 

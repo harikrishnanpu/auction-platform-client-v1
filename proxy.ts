@@ -24,7 +24,7 @@ export async function proxy(request: NextRequest) {
 
   const response = await authGetSesssion();
 
-  console.log('response/proxy/auth/me', response);
+  // console.log('response/proxy/auth/me', response);
 
   const isLoggedIn = response.success;
   const isAdmin = response.data?.roles?.includes(UserRole.ADMIN);

@@ -1,4 +1,4 @@
-import { ProfileView } from '@/modules/profile/components/profile-view';
+import { ProfileView } from '@/modules/user/profile/components/profile-view';
 
 export default async function ProfilePage() {
   return (

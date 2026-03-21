@@ -1,21 +1,24 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+
 import {
   createAuctionAction,
   generateAuctionUploadUrlAction,
 } from '@/actions/auction/auction.actions';
-import type { AuctionType } from '@/types/auction.type';
-import type { AuctionAssetForm } from '@/types/auction.type';
+import type { AuctionAssetForm, AuctionType } from '@/types/auction.type';
 import { getErrorMessage } from '@/utils/get-app-error';
-import { toast } from 'sonner';
+import { datetimeLocalToISO } from '@/lib/datetime-local';
 import {
   createAuctionFormSchema,
   type CreateAuctionFormValues,
 } from '../schemas/create-auction.schema';
+
+const VALID_TYPES: AuctionType[] = ['LONG', 'LIVE', 'SEALED'];
 
 export interface PendingAsset {
   file: File;
@@ -23,14 +26,13 @@ export interface PendingAsset {
   position: number;
   assetType: 'IMAGE' | 'VIDEO';
   status: 'idle' | 'uploading' | 'done' | 'error';
+  previewUrl: string;
 }
-
-const VALID_TYPES: AuctionType[] = ['LONG', 'LIVE', 'SEALED'];
 
 const defaultValues: CreateAuctionFormValues = {
   title: '',
   description: '',
-  category: '',
+  categoryId: '',
   condition: '',
   startPrice: 0,
   minIncrement: 0,
@@ -61,11 +63,28 @@ export function useCreateAuctionForm() {
     mode: 'onBlur',
   });
 
+  useEffect(() => {
+    return () => {
+      assets.forEach((asset) => {
+        if (asset.previewUrl) URL.revokeObjectURL(asset.previewUrl);
+      });
+    };
+  }, [assets]);
+
+  const categoryValue = form.watch('categoryId');
+
   const handleSelectType = useCallback(
     (type: AuctionType) => {
       router.replace(`/seller/auction/create?type=${type}`);
     },
     [router]
+  );
+
+  const handleCategoryChange = useCallback(
+    (value: string) => {
+      form.setValue('categoryId', value, { shouldValidate: true });
+    },
+    [form]
   );
 
   const handleAddFiles = useCallback(
@@ -77,13 +96,16 @@ export function useCreateAuctionForm() {
       if (valid.length !== files.length) {
         toast.error('Only JPEG, PNG, WebP images and MP4 video are allowed.');
       }
+
       const newAssets: PendingAsset[] = valid.map((file, i) => ({
         file,
         fileKey: '',
         position: assets.length + i,
         assetType: file.type.startsWith('video/') ? 'VIDEO' : 'IMAGE',
         status: 'idle',
+        previewUrl: URL.createObjectURL(file),
       }));
+
       setAssets((prev) => [...prev, ...newAssets]);
       e.target.value = '';
     },
@@ -97,9 +119,11 @@ export function useCreateAuctionForm() {
         if (next[index]) next[index] = { ...next[index], status: 'uploading' };
         return next;
       });
+
       setUploadError(null);
       const item = assets[index];
       if (!item || item.status !== 'idle' || item.fileKey) return;
+
       try {
         const urlRes = await generateAuctionUploadUrlAction({
           contentType: item.file.type,
@@ -115,7 +139,9 @@ export function useCreateAuctionForm() {
           headers: { 'Content-Type': item.file.type },
           body: item.file,
         });
+
         if (!putRes.ok) throw new Error('Upload to storage failed');
+
         setAssets((prev) => {
           const next = [...prev];
           if (next[index])
@@ -135,21 +161,35 @@ export function useCreateAuctionForm() {
   );
 
   const removeAsset = useCallback((index: number) => {
-    setAssets((prev) => prev.filter((_, i) => i !== index));
+    setAssets((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      const removed = prev[index];
+      if (removed?.previewUrl) URL.revokeObjectURL(removed.previewUrl);
+      return next;
+    });
   }, []);
 
   const onSubmit = useCallback(
     async (data: CreateAuctionFormValues) => {
+      form.clearErrors('root');
       if (!auctionType) return;
+
       const withKeys = assets.filter((a) => a.fileKey);
+
       if (assets.length > 0 && withKeys.length === 0) {
-        toast.error('Please upload all selected files first.');
+        const msg = 'Please upload all selected files first.';
+        toast.error(msg);
+        form.setError('root', { message: msg });
         return;
       }
+
       if (assets.some((a) => a.status === 'uploading')) {
-        toast.error('Please wait for uploads to finish.');
+        const msg = 'Please wait for uploads to finish.';
+        toast.error(msg);
+        form.setError('root', { message: msg });
         return;
       }
+
       const assetDtos: AuctionAssetForm[] = assets
         .filter((a) => a.fileKey)
         .map((a) => ({
@@ -157,48 +197,62 @@ export function useCreateAuctionForm() {
           position: a.position,
           assetType: a.assetType,
         }));
+
+      if (assetDtos.length === 0) {
+        const msg = 'At least one image or video is required.';
+        toast.error(msg);
+        form.setError('root', { message: msg });
+        return;
+      }
+
       try {
         const result = await createAuctionAction({
           auctionType,
           title: data.title.trim(),
           description: data.description?.trim() ?? '',
-          category: data.category.trim(),
+          categoryId: data.categoryId.trim(),
           condition: data.condition.trim(),
           startPrice: data.startPrice,
           minIncrement: data.minIncrement,
-          startAt: new Date(data.startAt).toISOString(),
-          endAt: new Date(data.endAt).toISOString(),
+          startAt: datetimeLocalToISO(data.startAt),
+          endAt: datetimeLocalToISO(data.endAt),
           antiSnipSeconds: data.antiSnipSeconds,
           maxExtensionCount: data.maxExtensionCount,
           bidCooldownSeconds: data.bidCooldownSeconds,
           assets: assetDtos.length ? assetDtos : undefined,
         });
+
         if (!result.success || !result.data) {
-          form.setError('root', {
-            message: result.error ?? 'Failed to create auction',
-          });
+          const msg = result.error ?? 'Failed to create auction';
+          form.setError('root', { message: msg });
+          toast.error(msg);
           return;
         }
+
         toast.success('Auction created as draft.');
         router.push(`/seller/auction/${result.data.id}`);
       } catch (err) {
-        form.setError('root', {
-          message: getErrorMessage(err) ?? 'Something went wrong',
-        });
+        const msg = getErrorMessage(err) ?? 'Something went wrong';
+        form.setError('root', { message: msg });
+        toast.error(msg);
       }
     },
-    [auctionType, assets, form, router]
+    [assets, auctionType, form, router]
   );
+
+  const submit = useMemo(() => form.handleSubmit(onSubmit), [form, onSubmit]);
 
   return {
     form,
     auctionType,
+    categoryValue,
     assets,
     uploadError,
     handleSelectType,
+    handleCategoryChange,
     handleAddFiles,
     uploadOne,
     removeAsset,
-    onSubmit,
+    submit,
   };
 }
