@@ -11,6 +11,11 @@ import type { AuctionCategory } from '@/types/auction.type';
 import { useCreateAuctionForm } from '../hooks/use-create-auction-form';
 import { AuctionTypeSelector } from './auction-type-selector';
 import { SellerCategorySelect } from './category-select';
+import {
+  AuctionBidRuleThreeColumnFields,
+  sealedBidInputProps,
+} from './auction-bid-rule-fields';
+import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 export function CreateAuctionContainer({
@@ -36,6 +41,9 @@ export function CreateAuctionContainer({
     register,
     formState: { errors, isSubmitting },
   } = form;
+
+  const isSealed = auctionType === 'SEALED';
+  const sealedField = sealedBidInputProps(isSealed, isSubmitting);
 
   if (!auctionType) {
     return (
@@ -187,9 +195,16 @@ export function CreateAuctionContainer({
                     type="number"
                     step="any"
                     {...register('minIncrement')}
-                    placeholder="0"
-                    className="mt-1"
+                    placeholder={isSealed ? '0' : undefined}
+                    readOnly={sealedField.readOnly}
+                    disabled={sealedField.disabled}
+                    className={cn('mt-1', sealedField.className)}
                   />
+                  {isSealed ? (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Not used for sealed auctions (sent as 0).
+                    </p>
+                  ) : null}
                   {errors.minIncrement && (
                     <p className="text-destructive text-xs mt-1">
                       {errors.minIncrement.message}
@@ -227,61 +242,12 @@ export function CreateAuctionContainer({
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="antiSnipSeconds">Anti-snip (seconds)</Label>
-                  <Input
-                    id="antiSnipSeconds"
-                    type="number"
-                    step={1}
-                    {...register('antiSnipSeconds')}
-                    placeholder="60"
-                    className="mt-1"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Extend end time if bid in last N seconds
-                  </p>
-                  {errors.antiSnipSeconds && (
-                    <p className="text-destructive text-xs mt-1">
-                      {errors.antiSnipSeconds.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="maxExtensionCount">Max extensions</Label>
-                  <Input
-                    id="maxExtensionCount"
-                    type="number"
-                    step={1}
-                    {...register('maxExtensionCount')}
-                    placeholder="3"
-                    className="mt-1"
-                  />
-                  {errors.maxExtensionCount && (
-                    <p className="text-destructive text-xs mt-1">
-                      {errors.maxExtensionCount.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="bidCooldownSeconds">
-                    Bid cooldown (seconds)
-                  </Label>
-                  <Input
-                    id="bidCooldownSeconds"
-                    type="number"
-                    step={1}
-                    {...register('bidCooldownSeconds')}
-                    placeholder="10"
-                    className="mt-1"
-                  />
-                  {errors.bidCooldownSeconds && (
-                    <p className="text-destructive text-xs mt-1">
-                      {errors.bidCooldownSeconds.message}
-                    </p>
-                  )}
-                </div>
-              </div>
+              <AuctionBidRuleThreeColumnFields
+                register={register}
+                errors={errors}
+                isSealed={isSealed}
+                submitting={isSubmitting}
+              />
             </CardContent>
           </Card>
 
