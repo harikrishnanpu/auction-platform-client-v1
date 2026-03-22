@@ -3,10 +3,17 @@ import { z } from 'zod';
 export const changePasswordSchema = z
   .object({
     otp: z.string().length(6, 'OTP must be 6 digits'),
-    oldPassword: z.string().optional(),
-    newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+    oldPassword: z
+      .string()
+      .trim()
+      .min(6, 'Password must be at least 6 characters'),
+    newPassword: z
+      .string()
+      .trim()
+      .min(6, 'Password must be at least 6 characters'),
     confirmPassword: z
       .string()
+      .trim()
       .min(6, 'Password must be at least 6 characters'),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
@@ -14,4 +21,4 @@ export const changePasswordSchema = z
     path: ['confirmPassword'],
   });
 
-export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
+export type ZodChangePasswordFormValues = z.infer<typeof changePasswordSchema>;

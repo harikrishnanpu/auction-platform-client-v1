@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { Camera, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { AuthProvider, UserInfo as User } from '@/types/user.type';
+import { AuthProvider, IUser as User } from '@/types/user.type';
 import { getErrorMessage } from '@/utils/get-app-error';
 import {
   getAvatarUploadUrlAction,
@@ -22,21 +22,22 @@ export function AvatarUpload({ user, onUploadSuccess }: AvatarUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size must be less than 5MB');
-      return;
-    }
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Only image files are allowed');
-      return;
-    }
-
-    setUploading(true);
     try {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        toast.error('Only image files are allowed');
+        return;
+      }
+
+      setUploading(true);
+
       const response = await getAvatarUploadUrlAction({
         contentType: file.type,
         fileName: file.name,
@@ -64,14 +65,15 @@ export function AvatarUpload({ user, onUploadSuccess }: AvatarUploadProps) {
       const updateResponse = await updateAvatarAction(fileKey);
 
       if (!updateResponse.success || !updateResponse.data) {
+        console.log('ERROR IN UPDATE AVATAR', updateResponse);
         toast.error(updateResponse.error || 'Failed to update avatar');
         return;
       }
 
       onUploadSuccess(updateResponse.data.user);
     } catch (error: unknown) {
-      const errorMessage = getErrorMessage(error) || 'Failed to upload avatar';
-      toast.error(errorMessage);
+      console.log('ERROR IN AVATAR UPLOAD', error);
+      toast.error(getErrorMessage(error) || 'Failed to upload avatar');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

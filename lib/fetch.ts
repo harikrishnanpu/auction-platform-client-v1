@@ -5,8 +5,8 @@ import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adap
 export const apiFetch = async <T>(
   url: string,
   options: RequestInit,
-  cookies: ReadonlyRequestCookies,
-  cache: RequestCache = 'no-store'
+  cookies?: ReadonlyRequestCookies | null,
+  cache?: RequestCache
 ): Promise<ApiResponse<T>> => {
   console.log('OPTIONS', options);
 
@@ -17,11 +17,11 @@ export const apiFetch = async <T>(
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
-        Cookie: cookies.toString(),
+        Cookie: cookies?.toString() ?? '',
       },
       body: options.body ?? null,
       credentials: 'include',
-      cache: cache,
+      cache: cache ?? 'no-store',
     });
 
     if (!response.ok) {

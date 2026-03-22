@@ -97,7 +97,7 @@ export function useAuctionRoomSocket({
   useEffect(() => {
     if (!auctionId) return;
 
-    const socketBaseUrl = env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, '');
+    const socketBaseUrl = env.NEXT_PUBLIC_SOCKET_URL;
 
     const socket = io(socketBaseUrl, {
       withCredentials: true,

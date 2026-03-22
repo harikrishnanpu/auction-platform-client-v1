@@ -1,16 +1,17 @@
-import { ChangePasswordFormValues } from '@/modules/user/profile/schemes/changeprofilePassword.schema';
-import { EditProfileFormValues } from '@/modules/user/profile/schemes/editProfile.schema';
+'use server';
+import { ZodChangePasswordFormValues } from '@/modules/user/profile/schemes/changeprofilePassword.schema';
+import { ZodEditProfileFormValues } from '@/modules/user/profile/schemes/editProfile.schema';
 import { profileService } from '@/services/user/profile.service';
 import { ApiResponse } from '@/types/api.index';
-import { UserInfo } from '@/types/user.type';
+import { IUser } from '@/types/user.type';
 
-export const getProfileAction = async (): Promise<ApiResponse<UserInfo>> => {
+export const getProfileAction = async (): Promise<ApiResponse<IUser>> => {
   return await profileService.getProfile();
 };
 
 export const editProfileAction = async (
-  data: EditProfileFormValues
-): Promise<ApiResponse<{ user: UserInfo }>> => {
+  data: ZodEditProfileFormValues
+): Promise<ApiResponse<{ user: IUser }>> => {
   return await profileService.editProfile(data);
 };
 
@@ -21,7 +22,7 @@ export const sendProfileChangePasswordOtpAction = async (): Promise<
 };
 
 export const changeProfilePasswordAction = async (
-  data: ChangePasswordFormValues
+  data: ZodChangePasswordFormValues
 ): Promise<ApiResponse<null>> => {
   return await profileService.changeProfilePassword(data);
 };
@@ -57,6 +58,6 @@ export const uploadAvatarAction = async (
 
 export const updateAvatarAction = async (
   fileKey: string
-): Promise<ApiResponse<{ user: UserInfo }>> => {
+): Promise<ApiResponse<{ user: IUser }>> => {
   return await profileService.updateAvatar(fileKey);
 };

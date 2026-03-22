@@ -43,7 +43,7 @@ export const API_ENDPOINTS = {
     pauseAuction: (id: string) => `/auction/${id}/pause`,
     resumeAuction: (id: string) => `/auction/${id}/resume`,
     endAuction: (id: string) => `/auction/${id}/end`,
-    getLatestAuctions: '/auction/auctions/latest',
+    getLatestAuctions: '/auction/auctions',
     getBrowseAuctions: '/auction/auctions',
   },
 

@@ -1,129 +1,60 @@
 import { API_ENDPOINTS, buildApiUrl } from '@/apiInstance';
-import { ChangePasswordFormValues } from '@/modules/user/profile/schemes/changeprofilePassword.schema';
-import { EditProfileFormValues } from '@/modules/user/profile/schemes/editProfile.schema';
+import { apiFetch } from '@/lib/fetch';
+import { ZodChangePasswordFormValues } from '@/modules/user/profile/schemes/changeprofilePassword.schema';
+import { ZodEditProfileFormValues } from '@/modules/user/profile/schemes/editProfile.schema';
 import { ApiResponse } from '@/types/api.index';
-import { UserInfo } from '@/types/user.type';
+import { IUser } from '@/types/user.type';
 import { getErrorMessage } from '@/utils/get-app-error';
+import { cookies } from 'next/headers';
 
 export const profileService = {
-  getProfile: async (): Promise<ApiResponse<UserInfo>> => {
-    try {
-      const response = await fetch(buildApiUrl(API_ENDPOINTS.user.profile));
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-
-      return response.json();
-    } catch (error) {
-      return { success: false, data: null, error: getErrorMessage(error) };
-    }
+  getProfile: async (): Promise<ApiResponse<IUser>> => {
+    const cookieStorage = await cookies();
+    return await apiFetch<IUser>(
+      buildApiUrl(API_ENDPOINTS.user.profile),
+      { method: 'GET' },
+      cookieStorage
+    );
   },
 
   editProfile: async (
-    data: EditProfileFormValues
-  ): Promise<ApiResponse<{ user: UserInfo }>> => {
-    try {
-      const response = await fetch(
-        buildApiUrl(API_ENDPOINTS.user.editProfile),
-        {
-          method: 'PUT',
-          body: JSON.stringify(data),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-
-      const responseData = await response.json();
-
-      return { success: true, data: responseData.data };
-    } catch (error: unknown) {
-      return { success: false, data: null, error: getErrorMessage(error) };
-    }
+    data: ZodEditProfileFormValues
+  ): Promise<ApiResponse<{ user: IUser }>> => {
+    const cookieStorage = await cookies();
+    return await apiFetch<{ user: IUser }>(
+      buildApiUrl(API_ENDPOINTS.user.editProfile),
+      { method: 'PUT', body: JSON.stringify(data) },
+      cookieStorage
+    );
   },
 
   sendProfileChangePasswordOtp: async (): Promise<ApiResponse<null>> => {
-    try {
-      const response = await fetch(
-        buildApiUrl(API_ENDPOINTS.user.sendProfileChangePasswordOtp),
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-
-      return response.json();
-    } catch (error: unknown) {
-      return { success: false, data: null, error: getErrorMessage(error) };
-    }
+    const cookieStorage = await cookies();
+    return await apiFetch<null>(
+      buildApiUrl(API_ENDPOINTS.user.sendProfileChangePasswordOtp),
+      { method: 'POST' },
+      cookieStorage
+    );
   },
 
   changeProfilePassword: async (
-    data: ChangePasswordFormValues
+    data: ZodChangePasswordFormValues
   ): Promise<ApiResponse<null>> => {
-    try {
-      const response = await fetch(
-        buildApiUrl(API_ENDPOINTS.user.changeProfilePassword),
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-
-      return response.json();
-    } catch (error: unknown) {
-      return { success: false, data: null, error: getErrorMessage(error) };
-    }
+    const cookieStorage = await cookies();
+    return await apiFetch<null>(
+      buildApiUrl(API_ENDPOINTS.user.changeProfilePassword),
+      { method: 'PUT', body: JSON.stringify(data) },
+      cookieStorage
+    );
   },
 
   editProfileSendOtp: async (): Promise<ApiResponse<null>> => {
-    try {
-      const response = await fetch(
-        buildApiUrl(API_ENDPOINTS.user.editProfileSendOtp),
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-
-      return { success: true, data: null };
-    } catch (error: unknown) {
-      return { success: false, data: null, error: getErrorMessage(error) };
-    }
+    const cookieStorage = await cookies();
+    return await apiFetch<null>(
+      buildApiUrl(API_ENDPOINTS.user.editProfileSendOtp),
+      { method: 'POST' },
+      cookieStorage
+    );
   },
 
   getAvatarUploadUrl: async ({
@@ -135,34 +66,15 @@ export const profileService = {
     fileName: string;
     fileSize: number;
   }): Promise<ApiResponse<{ uploadUrl: string; fileKey: string }>> => {
-    try {
-      const response = await fetch(
-        buildApiUrl(API_ENDPOINTS.user.getAvatarUploadUrl),
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            contentType: contentType,
-            fileName: fileName,
-            fileSize: fileSize,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-
-      const responseData = await response.json();
-
-      return { success: true, data: responseData.data };
-    } catch (error: unknown) {
-      return { success: false, data: null, error: getErrorMessage(error) };
-    }
+    const cookieStorage = await cookies();
+    return await apiFetch<{ uploadUrl: string; fileKey: string }>(
+      buildApiUrl(API_ENDPOINTS.user.getAvatarUploadUrl),
+      {
+        method: 'POST',
+        body: JSON.stringify({ contentType, fileName, fileSize }),
+      },
+      cookieStorage
+    );
   },
 
   uploadAvatar: async (
@@ -191,32 +103,12 @@ export const profileService = {
 
   updateAvatar: async (
     fileKey: string
-  ): Promise<ApiResponse<{ user: UserInfo }>> => {
-    try {
-      const response = await fetch(
-        buildApiUrl(API_ENDPOINTS.user.updateAvatar),
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            fileKey: fileKey,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-
-      const responseData = await response.json();
-
-      return { success: true, data: responseData.data };
-    } catch (error: unknown) {
-      return { success: false, data: null, error: getErrorMessage(error) };
-    }
+  ): Promise<ApiResponse<{ user: IUser }>> => {
+    const cookieStorage = await cookies();
+    return await apiFetch<{ user: IUser }>(
+      buildApiUrl(API_ENDPOINTS.user.updateAvatar),
+      { method: 'PUT', body: JSON.stringify({ fileKey }) },
+      cookieStorage
+    );
   },
 };
