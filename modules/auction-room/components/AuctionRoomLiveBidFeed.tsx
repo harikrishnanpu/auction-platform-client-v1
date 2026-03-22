@@ -9,7 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { formatAuctionDateTime, formatAuctionPrice } from '@/lib/auction-utils';
+import {
+  formatAuctionDateTime,
+  formatAuctionPrice,
+} from '@/utils/auction-utils';
 import { cn } from '@/lib/utils';
 
 import type {

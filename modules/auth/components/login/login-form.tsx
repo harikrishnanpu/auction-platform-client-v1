@@ -30,7 +30,9 @@ const LoginForm = () => {
 
   const params = useSearchParams();
   const errorParam = params.get('error');
+
   const isBlockedError = errorParam === 'blocked';
+
   const errorDisplayMessage = isBlockedError
     ? BLOCKED_MESSAGE
     : (errorParam ?? '');

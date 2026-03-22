@@ -9,7 +9,7 @@ import {
   getAuctionCategoryName,
   getAuctionAssetUrl,
   getAuctionTypeLabel,
-} from '@/lib/auction-utils';
+} from '@/utils/auction-utils';
 import type { AuctionStatus, IAuctionDto } from '@/types/auction.type';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';

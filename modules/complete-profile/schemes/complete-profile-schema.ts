@@ -16,4 +16,4 @@ export const completeProfileSchema = z.object({
     ),
 });
 
-export type CompleteProfileFormValues = z.infer<typeof completeProfileSchema>;
+export type ZodCompleteProfileValues = z.infer<typeof completeProfileSchema>;

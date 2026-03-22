@@ -12,7 +12,7 @@ import {
 } from '@/actions/auction/auction.actions';
 import type { AuctionAssetForm, AuctionType } from '@/types/auction.type';
 import { getErrorMessage } from '@/utils/get-app-error';
-import { datetimeLocalToISO } from '@/lib/datetime-local';
+import { datetimeLocalToISO } from '@/utils/datetime-local';
 import {
   createAuctionFormSchema,
   type CreateAuctionFormValues,

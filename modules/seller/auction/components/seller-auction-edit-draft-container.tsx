@@ -14,7 +14,7 @@ import type {
   IAuctionDto,
 } from '@/types/auction.type';
 import { SellerCategorySelect } from './category-select';
-import { AUCTION_CONDITIONS, getAuctionTypeLabel } from '@/lib/auction-utils';
+import { AUCTION_CONDITIONS, getAuctionTypeLabel } from '@/utils/auction-utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,7 +30,7 @@ import {
   generateAuctionUploadUrlAction,
 } from '@/actions/auction/auction.actions';
 import type { UpdateAuctionDraftInput } from '@/types/auction.type';
-import { isoToDatetimeLocal, datetimeLocalToISO } from '@/lib/datetime-local';
+import { isoToDatetimeLocal, datetimeLocalToISO } from '@/utils/datetime-local';
 import { getErrorMessage } from '@/utils/get-app-error';
 import type { AuctionAssetEditorItem } from './seller-auction-assets-editor';
 import { SellerAuctionAssetsEditor } from './seller-auction-assets-editor';

@@ -32,11 +32,17 @@ export const registerSchema = z.object({
       /^[a-zA-Z0-9\s,.\#'\/\-]+$/,
       'Address contains invalid characters (like $, %, etc.)'
     ),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z
+    .string()
+    .min(6, 'Password must be at least 6 characters')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+    ),
   avatar_url: z.string().optional(),
   terms: z.boolean().refine((val) => val === true, {
     message: 'You must agree to the terms and privacy policy',
   }),
 });
 
-export type RegisterFormValues = z.infer<typeof registerSchema>;
+export type ZodRegisterFormValues = z.infer<typeof registerSchema>;

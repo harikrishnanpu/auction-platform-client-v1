@@ -7,7 +7,7 @@ import type { IAuctionDto, AuctionType } from '@/types/auction.type';
 import {
   getAuctionCategoryName,
   getAuctionTypeLabel,
-} from '@/lib/auction-utils';
+} from '@/utils/auction-utils';
 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';

@@ -1,5 +1,5 @@
 import type { IAuctionDto } from '@/types/auction.type';
-import { getAuctionAssetUrl } from '@/lib/auction-utils';
+import { getAuctionAssetUrl } from '@/utils/auction-utils';
 
 export function auctionStatusLabel(status: string): string {
   switch (status) {

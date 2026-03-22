@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import type { IAuctionDto } from '@/types/auction.type';
-import { formatAuctionPrice } from '@/lib/auction-utils';
+import { formatAuctionPrice } from '@/utils/auction-utils';
 import { cn } from '@/lib/utils';
 
 type AuctionRoomBidPanelProps = {

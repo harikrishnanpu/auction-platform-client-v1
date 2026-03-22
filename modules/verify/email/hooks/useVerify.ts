@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   sendVerificationCodeAction,
   verifyEmailAction,
@@ -9,6 +9,7 @@ import {
 import { OTP_CHANNEL, OTP_PURPOSE } from '@/constants/auth/otp.constants';
 import { useLocalStorage } from '@/shared/hooks/useLocalStorage';
 import useUserStore from '@/store/user.store';
+import { verifyEmailSchema } from '../schemes/verify-email.schema';
 
 const RESEND_INTERVALS = [20, 40, 60, 120];
 
@@ -30,10 +31,11 @@ export const useVerify = ({
   const [success, setSuccess] = useState<string | null>(null);
 
   const TIMER_KEY = `verify_timer_${email}`;
-  const autoSentRef = useRef(false);
+  const isAutoSent = useRef(false);
   const { getValue, setValue, removeValue } = useLocalStorage();
 
   useEffect(() => {
+    if (!email) return;
     let targetTime: number;
     let count = 0;
 
@@ -67,76 +69,12 @@ export const useVerify = ({
     return () => clearInterval(timer);
   }, [email, TIMER_KEY, getValue, setValue]);
 
-  useEffect(() => {
-    if (!autoSend || !email || autoSentRef.current) return;
-    autoSentRef.current = true;
-
-    sendVerificationCodeAction({
-      email,
-      purpose: 'verification',
-      otp: '',
-    }).then((res) => {
-      if (res.success) {
-        setError(null);
-        setSuccess('A verification code has been sent to your email.');
-      } else {
-        setError(res.error || 'Failed to send verification OTP.');
-      }
-    });
-  }, [autoSend, email]);
-
-  const handleVerify = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    setError(null);
-    setSuccess(null);
-
-    if (otp.length !== 6) {
-      setError('Please enter the complete 6-digit code.');
-      return;
-    }
-
-    if (!email) {
-      setError('Email address is missing.');
-      return;
-    }
-
-    setIsVerifying(true);
-    try {
-      const res = await verifyEmailAction({
-        email,
-        otp,
-        purpose: OTP_PURPOSE.VERIFY_EMAIL,
-        channel: OTP_CHANNEL.EMAIL,
-      });
-
-      if (!res.success) {
-        setError(res.error || 'Verification failed. Please check your code.');
-        setIsVerifying(false);
-        return;
-      }
-
-      if (res.data?.user) {
-        setUser(res.data.user);
-      }
-
-      setSuccess('Email verified successfully! Redirecting...');
-      removeValue(TIMER_KEY);
-      setIsVerifying(false);
-      router.replace('/home');
-      router.refresh();
-    } catch {
-      setError('An unexpected error occurred. Please try again.');
-      setIsVerifying(false);
-    }
-  };
-
-  const handleResend = async () => {
+  const handleSendVerificationCode = useCallback(async () => {
     if (!email) return;
     try {
       const res = await sendVerificationCodeAction({
         email,
-        purpose: 'verification',
-        otp: '',
+        purpose: OTP_PURPOSE.VERIFY_EMAIL,
       });
 
       if (!res.success) {
@@ -165,11 +103,63 @@ export const useVerify = ({
     } catch {
       setError('Failed to resend OTP.');
     }
+  }, [email, TIMER_KEY, setValue, resendCount]);
+
+  useEffect(() => {
+    if (!autoSend || !email || isAutoSent.current) return;
+    isAutoSent.current = true;
+    const sendVerificationCode = async () => {
+      await handleSendVerificationCode();
+    };
+    sendVerificationCode();
+  }, [autoSend, email, handleSendVerificationCode]);
+
+  const handleVerify = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    setIsVerifying(true);
+
+    try {
+      const validateOtp = verifyEmailSchema.safeParse({
+        otp,
+        email,
+        purpose: OTP_PURPOSE.VERIFY_EMAIL,
+        channel: OTP_CHANNEL.EMAIL,
+      });
+
+      if (!validateOtp.success) {
+        setError(validateOtp.error.issues[0].message);
+        setIsVerifying(false);
+        return;
+      }
+
+      const res = await verifyEmailAction(validateOtp.data);
+
+      if (!res.success) {
+        setError(res.error || 'Verification failed. Please check your code.');
+        setIsVerifying(false);
+        return;
+      }
+
+      if (res.data?.user) {
+        setUser(res.data.user);
+      }
+
+      setSuccess('Email verified successfully! Redirecting...');
+      removeValue(TIMER_KEY);
+      setIsVerifying(false);
+      router.replace('/home');
+      router.refresh();
+    } catch {
+      setError('An unexpected error occurred. Please try again.');
+      setIsVerifying(false);
+    }
   };
 
   return {
     handleVerify,
-    handleResend,
+    handleSendVerificationCode,
     otp,
     setOtp,
     isVerifying,

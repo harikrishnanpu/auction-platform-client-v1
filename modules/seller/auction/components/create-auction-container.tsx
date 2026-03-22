@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AUCTION_CONDITIONS, getAuctionTypeLabel } from '@/lib/auction-utils';
+import { AUCTION_CONDITIONS, getAuctionTypeLabel } from '@/utils/auction-utils';
 import type { AuctionCategory } from '@/types/auction.type';
 import { useCreateAuctionForm } from '../hooks/use-create-auction-form';
 import { AuctionTypeSelector } from './auction-type-selector';

@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { formatAuctionDateTime } from '@/lib/auction-utils';
+import { formatAuctionDateTime } from '@/utils/auction-utils';
 import { cn } from '@/lib/utils';
 
 import type { IAuctionRoomParticipant } from '../../../socket/useAuctionRoomSocket';
