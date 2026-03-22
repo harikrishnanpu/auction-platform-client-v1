@@ -43,7 +43,6 @@ export function SellerListingSectionSkeleton() {
   );
 }
 
-/** Route loading + Suspense fallback: compact seller shell (no stat tiles). */
 export function SellerShellSkeleton() {
   return (
     <div className="min-h-[50vh] bg-background">
