@@ -18,6 +18,7 @@ import { logoutAction } from '@/actions/auth/auth.actions';
 import { useRouter } from 'next/navigation';
 import useUserStore from '@/store/user.store';
 import { AuthProvider } from '@/types/user.type';
+import { useNotifications } from '@/modules/user/notifications/hooks/use-notifications';
 
 export function DashboardHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,15 +26,14 @@ export function DashboardHeader() {
   const menuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const { user, setUser } = useUserStore();
+  const {
+    notifications,
+    unreadCount,
+    loading: notificationsLoading,
+    error: notificationsError,
+  } = useNotifications();
 
-  const userInitials = user?.name
-    ? user.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
-    : 'UN';
+  const userInitials = user?.name ? user.name.slice(0, 2).toUpperCase() : 'UN';
 
   const router = useRouter();
 
@@ -114,6 +114,11 @@ export function DashboardHeader() {
                 className="p-2 text-muted-foreground hover:bg-muted rounded-full relative transition-colors"
               >
                 <Bell size={20} />
+                {unreadCount > 0 ? (
+                  <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-red-500 px-1 text-center text-[10px] font-semibold leading-4 text-white">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                ) : null}
               </button>
               {isNotificationOpen && (
                 <div className="absolute right-0 mt-2 w-80 max-h-[400px] overflow-hidden bg-white dark:bg-slate-900 border border-border rounded-2xl shadow-2xl z-50 flex flex-col animate-in fade-in slide-in-from-top-2 duration-200">
@@ -128,6 +133,35 @@ export function DashboardHeader() {
                     >
                       View all
                     </Link>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notificationsLoading ? (
+                      <p className="px-4 py-3 text-sm text-muted-foreground">
+                        Loading notifications...
+                      </p>
+                    ) : notificationsError ? (
+                      <p className="px-4 py-3 text-sm text-red-500">
+                        {notificationsError}
+                      </p>
+                    ) : notifications.length === 0 ? (
+                      <p className="px-4 py-3 text-sm text-muted-foreground">
+                        No notifications yet.
+                      </p>
+                    ) : (
+                      notifications.slice(0, 8).map((notification) => (
+                        <div
+                          key={notification.id}
+                          className="border-b border-border px-4 py-3 last:border-b-0"
+                        >
+                          <p className="text-sm font-medium text-foreground">
+                            {notification.title}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {notification.message}
+                          </p>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
