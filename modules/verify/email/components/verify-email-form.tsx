@@ -25,45 +25,23 @@ export function VerifyEmailForm() {
   const emailParam = searchParams.get('email');
   const autoSend = searchParams.get('autoSend') === '1';
 
-  const zodVeifyemail = z.string().email();
+  const zodVeifyemail = z.email('Invalid email address');
 
-  const isValidEmail =
-    emailParam && zodVeifyemail.safeParse(emailParam).success;
-
-  const email = emailParam?.trim();
+  const validateEmail = zodVeifyemail.safeParse(emailParam);
+  const email = validateEmail.data;
 
   const {
     handleVerify,
-    handleResend,
+    handleSendVerificationCode,
     otp,
     setOtp,
     isVerifying,
     timeLeft,
     error,
     success,
-  } = useVerify({ email: email || '', autoSend });
+  } = useVerify({ email: email ?? '', autoSend });
 
-  if (!isValidEmail) {
-    return (
-      <Card className="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-3xl shadow-xl overflow-hidden fade-in relative z-10">
-        <CardHeader className="text-center pb-6 pt-8 md:pt-10">
-          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Email not found
-          </CardTitle>
-          <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            <Link
-              href="/login"
-              className="hover:underline text-black dark:text-white font-semibold flex items-center justify-center gap-2"
-            >
-              <ArrowLeft size={16} /> Go back to login
-            </Link>
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
-  if (!email) {
+  if (!validateEmail.success) {
     return (
       <Card className="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-3xl shadow-xl overflow-hidden fade-in relative z-10">
         <CardHeader className="text-center pb-6 pt-8 md:pt-10">
@@ -185,7 +163,7 @@ export function VerifyEmailForm() {
                 {"Didn't receive the code? "}
                 <button
                   type="button"
-                  onClick={handleResend}
+                  onClick={handleSendVerificationCode}
                   className="font-semibold hover:underline ml-1 text-black dark:text-white transition-all hover:text-blue-600 dark:hover:text-blue-400"
                 >
                   Resend Now

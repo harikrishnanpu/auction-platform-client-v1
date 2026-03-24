@@ -3,7 +3,10 @@
 import { CalendarClock, DollarSign, Package, Timer } from 'lucide-react';
 
 import type { IAuctionDto } from '@/types/auction.type';
-import { formatAuctionDateTime, formatAuctionPrice } from '@/lib/auction-utils';
+import {
+  formatAuctionDateTime,
+  formatAuctionPrice,
+} from '@/utils/auction-utils';
 
 import {
   Card,

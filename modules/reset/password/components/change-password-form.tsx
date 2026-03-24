@@ -2,12 +2,22 @@
 
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, Eye, EyeOff, Lock } from 'lucide-react';
 import { useChangePassword } from '../hooks/useChangePassword';
+import {
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { AuthFormCard } from '@/components/auth/authFormCard';
 
 export function ChangePasswordForm() {
   const searchParams = useSearchParams();
-
   const token = searchParams.get('token');
 
   const [showPassword, setShowPassword] = useState(false);
@@ -17,105 +27,129 @@ export function ChangePasswordForm() {
 
   if (!token) {
     return (
-      <div className="w-full max-w-md bg-white rounded-[2rem] shadow-2xl p-8 md:p-12 border border-gray-200 relative overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-500">
-        {' '}
-        <h1 className="text-2xl font-bold mb-4 text-red-500">Invalid Link</h1>
-        <p className="text-muted-foreground mb-6">
-          This password reset link is invalid or missing required information.
-        </p>
-        <a
-          href="/forgot-password"
-          className="text-primary hover:underline font-medium"
-        >
-          Request a new link
-        </a>
-      </div>
+      <AuthFormCard className="border-red-200/80 dark:border-red-900/50">
+        <CardHeader className="text-center pb-2 pt-8 md:pt-10 px-8 md:px-10">
+          <CardTitle className="text-2xl font-bold text-red-600 dark:text-red-400">
+            Invalid or expired link
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-600 dark:text-gray-400 pt-2">
+            This reset link is missing or no longer valid. Request a new one to
+            continue.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="px-8 md:px-10 pb-8 md:pb-10">
+          <Button
+            className="w-full rounded-xl bg-black hover:bg-[#333333] dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black font-semibold py-6"
+            asChild
+          >
+            <Link href="/reset/password">Request new link</Link>
+          </Button>
+        </CardContent>
+      </AuthFormCard>
     );
   }
 
   return (
-    <div className="w-full max-w-md bg-white rounded-[2rem] shadow-2xl p-8 md:p-12 border border-gray-200 relative overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-500">
-      {' '}
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-foreground mb-6 shadow-lg">
-          <Lock className="text-background w-8 h-8" />
-        </div>
-        <h1 className="text-3xl md:text-3xl font-bold mb-3 text-foreground">
-          Reset Password
-        </h1>
-        <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mx-auto">
-          Enter your new password below.
-        </p>
-      </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 ml-1">
-            New Password
-          </label>
-          <div className="relative group">
-            <input
-              {...register('newPassword')}
-              type={showPassword ? 'text' : 'password'}
-              className="block w-full px-4 py-4 bg-background/50 border-none rounded-xl text-foreground placeholder-muted-foreground/50 focus:ring-2 focus:ring-primary focus:shadow-lg transition-all shadow-inner outline-none"
-              placeholder="******"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-          {errors.newPassword && (
-            <p className="text-red-500 text-xs mt-1 ml-1">
-              {errors.newPassword.message}
-            </p>
-          )}
-        </div>
+    <AuthFormCard>
+      <CardHeader className="text-center pb-6 pt-8 md:pt-10 px-8 md:px-10">
+        <CardTitle className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+          New password
+        </CardTitle>
+        <CardDescription className="text-sm text-gray-600 dark:text-gray-400">
+          Choose a strong password you haven&apos;t used elsewhere.
+        </CardDescription>
+      </CardHeader>
 
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 ml-1">
-            Confirm Password
-          </label>
-          <div className="relative group">
-            <input
-              {...register('confirmPassword')}
-              type="password"
-              className="block w-full px-4 py-4 bg-background/50 border-none rounded-xl text-foreground placeholder-muted-foreground/50 focus:ring-2 focus:ring-primary focus:shadow-lg transition-all shadow-inner outline-none"
-              placeholder="******"
-            />
+      <CardContent className="px-8 md:px-10 pb-8 md:pb-10">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="space-y-2">
+            <Label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 ml-1">
+              New password
+            </Label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Lock className="text-gray-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors w-5 h-5" />
+              </div>
+              <Input
+                {...register('newPassword')}
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                placeholder="••••••••"
+                className="block w-full pl-11 pr-12 py-6 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all outline-none shadow-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {errors.newPassword && (
+              <p className="text-red-500 text-xs mt-1 ml-1 font-medium">
+                {errors.newPassword.message}
+              </p>
+            )}
           </div>
-          {errors.confirmPassword && (
-            <p className="text-red-500 text-xs mt-1 ml-1">
-              {errors.confirmPassword.message}
-            </p>
-          )}
-        </div>
 
-        <div>
+          <div className="space-y-2">
+            <Label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 ml-1">
+              Confirm password
+            </Label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Lock className="text-gray-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors w-5 h-5" />
+              </div>
+              <Input
+                {...register('confirmPassword')}
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                placeholder="••••••••"
+                className="block w-full pl-11 pr-4 py-6 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all outline-none shadow-sm"
+              />
+            </div>
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-xs mt-1 ml-1 font-medium">
+                {errors.confirmPassword.message}
+              </p>
+            )}
+          </div>
+
           {errors.root && (
-            <div className="text-red-500 text-sm text-center bg-red-50 dark:bg-red-900/10 p-2 rounded">
+            <div className="text-red-500 text-sm text-center bg-red-100 dark:bg-red-500/10 border border-red-200 dark:border-red-500/40 p-3 rounded-xl font-medium">
               {errors.root.message}
             </div>
           )}
-        </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-black hover:bg-[#333333] dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black font-medium py-4 px-4 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? (
-            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin dark:border-black/30 dark:border-t-black"></span>
-          ) : (
-            <>
-              Change Password
-              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-            </>
-          )}
-        </button>
-      </form>
-    </div>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-black hover:bg-[#333333] dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black font-semibold py-6 rounded-xl transition-all duration-300 shadow-lg flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed group"
+          >
+            {isSubmitting ? (
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin dark:border-black/30 dark:border-t-black" />
+            ) : (
+              <>
+                <span>Update password</span>
+                <ArrowRight
+                  size={18}
+                  className="group-hover:translate-x-1 transition-transform"
+                />
+              </>
+            )}
+          </Button>
+        </form>
+
+        <p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
+          <Link
+            href="/login"
+            className="font-bold text-black dark:text-white hover:underline transition-all"
+          >
+            Back to login
+          </Link>
+        </p>
+      </CardContent>
+    </AuthFormCard>
   );
 }

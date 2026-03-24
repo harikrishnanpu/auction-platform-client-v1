@@ -8,7 +8,7 @@ import {
   getAuctionAssetUrl,
   getAuctionCategoryName,
   getAuctionTypeLabel,
-} from '@/lib/auction-utils';
+} from '@/utils/auction-utils';
 import { cn } from '@/lib/utils';
 
 function statusLabel(status: AuctionStatus): string {

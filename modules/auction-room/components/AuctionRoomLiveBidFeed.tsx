@@ -9,8 +9,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { formatAuctionDateTime, formatAuctionPrice } from '@/lib/auction-utils';
+import { formatAuctionDateTime } from '@/utils/auction-utils';
 import { cn } from '@/lib/utils';
+
+import {
+  formatBidFeedAmountLabel,
+  getBidFeedEmptyMessage,
+} from '../utils/auction-room.utils';
 
 import type {
   AuctionRoomMode,
@@ -20,12 +25,22 @@ import type {
 type AuctionRoomLiveBidFeedProps = {
   bids: IAuctionRoomBid[];
   mode: AuctionRoomMode;
+  isSealedRoom?: boolean;
+  isLiveRoom?: boolean;
 };
 
 export function AuctionRoomLiveBidFeed({
   bids,
   mode,
+  isSealedRoom = false,
+  isLiveRoom = false,
 }: AuctionRoomLiveBidFeedProps) {
+  const feedDescription = isLiveRoom
+    ? 'Live bidding will appear here'
+    : isSealedRoom
+      ? 'Most recent sealed entries'
+      : 'Most recent bids';
+
   return (
     <Card className="rounded-lg border-border/60 bg-card/70 shadow-sm">
       <CardHeader className="px-3 py-2 pb-1">
@@ -34,7 +49,7 @@ export function AuctionRoomLiveBidFeed({
           <CardTitle className="text-xs font-semibold">Bid activity</CardTitle>
         </div>
         <CardDescription className="text-[10px] leading-tight">
-          Most recent bids
+          {feedDescription}
         </CardDescription>
       </CardHeader>
       <CardContent className="px-3 pb-3">
@@ -48,7 +63,7 @@ export function AuctionRoomLiveBidFeed({
         >
           {bids.length === 0 ? (
             <li className="rounded-lg border border-dashed border-border/80 bg-muted/20 px-3 py-6 text-center text-xs text-muted-foreground">
-              No bids yet. Be the first when the room opens.
+              {getBidFeedEmptyMessage(isLiveRoom)}
             </li>
           ) : (
             bids.map((b, index) => (
@@ -71,7 +86,7 @@ export function AuctionRoomLiveBidFeed({
                   </p>
                 </div>
                 <p className="shrink-0 text-xs font-semibold tabular-nums text-foreground">
-                  {formatAuctionPrice(b.amount)}
+                  {formatBidFeedAmountLabel(isSealedRoom, b.amount)}
                 </p>
               </li>
             ))

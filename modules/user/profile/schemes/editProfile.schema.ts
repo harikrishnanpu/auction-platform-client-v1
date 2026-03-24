@@ -28,4 +28,4 @@ export const editProfileSchema = z.object({
     ),
 });
 
-export type EditProfileFormValues = z.infer<typeof editProfileSchema>;
+export type ZodEditProfileFormValues = z.infer<typeof editProfileSchema>;

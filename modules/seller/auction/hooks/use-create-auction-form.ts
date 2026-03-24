@@ -12,7 +12,7 @@ import {
 } from '@/actions/auction/auction.actions';
 import type { AuctionAssetForm, AuctionType } from '@/types/auction.type';
 import { getErrorMessage } from '@/utils/get-app-error';
-import { datetimeLocalToISO } from '@/lib/datetime-local';
+import { datetimeLocalToISO } from '@/utils/datetime-local';
 import {
   createAuctionFormSchema,
   type CreateAuctionFormValues,
@@ -35,12 +35,13 @@ const defaultValues: CreateAuctionFormValues = {
   categoryId: '',
   condition: '',
   startPrice: 0,
-  minIncrement: 0,
+  minIncrement: 1,
   startAt: '',
   endAt: '',
   antiSnipSeconds: 60,
   maxExtensionCount: 3,
   bidCooldownSeconds: 10,
+  auctionType: undefined,
 };
 
 export function useCreateAuctionForm() {
@@ -70,6 +71,22 @@ export function useCreateAuctionForm() {
       });
     };
   }, [assets]);
+
+  useEffect(() => {
+    if (!auctionType) return;
+    form.setValue('auctionType', auctionType);
+    if (auctionType === 'SEALED') {
+      form.setValue('minIncrement', 0);
+      form.setValue('antiSnipSeconds', 0);
+      form.setValue('maxExtensionCount', 0);
+      form.setValue('bidCooldownSeconds', 0);
+    } else {
+      form.setValue('minIncrement', 1);
+      form.setValue('antiSnipSeconds', 60);
+      form.setValue('maxExtensionCount', 3);
+      form.setValue('bidCooldownSeconds', 10);
+    }
+  }, [auctionType, form]);
 
   const categoryValue = form.watch('categoryId');
 
@@ -205,6 +222,8 @@ export function useCreateAuctionForm() {
         return;
       }
 
+      const sealed = auctionType === 'SEALED';
+
       try {
         const result = await createAuctionAction({
           auctionType,
@@ -213,12 +232,12 @@ export function useCreateAuctionForm() {
           categoryId: data.categoryId.trim(),
           condition: data.condition.trim(),
           startPrice: data.startPrice,
-          minIncrement: data.minIncrement,
+          minIncrement: sealed ? 0 : data.minIncrement,
           startAt: datetimeLocalToISO(data.startAt),
           endAt: datetimeLocalToISO(data.endAt),
-          antiSnipSeconds: data.antiSnipSeconds,
-          maxExtensionCount: data.maxExtensionCount,
-          bidCooldownSeconds: data.bidCooldownSeconds,
+          antiSnipSeconds: sealed ? 0 : data.antiSnipSeconds,
+          maxExtensionCount: sealed ? 0 : data.maxExtensionCount,
+          bidCooldownSeconds: sealed ? 0 : data.bidCooldownSeconds,
           assets: assetDtos.length ? assetDtos : undefined,
         });
 

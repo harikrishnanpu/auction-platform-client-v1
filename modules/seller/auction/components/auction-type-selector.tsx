@@ -2,7 +2,7 @@
 
 import { Clock, Video, Lock } from 'lucide-react';
 import type { AuctionType } from '@/types/auction.type';
-import { getAuctionTypeLabel } from '@/lib/auction-utils';
+import { getAuctionTypeLabel } from '@/utils/auction-utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 

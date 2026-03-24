@@ -2,8 +2,8 @@
 
 import { useForm } from 'react-hook-form';
 import {
-  resetPasswordSchema,
-  ResetPasswordValues,
+  changePasswordSchema,
+  ZodChangePasswordValues,
 } from '../schems/change-password.schema';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -22,32 +22,24 @@ export const useChangePassword = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
     setError,
-  } = useForm<ResetPasswordValues>({
-    resolver: zodResolver(resetPasswordSchema),
+  } = useForm<ZodChangePasswordValues>({
+    resolver: zodResolver(changePasswordSchema),
     defaultValues: { newPassword: '', confirmPassword: '' },
   });
 
-  const onSubmit = async (data: ResetPasswordValues) => {
-    try {
-      const response = await changePasswordAction({
-        newPassword: data.newPassword,
-        token: token as string,
-      });
+  const onSubmit = async (data: ZodChangePasswordValues) => {
+    const response = await changePasswordAction({
+      newPassword: data.newPassword,
+      token: token as string,
+    });
 
-      if (response.success) {
-        toast.success('Password reset successfully! Please login.');
-        router.push('/login');
-      } else {
-        setError('root', {
-          type: 'manual',
-          message: response.error || 'Failed to reset password',
-        });
-      }
-    } catch (error: unknown) {
-      console.log(error);
+    if (response.success) {
+      toast.success('Password reset successfully! Please login.');
+      router.push('/login');
+    } else {
       setError('root', {
         type: 'manual',
-        message: getErrorMessage(error) || 'Failed to reset password',
+        message: response.error || 'Failed to reset password',
       });
     }
   };

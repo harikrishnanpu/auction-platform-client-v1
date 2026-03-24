@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import {
   forgotPasswordSchema,
-  ForgotPasswordValues,
+  ZodForgotPasswordValues,
 } from '../schems/forget-password.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
@@ -15,12 +15,12 @@ export const useResetPassword = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
     setError,
-  } = useForm<ForgotPasswordValues>({
+  } = useForm<ZodForgotPasswordValues>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: { email: '' },
   });
 
-  const onSubmit = async (data: ForgotPasswordValues) => {
+  const onSubmit = async (data: ZodForgotPasswordValues) => {
     try {
       const response = await forgotPasswordAction({ email: data.email });
       if (!response.success) {

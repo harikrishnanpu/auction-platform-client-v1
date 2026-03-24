@@ -1,13 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import type { IAuctionDto, AuctionType } from '@/types/auction.type';
 import {
   getAuctionCategoryName,
   getAuctionTypeLabel,
-} from '@/lib/auction-utils';
+} from '@/utils/auction-utils';
 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -18,8 +18,11 @@ import type { AuctionRoomMode } from '../../../socket/useAuctionRoomSocket';
 import { useAuctionRoomSocket } from '../../../socket/useAuctionRoomSocket';
 import {
   auctionStatusLabel,
+  computeNextBidMin,
   isAuctionActiveForBidding,
   isAuctionEndedByStatus,
+  isLiveAuctionType,
+  isSealedAuctionType,
 } from '../utils/auction-room.utils';
 
 import { AuctionRoomAlert } from './AuctionRoomAlert';
@@ -64,27 +67,24 @@ export function AuctionRoom({
   });
 
   const canInteract = connectionState === 'connected' && !error;
+  const isSealedRoom = isSealedAuctionType(auction?.auctionType);
+  const isLiveRoom = isLiveAuctionType(auction?.auctionType);
 
   const [actionBusy, setActionBusy] = useState<
     'pause' | 'resume' | 'end' | null
   >(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const [bidAmount, setBidAmount] = useState('');
-  const [placingBid, setPlacingBid] = useState(false);
   const [chatDraft, setChatDraft] = useState('');
   const {
     remainingSeconds: cooldownRemainingSeconds,
     start: startBidCooldown,
   } = useBidCooldown();
 
-  const nextBidMin = useMemo(() => {
-    if (!auction) return null;
-    if (currentBid?.amount != null) {
-      return currentBid.amount + auction.minIncrement;
-    }
-    return auction.startPrice;
-  }, [auction, currentBid]);
+  const nextBidMin = useMemo(
+    () => computeNextBidMin(auction, currentBid?.amount ?? null),
+    [auction, currentBid?.amount]
+  );
 
   const endCountdown = useAuctionRoomCountdown(auction?.endAt);
   const auctionStatusStr = (auction?.status as unknown as string) ?? null;
@@ -96,49 +96,20 @@ export function AuctionRoom({
     endCountdown
   );
 
-  const parsedBid = useMemo(() => {
-    const n = bidAmount.trim() ? Number(bidAmount) : NaN;
-    return Number.isFinite(n) ? n : null;
-  }, [bidAmount]);
-
-  const onSubmitBid = useCallback(async () => {
-    if (parsedBid == null || !auction) return;
-    setPlacingBid(true);
-    try {
-      const res = await placeBid(parsedBid);
-      if (res.success) {
-        setBidAmount('');
+  const handlePlaceBid = useCallback(
+    async (amount: number) => {
+      const res = await placeBid(amount);
+      if (res.success && auction) {
         startBidCooldown(auction.bidCooldownSeconds ?? 0);
-      } else {
+      } else if (!res.success) {
         toast.error(res.error ?? 'Could not place bid');
       }
-    } finally {
-      setPlacingBid(false);
-    }
-  }, [parsedBid, placeBid, auction, startBidCooldown]);
+      return res;
+    },
+    [placeBid, auction, startBidCooldown]
+  );
 
   const canControlAuction = mode === 'SELLER' || mode === 'ADMIN';
-
-  const lastSuggestedBidRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (mode !== 'USER') return;
-    if (nextBidMin == null) return;
-    const suggested = String(nextBidMin);
-    const currentTrimmed = bidAmount.trim();
-
-    const shouldReplace =
-      currentTrimmed.length === 0 ||
-      currentTrimmed === (lastSuggestedBidRef.current ?? '');
-
-    lastSuggestedBidRef.current = suggested;
-
-    if (shouldReplace) {
-      // Sync suggested minimum bid when empty or still matching last suggestion.
-
-      setBidAmount(suggested);
-    }
-  }, [mode, nextBidMin, bidAmount]);
 
   const categoryName = auction ? getAuctionCategoryName(auction) : '—';
   const typeLabel = auction
@@ -230,20 +201,20 @@ export function AuctionRoom({
 
               <aside className="min-w-0 space-y-3 lg:sticky lg:top-5">
                 <AuctionRoomBidPanel
+                  auctionId={auctionId}
                   auction={auction}
                   currentBidAmount={currentBid?.amount ?? null}
+                  bidCount={liveFeed.length}
+                  isSealedRoom={isSealedRoom}
+                  isLiveRoom={isLiveRoom}
                   nextBidMin={nextBidMin}
                   endCountdown={endCountdown}
                   isAuctionEnded={isAuctionEnded}
                   isAuctionActive={isAuctionActive}
                   canInteract={canInteract}
-                  showPlaceBid={mode === 'USER'}
-                  bidAmount={bidAmount}
-                  onBidAmountChange={setBidAmount}
-                  onSubmitBid={onSubmitBid}
-                  parsedBid={parsedBid}
+                  showPlaceBid={mode === 'USER' && !isLiveRoom}
                   cooldownRemainingSeconds={cooldownRemainingSeconds}
-                  placingBid={placingBid}
+                  onPlaceBid={handlePlaceBid}
                 />
 
                 {canControlAuction ? (
@@ -259,7 +230,12 @@ export function AuctionRoom({
                   />
                 ) : null}
 
-                <AuctionRoomLiveBidFeed bids={liveFeed} mode={mode} />
+                <AuctionRoomLiveBidFeed
+                  bids={liveFeed}
+                  mode={mode}
+                  isSealedRoom={isSealedRoom}
+                  isLiveRoom={isLiveRoom}
+                />
 
                 <AuctionRoomParticipantsPanel participants={participants} />
               </aside>

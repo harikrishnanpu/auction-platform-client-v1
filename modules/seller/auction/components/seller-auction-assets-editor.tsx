@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Loader2, Upload, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { getAuctionAssetUrl } from '@/lib/auction-utils';
+import { getAuctionAssetUrl } from '@/utils/auction-utils';
 
 export type AuctionAssetEditorStatus = 'idle' | 'uploading' | 'done' | 'error';
 

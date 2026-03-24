@@ -7,11 +7,8 @@ import { logoutAction } from '@/actions/auth/auth.actions';
 import useUserStore from '@/store/user.store';
 
 export function CompleteProfileForm() {
-  const { form, isSubmitting, onSubmit } = useCompleteProfile();
-  const {
-    register,
-    formState: { errors },
-  } = form;
+  const { register, handleSubmit, errors, isSubmitting, onSubmit } =
+    useCompleteProfile();
   const router = useRouter();
   const setUser = useUserStore((s) => s.setUser);
 
@@ -26,7 +23,7 @@ export function CompleteProfileForm() {
         </p>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-1.5">
           <label
             htmlFor="phone"

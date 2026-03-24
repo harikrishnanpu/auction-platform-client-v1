@@ -1,250 +1,168 @@
 import { API_ENDPOINTS, buildApiUrl } from '@/apiInstance';
-import { LoginFormValues } from '@/modules/auth/schemes/login-from.schema';
-import { RegisterFormValues } from '@/modules/auth/schemes/register-form.schema';
+import { ZodLoginFormValues } from '@/modules/auth/schemes/login-from.schema';
+import { ZodRegisterFormValues } from '@/modules/auth/schemes/register-form.schema';
 import { cookies } from 'next/headers';
 import { ApiResponse } from '@/types/api.index';
 import { getErrorMessage } from '@/utils/get-app-error';
-import { UserInfo } from '@/types/user.type';
+import { IUser } from '@/types/user.type';
+import { apiFetch } from '@/lib/fetch';
+import { OtpPurpose } from '@/constants/auth/otp.constants';
+import { ZodVerifyEmailValues } from '@/modules/verify/email/schemes/verify-email.schema';
+import { ZodCompleteProfileValues } from '@/modules/complete-profile/schemes/complete-profile-schema';
+import { ZodForgotPasswordValues } from '@/modules/reset/password/schems/forget-password.schema';
+import { ZodChangePasswordValues } from '@/modules/reset/password/schems/change-password.schema';
 
-const getSession = async (): Promise<ApiResponse<UserInfo>> => {
-  try {
-    const cookieStorage = await cookies();
-
-    const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.me), {
-      headers: {
-        Cookie: cookieStorage.toString(),
-      },
-      cache: 'no-store',
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      if (res.status === 403 && body?.message === 'ACCOUNT_BLOCKED') {
-        cookieStorage.delete('accessToken');
-        cookieStorage.delete('refreshToken');
-        return { success: false, data: null, error: 'ACCOUNT_BLOCKED' };
-      }
-      return {
-        success: false,
-        data: null,
-        error: body?.message ?? getErrorMessage(new Error('Session failed')),
-      };
-    }
-
-    const session = await res.json();
-    return session;
-  } catch (err: unknown) {
-    return {
-      success: false,
-      data: null,
-      error: getErrorMessage(err),
-    };
-  }
+const getSession = async (): Promise<ApiResponse<IUser>> => {
+  const cookieStorage = await cookies();
+  return await apiFetch<IUser>(
+    buildApiUrl(API_ENDPOINTS.auth.me),
+    { method: 'GET' },
+    cookieStorage,
+    'no-store'
+  );
 };
 
 const login = async (
-  data: LoginFormValues
+  data: ZodLoginFormValues
 ): Promise<
-  ApiResponse<{ user: UserInfo; accessToken: string; refreshToken: string }>
+  ApiResponse<{ user: IUser; accessToken: string; refreshToken: string }>
 > => {
-  try {
-    const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.login), {
+  const cookieStorage = await cookies();
+  const response = await apiFetch<{
+    user: IUser;
+    accessToken: string;
+    refreshToken: string;
+  }>(
+    buildApiUrl(API_ENDPOINTS.auth.login),
+    {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
-    });
+    },
+    cookieStorage
+  );
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      const message =
-        body?.message ?? body?.error ?? 'Login failed. Please try again.';
-      throw new Error(message);
-    }
-
-    const response = await res.json();
-    (await cookies()).set('accessToken', response.data.accessToken);
-    (await cookies()).set('refreshToken', response.data.refreshToken);
-    return { success: true, data: response.data };
-  } catch (error: unknown) {
-    return { success: false, data: null, error: getErrorMessage(error) };
+  if (!response.success || !response.data) {
+    return response;
   }
+
+  cookieStorage.set('accessToken', response.data.accessToken);
+  cookieStorage.set('refreshToken', response.data.refreshToken);
+
+  return response;
 };
 
 const register = async (
-  data: RegisterFormValues
+  data: ZodRegisterFormValues
 ): Promise<ApiResponse<{ userId: string }>> => {
-  try {
-    const url = buildApiUrl(API_ENDPOINTS.auth.register);
-    console.log(url);
+  const cookieStorage = await cookies();
 
-    const res = await fetch(url, {
+  return await apiFetch<{ userId: string }>(
+    buildApiUrl(API_ENDPOINTS.auth.register),
+    {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
-    });
-
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message);
-    }
-
-    const response = await res.json();
-    console.log(response);
-    return response;
-  } catch (error: unknown) {
-    return { success: false, data: null, error: getErrorMessage(error) };
-  }
+    },
+    cookieStorage
+  );
 };
 
 const sendVerificationCode = async (data: {
-  otp: string;
   email: string;
-  purpose: string;
+  purpose: OtpPurpose;
 }): Promise<ApiResponse<{ userId: string }>> => {
-  try {
-    console.log('send verification code');
-    const res = await fetch(
-      buildApiUrl(API_ENDPOINTS.auth.sendVerificationCode),
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      }
-    );
-
-    if (!res.ok) {
-      console.log(res);
-      const error = await res.json();
-      throw new Error(error.message);
-    }
-
-    const response = await res.json();
-    return response;
-  } catch (error: unknown) {
-    console.log(error);
-    return { success: false, data: null, error: getErrorMessage(error) };
-  }
+  const cookieStorage = await cookies();
+  return await apiFetch<{ userId: string }>(
+    buildApiUrl(API_ENDPOINTS.auth.sendVerificationCode),
+    {
+      method: 'POST',
+      body: JSON.stringify(data),
+    },
+    cookieStorage
+  );
 };
 
-const verifyEmail = async (data: {
-  otp: string;
-  email: string;
-}): Promise<
-  ApiResponse<{ user: UserInfo; accessToken: string; refreshToken: string }>
+const verifyEmail = async (
+  data: ZodVerifyEmailValues
+): Promise<
+  ApiResponse<{ user: IUser; accessToken: string; refreshToken: string }>
 > => {
-  try {
-    const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.verifyEmail), {
+  const cookieStorage = await cookies();
+
+  const response = await apiFetch<{
+    user: IUser;
+    accessToken: string;
+    refreshToken: string;
+  }>(
+    buildApiUrl(API_ENDPOINTS.auth.verifyEmail),
+    {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
-    });
+    },
+    cookieStorage
+  );
 
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message);
-    }
-
-    const response = await res.json();
-    (await cookies()).set('accessToken', response.data.accessToken);
-    (await cookies()).set('refreshToken', response.data.refreshToken);
+  if (!response.success || !response.data) {
     return response;
-  } catch (error: unknown) {
-    return { success: false, data: null, error: getErrorMessage(error) };
   }
+
+  cookieStorage.set('accessToken', response.data.accessToken);
+  cookieStorage.set('refreshToken', response.data.refreshToken);
+
+  return response;
 };
 
-const completeProfile = async (data: {
-  phone: string;
-  address: string;
-}): Promise<ApiResponse<UserInfo>> => {
-  try {
-    const cookieStorage = await cookies();
-    const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.completeProfile), {
+const completeProfile = async (
+  data: ZodCompleteProfileValues
+): Promise<ApiResponse<IUser>> => {
+  const cookieStorage = await cookies();
+
+  return await apiFetch<IUser>(
+    buildApiUrl(API_ENDPOINTS.auth.completeProfile),
+    {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Cookie: cookieStorage.toString(),
-      },
       body: JSON.stringify(data),
-    });
-
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message);
-    }
-
-    const response = await res.json();
-    return response;
-  } catch (error: unknown) {
-    return { success: false, data: null, error: getErrorMessage(error) };
-  }
+    },
+    cookieStorage
+  );
 };
 
 const logout = async (): Promise<ApiResponse<null>> => {
   try {
-    (await cookies()).delete('accessToken');
-    (await cookies()).delete('refreshToken');
+    const cookieStorage = await cookies();
+    cookieStorage.delete('accessToken');
+    cookieStorage.delete('refreshToken');
     return { success: true, data: null };
   } catch (error: unknown) {
     return { success: false, data: null, error: getErrorMessage(error) };
   }
 };
 
-const forgotPassword = async (data: {
-  email: string;
-}): Promise<ApiResponse<null>> => {
-  try {
-    const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.forgotPassword), {
+const forgotPassword = async (
+  data: ZodForgotPasswordValues
+): Promise<ApiResponse<null>> => {
+  const cookieStorage = await cookies();
+  return await apiFetch<null>(
+    buildApiUrl(API_ENDPOINTS.auth.forgotPassword),
+    {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
-    });
-
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message);
-    }
-
-    const response = await res.json();
-    return response;
-  } catch (error: unknown) {
-    return { success: false, data: null, error: getErrorMessage(error) };
-  }
+    },
+    cookieStorage
+  );
 };
 
-const changePassword = async (data: {
-  newPassword: string;
-  token: string;
-}): Promise<ApiResponse<null>> => {
-  try {
-    const res = await fetch(buildApiUrl(API_ENDPOINTS.auth.changePassword), {
+const changePassword = async (
+  data: ZodChangePasswordValues
+): Promise<ApiResponse<null>> => {
+  const cookieStorage = await cookies();
+  return await apiFetch<null>(
+    buildApiUrl(API_ENDPOINTS.auth.changePassword),
+    {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
-    });
-
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message);
-    }
-
-    const response = await res.json();
-    return response;
-  } catch (error: unknown) {
-    return { success: false, data: null, error: getErrorMessage(error) };
-  }
+    },
+    cookieStorage
+  );
 };
 
 export const authService = {

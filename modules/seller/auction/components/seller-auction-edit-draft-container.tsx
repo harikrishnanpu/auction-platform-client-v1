@@ -14,7 +14,7 @@ import type {
   IAuctionDto,
 } from '@/types/auction.type';
 import { SellerCategorySelect } from './category-select';
-import { AUCTION_CONDITIONS, getAuctionTypeLabel } from '@/lib/auction-utils';
+import { AUCTION_CONDITIONS, getAuctionTypeLabel } from '@/utils/auction-utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,10 +30,15 @@ import {
   generateAuctionUploadUrlAction,
 } from '@/actions/auction/auction.actions';
 import type { UpdateAuctionDraftInput } from '@/types/auction.type';
-import { isoToDatetimeLocal, datetimeLocalToISO } from '@/lib/datetime-local';
+import { isoToDatetimeLocal, datetimeLocalToISO } from '@/utils/datetime-local';
 import { getErrorMessage } from '@/utils/get-app-error';
 import type { AuctionAssetEditorItem } from './seller-auction-assets-editor';
 import { SellerAuctionAssetsEditor } from './seller-auction-assets-editor';
+import {
+  AuctionBidRuleThreeColumnFields,
+  sealedBidInputProps,
+} from './auction-bid-rule-fields';
+import { cn } from '@/lib/utils';
 
 export function SellerAuctionEditDraftContainer({
   auction,
@@ -77,16 +82,31 @@ export function SellerAuctionEditDraftContainer({
       categoryId: auction.category?.id ?? '',
       condition: auction.condition ?? '',
       startPrice: auction.startPrice ?? 0,
-      minIncrement: auction.minIncrement ?? 0,
+      minIncrement:
+        auction.auctionType === 'SEALED' ? 0 : (auction.minIncrement ?? 0),
       startAt: isoToDatetimeLocal(auction.startAt),
       endAt: isoToDatetimeLocal(auction.endAt),
-      antiSnipSeconds: auction.antiSnipSeconds ?? 60,
-      maxExtensionCount: auction.maxExtensionCount ?? 3,
-      bidCooldownSeconds: auction.bidCooldownSeconds ?? 10,
+      antiSnipSeconds:
+        auction.auctionType === 'SEALED' ? 0 : (auction.antiSnipSeconds ?? 60),
+      maxExtensionCount:
+        auction.auctionType === 'SEALED' ? 0 : (auction.maxExtensionCount ?? 3),
+      bidCooldownSeconds:
+        auction.auctionType === 'SEALED'
+          ? 0
+          : (auction.bidCooldownSeconds ?? 10),
+      auctionType: auction.auctionType,
     },
   });
 
   const categoryValue = form.watch('categoryId');
+
+  useEffect(() => {
+    if (auctionType !== 'SEALED') return;
+    form.setValue('minIncrement', 0);
+    form.setValue('antiSnipSeconds', 0);
+    form.setValue('maxExtensionCount', 0);
+    form.setValue('bidCooldownSeconds', 0);
+  }, [auctionType, form]);
 
   const handleAddFiles = useCallback(
     (files: FileList | null) => {
@@ -210,6 +230,7 @@ export function SellerAuctionEditDraftContainer({
 
         setSubmitting(true);
         try {
+          const sealed = auctionType === 'SEALED';
           const payload: UpdateAuctionDraftInput = {
             auctionType,
             title: data.title.trim(),
@@ -217,12 +238,12 @@ export function SellerAuctionEditDraftContainer({
             categoryId: data.categoryId.trim(),
             condition: data.condition.trim(),
             startPrice: data.startPrice,
-            minIncrement: data.minIncrement,
+            minIncrement: sealed ? 0 : data.minIncrement,
             startAt: datetimeLocalToISO(data.startAt),
             endAt: datetimeLocalToISO(data.endAt),
-            antiSnipSeconds: data.antiSnipSeconds,
-            maxExtensionCount: data.maxExtensionCount,
-            bidCooldownSeconds: data.bidCooldownSeconds,
+            antiSnipSeconds: sealed ? 0 : data.antiSnipSeconds,
+            maxExtensionCount: sealed ? 0 : data.maxExtensionCount,
+            bidCooldownSeconds: sealed ? 0 : data.bidCooldownSeconds,
             assets: uploadedAssets.map((a) => ({
               fileKey: a.fileKey!,
               position: a.position,
@@ -272,6 +293,9 @@ export function SellerAuctionEditDraftContainer({
       setSubmitting(false);
     }
   }, [auction.id, form, router]);
+
+  const isSealed = auctionType === 'SEALED';
+  const sealedField = sealedBidInputProps(isSealed, submitting);
 
   return (
     <div className="space-y-6">
@@ -422,9 +446,16 @@ export function SellerAuctionEditDraftContainer({
                   type="number"
                   step="any"
                   {...form.register('minIncrement')}
-                  disabled={submitting}
-                  className="mt-1"
+                  placeholder={isSealed ? '0' : undefined}
+                  readOnly={sealedField.readOnly}
+                  disabled={sealedField.disabled}
+                  className={cn('mt-1', sealedField.className)}
                 />
+                {isSealed ? (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Not used for sealed auctions (sent as 0).
+                  </p>
+                ) : null}
                 {form.formState.errors.minIncrement ? (
                   <p className="text-destructive text-xs mt-1">
                     {form.formState.errors.minIncrement.message}
@@ -466,58 +497,12 @@ export function SellerAuctionEditDraftContainer({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div>
-                <Label htmlFor="antiSnipSeconds">Anti-snip (seconds)</Label>
-                <Input
-                  id="antiSnipSeconds"
-                  type="number"
-                  step={1}
-                  {...form.register('antiSnipSeconds')}
-                  disabled={submitting}
-                  className="mt-1"
-                />
-                {form.formState.errors.antiSnipSeconds ? (
-                  <p className="text-destructive text-xs mt-1">
-                    {form.formState.errors.antiSnipSeconds.message}
-                  </p>
-                ) : null}
-              </div>
-              <div>
-                <Label htmlFor="maxExtensionCount">Max extensions</Label>
-                <Input
-                  id="maxExtensionCount"
-                  type="number"
-                  step={1}
-                  {...form.register('maxExtensionCount')}
-                  disabled={submitting}
-                  className="mt-1"
-                />
-                {form.formState.errors.maxExtensionCount ? (
-                  <p className="text-destructive text-xs mt-1">
-                    {form.formState.errors.maxExtensionCount.message}
-                  </p>
-                ) : null}
-              </div>
-              <div>
-                <Label htmlFor="bidCooldownSeconds">
-                  Bid cooldown (seconds)
-                </Label>
-                <Input
-                  id="bidCooldownSeconds"
-                  type="number"
-                  step={1}
-                  {...form.register('bidCooldownSeconds')}
-                  disabled={submitting}
-                  className="mt-1"
-                />
-                {form.formState.errors.bidCooldownSeconds ? (
-                  <p className="text-destructive text-xs mt-1">
-                    {form.formState.errors.bidCooldownSeconds.message}
-                  </p>
-                ) : null}
-              </div>
-            </div>
+            <AuctionBidRuleThreeColumnFields
+              register={form.register}
+              errors={form.formState.errors}
+              isSealed={isSealed}
+              submitting={submitting}
+            />
           </CardContent>
         </Card>
 

@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { formatAuctionDateTime } from '@/lib/auction-utils';
+import { formatAuctionDateTime } from '@/utils/auction-utils';
 
 import type { IAuctionRoomChatMessage } from '../../../socket/useAuctionRoomSocket';
 

@@ -27,6 +27,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const user = await authGetSesssion();
+
   if (user.success === false && user.error === 'ACCOUNT_BLOCKED') {
     redirect('/login?error=blocked');
   }

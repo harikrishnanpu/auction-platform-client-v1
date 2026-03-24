@@ -24,14 +24,9 @@ export const auctionService = {
       buildApiUrl(API_ENDPOINTS.auction.create),
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: cookieStore.toString(),
-        },
         body: JSON.stringify(input),
       },
-      cookieStore,
-      'no-store'
+      cookieStore
     );
   },
 
@@ -44,33 +39,20 @@ export const auctionService = {
     fileName: string;
     fileSize: number;
   }): Promise<ApiResponse<{ uploadUrl: string; fileKey: string }>> => {
-    try {
-      const cookieStore = await cookies();
+    const cookieStorage = await cookies();
 
-      const res = await fetch(
-        buildApiUrl(API_ENDPOINTS.auction.generateUploadUrl),
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Cookie: cookieStore.toString(),
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            contentType,
-            fileName,
-            fileSize,
-          }),
-        }
-      );
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? data.message);
-      if (!data.success) throw new Error(data.error ?? data.message);
-      return { success: true, data: data.data };
-    } catch (err: unknown) {
-      return { success: false, data: null, error: getErrorMessage(err) };
-    }
+    return await apiFetch<{ uploadUrl: string; fileKey: string }>(
+      buildApiUrl(API_ENDPOINTS.auction.generateUploadUrl),
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          contentType,
+          fileName,
+          fileSize,
+        }),
+      },
+      cookieStorage
+    );
   },
 
   getSellerAuctions: async (
@@ -94,12 +76,8 @@ export const auctionService = {
       url,
       {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       },
-      cookieStore,
-      'no-store'
+      cookieStore
     );
   },
 
@@ -114,12 +92,8 @@ export const auctionService = {
       url,
       {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       },
-      cookieStore,
-      'no-store'
+      cookieStore
     );
   },
 

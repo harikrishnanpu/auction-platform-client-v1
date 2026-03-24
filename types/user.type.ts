@@ -17,7 +17,7 @@ export enum UserStatus {
   PENDING = 'PENDING',
 }
 
-export interface UserInfo {
+export interface IUser {
   id: string;
   name: string;
   email: string;

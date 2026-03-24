@@ -1,29 +1,24 @@
-import Link from 'next/link';
 import AuthNavbar from '@/components/layout/navbars/AuthNavbar';
 import { ResetPasswordForm } from '@/modules/reset/password/components/reset-password-form';
 
 export default function RecoverPasswordPage() {
   return (
-    <div className="min-h-screen flex flex-col font-sans transition-colors duration-500 bg-gradient-to-b from-blue-100 via-white to-amber-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300 font-sans">
       <AuthNavbar />
 
-      <main className="flex-grow flex items-center justify-center px-4 py-12 relative overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10 pointer-events-none animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-orange-100/20 dark:bg-orange-900/10 rounded-full blur-3xl -z-10 pointer-events-none"></div>
-
-        <ResetPasswordForm />
+      <main className="min-h-screen flex items-center justify-center p-4 py-20 relative">
+        <div
+          className="absolute top-0 left-0 w-full h-96 bg-linear-to-b from-blue-100/50 to-transparent dark:from-blue-900/10 pointer-events-none"
+          aria-hidden
+        />
+        <div className="absolute -top-24 right-1/4 w-72 h-72 bg-blue-400/15 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 w-full flex justify-center">
+          <ResetPasswordForm />
+        </div>
       </main>
 
-      <footer className="w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center text-xs text-muted-foreground">
-        <div>© 2024 Hammr.Down Inc.</div>
-        <div className="flex gap-4">
-          <Link href="#" className="hover:text-foreground transition-colors">
-            Privacy
-          </Link>
-          <Link href="#" className="hover:text-foreground transition-colors">
-            Terms
-          </Link>
-        </div>
+      <footer className="py-6 text-center text-xs text-gray-400 dark:text-gray-600">
+        © 2024 Hammr.Down Inc. All rights reserved.
       </footer>
     </div>
   );

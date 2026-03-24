@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   registerSchema,
-  type RegisterFormValues,
+  ZodRegisterFormValues,
 } from '../schemes/register-form.schema';
 import { registerAction } from '@/actions/auth/auth.actions';
 import { getErrorMessage } from '@/utils/get-app-error';
@@ -18,7 +18,7 @@ export const useRegister = () => {
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterFormValues>({
+  } = useForm<ZodRegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       firstName: 'one',
@@ -31,7 +31,7 @@ export const useRegister = () => {
     },
   });
 
-  const onSubmit = async (data: RegisterFormValues) => {
+  const onSubmit = async (data: ZodRegisterFormValues) => {
     try {
       const res = await registerAction(data);
 

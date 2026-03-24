@@ -1,10 +1,14 @@
 'use client';
 
+import { useCallback, useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
+
 import { Gavel, Hourglass } from 'lucide-react';
 
 import { PlaceBidButton } from '@/components/auction/place-bid-button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
@@ -13,50 +17,119 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import type { IAuctionDto } from '@/types/auction.type';
-import { formatAuctionPrice } from '@/lib/auction-utils';
+import { formatAuctionPrice } from '@/utils/auction-utils';
 import { cn } from '@/lib/utils';
 
+import {
+  type PlaceBidFormValues,
+  validatePlaceBidAmount,
+} from '../schemas/place-bid.schema';
+import {
+  getAuctionRoomPrimaryBidDisplay,
+  getBidPanelHeadline,
+  isCountdownLowUrgency,
+} from '../utils/auction-room.utils';
+
 type AuctionRoomBidPanelProps = {
+  auctionId: string;
   auction: IAuctionDto | null;
   currentBidAmount: number | null;
+  bidCount: number;
+  isSealedRoom: boolean;
+  isLiveRoom: boolean;
   nextBidMin: number | null;
   endCountdown: string | null;
   isAuctionEnded: boolean;
   isAuctionActive: boolean;
   canInteract: boolean;
   showPlaceBid: boolean;
-  bidAmount: string;
-  onBidAmountChange: (value: string) => void;
-  onSubmitBid: () => void;
-  parsedBid: number | null;
   cooldownRemainingSeconds: number;
-  placingBid: boolean;
+  onPlaceBid: (amount: number) => Promise<{ success: boolean; error?: string }>;
 };
 
 export function AuctionRoomBidPanel({
+  auctionId,
   auction,
   currentBidAmount,
+  bidCount,
+  isSealedRoom,
+  isLiveRoom,
   nextBidMin,
   endCountdown,
   isAuctionEnded,
   isAuctionActive,
   canInteract,
   showPlaceBid,
-  bidAmount,
-  onBidAmountChange,
-  onSubmitBid,
-  parsedBid,
   cooldownRemainingSeconds,
-  placingBid,
+  onPlaceBid,
 }: AuctionRoomBidPanelProps) {
   const inputDisabled = !canInteract || isAuctionEnded || !isAuctionActive;
 
-  const bidInvalid =
-    parsedBid == null ||
-    (nextBidMin != null && parsedBid < nextBidMin) ||
-    isAuctionEnded ||
-    !canInteract ||
-    !isAuctionActive;
+  const validateAmount = useCallback(
+    (value: string) => validatePlaceBidAmount(value, nextBidMin),
+    [nextBidMin]
+  );
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    trigger,
+    formState: { errors, isSubmitting, isValid },
+  } = useForm<PlaceBidFormValues>({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: { amount: '' },
+  });
+
+  const amountField = register('amount', {
+    validate: validateAmount,
+  });
+
+  const didInitDefaultRef = useRef(false);
+
+  useEffect(() => {
+    didInitDefaultRef.current = false;
+  }, [auctionId]);
+
+  useEffect(() => {
+    if (!showPlaceBid || nextBidMin == null) return;
+    if (didInitDefaultRef.current) return;
+    didInitDefaultRef.current = true;
+    setValue('amount', String(nextBidMin), {
+      shouldValidate: true,
+      shouldDirty: false,
+    });
+  }, [auctionId, showPlaceBid, nextBidMin, setValue]);
+
+  useEffect(() => {
+    if (!showPlaceBid || nextBidMin == null) return;
+    void trigger('amount');
+  }, [nextBidMin, showPlaceBid, trigger]);
+
+  const onValidSubmit = async (data: PlaceBidFormValues) => {
+    const amount = Number(data.amount.trim());
+    const res = await onPlaceBid(amount);
+    if (res.success && auction) {
+      const nextSuggested = amount + auction.minIncrement;
+      setValue('amount', String(nextSuggested), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  };
+
+  const headline = getBidPanelHeadline(isLiveRoom, isSealedRoom);
+  const primaryDisplay = getAuctionRoomPrimaryBidDisplay(
+    isLiveRoom,
+    isSealedRoom,
+    isAuctionEnded,
+    bidCount,
+    currentBidAmount
+  );
+
+  const submitDisabled =
+    inputDisabled || isSubmitting || !isValid || cooldownRemainingSeconds > 0;
 
   return (
     <Card
@@ -72,10 +145,10 @@ export function AuctionRoomBidPanel({
           </span>
           <div>
             <CardTitle className="text-xs font-semibold tracking-tight">
-              Current bid
+              {headline.title}
             </CardTitle>
             <CardDescription className="text-[10px] leading-tight">
-              Live updates as bids arrive
+              {headline.description}
             </CardDescription>
           </div>
         </div>
@@ -83,15 +156,13 @@ export function AuctionRoomBidPanel({
       <CardContent className="space-y-3">
         <div>
           <p className="text-2xl font-bold tabular-nums tracking-tight text-foreground sm:text-3xl">
-            {currentBidAmount != null
-              ? formatAuctionPrice(currentBidAmount)
-              : '—'}
+            {primaryDisplay}
           </p>
           {nextBidMin != null ? (
             <p className="mt-1 text-xs text-muted-foreground">
-              Minimum next bid{' '}
+              Minimum start price{' '}
               <span className="font-semibold text-foreground tabular-nums">
-                {formatAuctionPrice(nextBidMin)}
+                {formatAuctionPrice(auction?.startPrice ?? nextBidMin)}
               </span>
             </p>
           ) : null}
@@ -106,9 +177,7 @@ export function AuctionRoomBidPanel({
             <span
               className={cn(
                 'font-mono text-sm font-semibold tabular-nums',
-                endCountdown &&
-                  endCountdown !== '0:00' &&
-                  endCountdown.length <= 5 &&
+                isCountdownLowUrgency(endCountdown) &&
                   'text-amber-700 dark:text-amber-400'
               )}
             >
@@ -117,38 +186,50 @@ export function AuctionRoomBidPanel({
           </div>
           <div className="flex flex-wrap gap-1.5 text-[10px] text-muted-foreground">
             <Badge variant="outline" className="px-1.5 py-0 font-normal">
-              Anti-snipe {auction?.antiSnipSeconds ?? 0}s
-            </Badge>
-            <Badge variant="outline" className="px-1.5 py-0 font-normal">
               Cooldown {auction?.bidCooldownSeconds ?? 0}s
-            </Badge>
-            <Badge variant="outline" className="px-1.5 py-0 font-normal">
-              Max ext. {auction?.maxExtensionCount ?? 0}
             </Badge>
           </div>
         </div>
 
         {showPlaceBid ? (
-          <div className="space-y-1.5">
-            <Input
-              inputMode="decimal"
-              placeholder={
-                nextBidMin != null
-                  ? `Amount ≥ ${nextBidMin}`
-                  : 'Enter bid amount'
-              }
-              value={bidAmount}
-              onChange={(e) => onBidAmountChange(e.target.value)}
-              disabled={inputDisabled}
-              className="h-9 rounded-md border-border/80 bg-background text-xs tabular-nums"
-            />
+          <form
+            className="space-y-1.5"
+            onSubmit={handleSubmit(onValidSubmit)}
+            noValidate
+          >
+            <div className="space-y-1">
+              <Label htmlFor="place-bid-amount" className="text-xs">
+                Your bid
+              </Label>
+              <Input
+                id="place-bid-amount"
+                inputMode="decimal"
+                autoComplete="off"
+                placeholder={
+                  nextBidMin != null
+                    ? `nextBidMin: ${nextBidMin}`
+                    : 'Enter your bid amount'
+                }
+                disabled={inputDisabled}
+                className={cn(
+                  'h-9 rounded-md border-border/80 bg-background text-xs tabular-nums',
+                  errors.amount && 'border-destructive'
+                )}
+                {...amountField}
+              />
+              {errors.amount?.message ? (
+                <p className="text-[11px] text-destructive" role="alert">
+                  {errors.amount.message}
+                </p>
+              ) : null}
+            </div>
             <PlaceBidButton
-              disabled={bidInvalid}
+              type="submit"
+              disabled={submitDisabled}
               cooldownRemainingSeconds={cooldownRemainingSeconds}
-              pending={placingBid}
-              onClick={onSubmitBid}
+              pending={isSubmitting}
             />
-          </div>
+          </form>
         ) : null}
       </CardContent>
     </Card>
