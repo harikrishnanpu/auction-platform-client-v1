@@ -30,6 +30,9 @@ export const apiFetch = async <T>(
       throw new Error(error.message);
     }
 
+    if (response.status === 401) {
+    }
+
     const responseData = await response.json();
 
     return {

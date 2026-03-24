@@ -155,10 +155,11 @@ export function useAuctionRoomSocket({
     );
 
     socket.on(AUCTION_SOCKET_EVENTS.BID_PLACED, (bid: IAuctionRoomBid) => {
+      console.log('BID_PLACED', bid);
       setSnapshot((prev) => {
         if (!prev) return prev;
 
-        const maxLiveFeed = mode === 'ADMIN' ? 10000 : 10;
+        const maxLiveFeed = mode === 'ADMIN' ? 10000 : 1000;
 
         const nextLiveFeed = (() => {
           const exists = prev.liveFeed.some((b) => b.id === bid.id);
@@ -177,6 +178,7 @@ export function useAuctionRoomSocket({
     socket.on(
       AUCTION_SOCKET_EVENTS.UPDATED,
       (payload: IAuctionUpdatedPayload) => {
+        console.log('UPDATED', payload);
         setSnapshot((prev) => {
           if (!prev) return prev;
           if (payload.auctionId !== auctionId) return prev;
@@ -196,6 +198,7 @@ export function useAuctionRoomSocket({
     );
 
     socket.on(AUCTION_SOCKET_EVENTS.ERROR, (payload: { message?: string }) => {
+      console.log('ERROR', payload);
       const message = payload?.message ?? 'Socket error';
       setError(message);
       setConnectionState('error');
