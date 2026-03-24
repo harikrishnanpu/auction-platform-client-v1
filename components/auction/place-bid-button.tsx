@@ -11,7 +11,9 @@ export type PlaceBidButtonProps = {
   cooldownRemainingSeconds: number;
   pending?: boolean;
   disabled: boolean;
-  onClick: () => void;
+  /** Use `submit` inside a form; omit `onClick`. */
+  type?: 'button' | 'submit';
+  onClick?: () => void;
 };
 
 export function PlaceBidButton({
@@ -19,6 +21,7 @@ export function PlaceBidButton({
   cooldownRemainingSeconds,
   pending,
   disabled,
+  type = 'button',
   onClick,
 }: PlaceBidButtonProps) {
   const inCooldown = cooldownRemainingSeconds > 0;
@@ -30,9 +33,9 @@ export function PlaceBidButton({
 
   return (
     <Button
-      type="button"
+      type={type}
       size="sm"
-      onClick={onClick}
+      onClick={type === 'button' ? onClick : undefined}
       disabled={disabled || inCooldown || pending}
       className={cn(
         'h-9 w-full gap-2 rounded-md text-xs font-semibold shadow-sm',

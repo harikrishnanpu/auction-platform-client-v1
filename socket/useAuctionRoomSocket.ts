@@ -155,7 +155,6 @@ export function useAuctionRoomSocket({
     );
 
     socket.on(AUCTION_SOCKET_EVENTS.BID_PLACED, (bid: IAuctionRoomBid) => {
-      console.log('bid is', bid);
       setSnapshot((prev) => {
         if (!prev) return prev;
 
