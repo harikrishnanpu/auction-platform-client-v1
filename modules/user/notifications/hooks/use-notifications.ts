@@ -1,7 +1,7 @@
 'use client';
 
 import { API_ENDPOINTS, buildApiUrl } from '@/apiInstance';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export interface IUserNotification {
   id: string;
@@ -10,57 +10,25 @@ export interface IUserNotification {
   isRead: boolean;
 }
 
-interface ApiEnvelope<T> {
-  success: boolean;
-  data: T;
-}
-
 export function useNotifications() {
   const [notifications, setNotifications] = useState<IUserNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNotifications = useCallback(async () => {
-    try {
-      const response = await fetch(
-        buildApiUrl(API_ENDPOINTS.user.notifications),
-        {
-          method: 'GET',
-          credentials: 'include',
-          cache: 'no-store',
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to load notifications');
-      }
-
-      const payload = (await response.json()) as ApiEnvelope<
-        IUserNotification[]
-      >;
-      const items = Array.isArray(payload.data) ? payload.data : [];
-      setNotifications(items);
-      setError(null);
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Failed to load notifications';
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    void fetchNotifications();
-
     const streamUrl = buildApiUrl(API_ENDPOINTS.user.notificationsStream);
     const source = new EventSource(streamUrl, { withCredentials: true });
 
+    source.onopen = () => {
+      setError(null);
+    };
+
     source.onmessage = (event) => {
       try {
-        const items = JSON.parse(event.data) as IUserNotification[];
-        setNotifications(Array.isArray(items) ? items : []);
-        setError(null);
+        const parsed = JSON.parse(event.data) as unknown;
+
+        const items = Array.isArray(parsed) ? parsed : [];
+        setNotifications(items as IUserNotification[]);
         setLoading(false);
       } catch {
         setError('Failed to parse notification stream');
@@ -69,14 +37,14 @@ export function useNotifications() {
     };
 
     source.onerror = () => {
-      setError('Notification stream disconnected. Using fallback refresh...');
+      setError('Notification stream disconnected');
       setLoading(false);
     };
 
     return () => {
       source.close();
     };
-  }, [fetchNotifications]);
+  }, []);
 
   const unreadCount = useMemo(
     () => notifications.filter((item) => !item.isRead).length,
@@ -88,6 +56,5 @@ export function useNotifications() {
     unreadCount,
     loading,
     error,
-    refresh: fetchNotifications,
   };
 }
