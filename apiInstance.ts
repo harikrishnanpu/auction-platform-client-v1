@@ -24,6 +24,9 @@ export const API_ENDPOINTS = {
     editProfileSendOtp: '/user/edit-profile-send-otp',
     updateAvatar: '/user/update-avatar-url',
     getKycUploadUrl: '/user/get-kyc-upload-url',
+    notifications: '/user/notifications',
+    notificationsStream: '/user/notifications/stream',
+    myAuctions: '/user/my-auctions',
   },
 
   kyc: {

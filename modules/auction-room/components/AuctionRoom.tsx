@@ -35,6 +35,8 @@ import { AuctionRoomLiveBidFeed } from './AuctionRoomLiveBidFeed';
 import { AuctionRoomMetaBadges } from './AuctionRoomMetaBadges';
 import { AuctionRoomSellerPanel } from './AuctionRoomSellerPanel';
 import { AuctionRoomParticipantsPanel } from './AuctionRoomParticipantsPanel';
+import { AuctionResultModal } from './AuctionResultModal';
+import useUserStore from '@/store/user.store';
 
 export function AuctionRoom({
   auctionId,
@@ -46,6 +48,8 @@ export function AuctionRoom({
   initialAuction?: IAuctionDto;
 }) {
   const [chatOpen, setChatOpen] = useState(false);
+  const { user } = useUserStore();
+  const [isResultModalDismissed, setIsResultModalDismissed] = useState(false);
 
   const {
     auction,
@@ -95,6 +99,16 @@ export function AuctionRoom({
     auctionStatusStr ?? undefined,
     endCountdown
   );
+
+  const resultOutcome = useMemo<'WIN' | 'LOSS' | 'ENDED'>(() => {
+    const winnerUserId = currentBid?.userId ?? null;
+    if (winnerUserId && user?.id === winnerUserId) return 'WIN';
+    if (winnerUserId) return 'LOSS';
+    return 'ENDED';
+  }, [currentBid?.userId, user?.id]);
+
+  const resultModalOpen =
+    mode === 'USER' && isAuctionEnded && !isResultModalDismissed;
 
   const handlePlaceBid = useCallback(
     async (amount: number) => {
@@ -158,6 +172,16 @@ export function AuctionRoom({
 
   return (
     <div className="min-h-screen bg-linear-to-b from-amber-950/4 via-background to-background dark:from-amber-400/5">
+      <AuctionResultModal
+        open={resultModalOpen}
+        outcome={resultOutcome}
+        title={auction?.title ?? 'Auction'}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsResultModalDismissed(true);
+          }
+        }}
+      />
       <div className="mx-auto max-w-6xl px-3 pb-12 pt-5 sm:px-5 lg:pb-14 lg:pt-6">
         <div className="space-y-3">
           {error ? <AuctionRoomAlert message={error} /> : null}
