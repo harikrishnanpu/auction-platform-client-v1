@@ -28,7 +28,7 @@ export function DashboardHeader() {
   const { user, setUser } = useUserStore();
   const {
     notifications,
-    unreadCount,
+    totalCount,
     loading: notificationsLoading,
     error: notificationsError,
   } = useNotifications();
@@ -114,9 +114,9 @@ export function DashboardHeader() {
                 className="p-2 text-muted-foreground hover:bg-muted rounded-full relative transition-colors"
               >
                 <Bell size={20} />
-                {unreadCount > 0 ? (
+                {totalCount > 0 ? (
                   <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-red-500 px-1 text-center text-[10px] font-semibold leading-4 text-white">
-                    {unreadCount > 9 ? '9+' : unreadCount}
+                    {totalCount > 9 ? '9+' : totalCount}
                   </span>
                 ) : null}
               </button>

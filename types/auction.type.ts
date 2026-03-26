@@ -116,3 +116,22 @@ export interface IGetBrowseAuctionsFilter {
 }
 
 export type IGetBrowseAuctionsResponse = IGetAllSellerAuctionsResponse;
+
+export interface IGetMyAuctionsFilter {
+  page: number;
+  limit: number;
+  search: string;
+  auctionType: 'ALL' | 'LONG' | 'LIVE' | 'SEALED';
+  status:
+    | 'ALL'
+    | 'DRAFT'
+    | 'ACTIVE'
+    | 'PAUSED'
+    | 'ENDED'
+    | 'SOLD'
+    | 'CANCELLED';
+  sort: string;
+  order: 'asc' | 'desc';
+}
+
+export type IGetMyAuctionsResponse = IGetAllSellerAuctionsResponse;

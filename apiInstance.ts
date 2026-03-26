@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
     getKycUploadUrl: '/user/get-kyc-upload-url',
     notifications: '/user/notifications',
     notificationsStream: '/user/notifications/stream',
+    myAuctions: '/user/my-auctions',
   },
 
   kyc: {

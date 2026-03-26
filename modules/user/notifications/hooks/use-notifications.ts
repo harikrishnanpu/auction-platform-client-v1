@@ -12,6 +12,7 @@ export interface IUserNotification {
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<IUserNotification[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,10 +26,18 @@ export function useNotifications() {
 
     source.onmessage = (event) => {
       try {
-        const parsed = JSON.parse(event.data) as unknown;
+        const parsed = JSON.parse(event.data) as {
+          items?: IUserNotification[];
+          totalCount?: number;
+        };
 
-        const items = Array.isArray(parsed) ? parsed : [];
-        setNotifications(items as IUserNotification[]);
+        const items = Array.isArray(parsed?.items) ? parsed.items : [];
+        setNotifications(items);
+        setTotalCount(
+          Number.isFinite(parsed?.totalCount as number)
+            ? (parsed.totalCount as number)
+            : 0
+        );
         setLoading(false);
       } catch {
         setError('Failed to parse notification stream');
@@ -46,14 +55,12 @@ export function useNotifications() {
     };
   }, []);
 
-  const unreadCount = useMemo(
-    () => notifications.filter((item) => !item.isRead).length,
-    [notifications]
-  );
+  const hasNotifications = useMemo(() => totalCount > 0, [totalCount]);
 
   return {
     notifications,
-    unreadCount,
+    totalCount,
+    hasNotifications,
     loading,
     error,
   };
