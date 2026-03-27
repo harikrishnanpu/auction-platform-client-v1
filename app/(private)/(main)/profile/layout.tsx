@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { User, Settings, Shield, Bell, Gavel } from 'lucide-react';
+import { User, Settings, Shield, Bell, Gavel, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import useUserStore from '@/store/user.store';
@@ -41,6 +41,7 @@ export default function ProfileLayout({
     { href: '/profile/security', label: 'Security', icon: Shield },
     { href: '/profile/notifications', label: 'Notifications', icon: Bell },
     { href: '/profile/my-auctions', label: 'My Auctions', icon: Gavel },
+    { href: '/profile/wallet', label: 'Wallet', icon: Wallet },
   ];
 
   return (

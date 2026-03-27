@@ -27,6 +27,7 @@ export const API_ENDPOINTS = {
     notifications: '/user/notifications',
     notificationsStream: '/user/notifications/stream',
     myAuctions: '/user/my-auctions',
+    wallet: '/user/wallet',
   },
 
   kyc: {
