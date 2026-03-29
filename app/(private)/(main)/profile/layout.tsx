@@ -45,8 +45,6 @@ export default function ProfileLayout({
 
   const links = [
     { href: '/profile', label: 'My Profile', icon: User },
-    { href: '/profile/settings', label: 'Account Settings', icon: Settings },
-    { href: '/profile/security', label: 'Security', icon: Shield },
     { href: '/profile/notifications', label: 'Notifications', icon: Bell },
     { href: '/profile/my-auctions', label: 'My Auctions', icon: Gavel },
     { href: '/profile/wallet', label: 'Wallet', icon: Wallet },

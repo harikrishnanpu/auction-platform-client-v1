@@ -1,4 +1,5 @@
 import { getKycStatusAction } from '@/actions/kyc/kyc.action';
+import SellerAreaShell from '@/modules/seller/components/seller-area-shell';
 import SellerLayoutInitializer from './seller-layout-initializer';
 
 export default async function SellerLayout({
@@ -10,7 +11,7 @@ export default async function SellerLayout({
 
   return (
     <SellerLayoutInitializer kycData={data} error={error}>
-      {children}
+      <SellerAreaShell>{children}</SellerAreaShell>
     </SellerLayoutInitializer>
   );
 }
