@@ -29,6 +29,18 @@ export const API_ENDPOINTS = {
     myAuctions: '/user/my-auctions',
     wallet: '/user/wallet',
   },
+  wallet: {
+    get: '/wallet',
+    withdraw: '/wallet/debit',
+    createTopupOrder: '/wallet/topup/create-order',
+    verifyTopup: '/wallet/topup/verify',
+  },
+  payments: {
+    list: '/payments',
+    createOrder: '/payments/create-order',
+    verify: '/payments/verify',
+    decline: '/payments/decline',
+  },
 
   kyc: {
     getKycStatus: '/kyc/get-kyc-status',
