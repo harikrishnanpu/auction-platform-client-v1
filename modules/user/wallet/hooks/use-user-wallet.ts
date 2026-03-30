@@ -1,21 +1,16 @@
 'use client';
 
-import { API_ENDPOINTS, buildApiUrl } from '@/apiInstance';
+import {
+  createWalletTopupOrderAction,
+  getWalletAction,
+  verifyWalletTopupAction,
+  withdrawWalletAction,
+} from '@/actions/user/wallet.actions';
 import { useCallback, useEffect, useState } from 'react';
-import type { IUserWallet } from '../types/wallet.types';
-
-type ApiEnvelope<T> = {
-  success: boolean;
-  data: T;
-  message?: string;
-};
-
-type TopupOrderResponse = {
-  orderId: string;
-  amountInPaise: number;
-  currency: string;
-  gatewayKey: string;
-};
+import type {
+  ICreateWalletTopupOrderResponse,
+  IUserWallet,
+} from '../types/wallet.types';
 
 export function useUserWallet() {
   const [wallet, setWallet] = useState<IUserWallet | null>(null);
@@ -25,16 +20,13 @@ export function useUserWallet() {
   const fetchWallet = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(buildApiUrl(API_ENDPOINTS.wallet.get), {
-        method: 'GET',
-        credentials: 'include',
-        cache: 'no-store',
-      });
+      const result = await getWalletAction();
 
-      if (!res.ok) throw new Error('Failed to load wallet');
+      if (!result.success || !result.data) {
+        throw new Error(result.error ?? 'Failed to load wallet');
+      }
 
-      const payload = (await res.json()) as ApiEnvelope<IUserWallet>;
-      setWallet(payload.data);
+      setWallet(result.data);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load wallet');
@@ -48,24 +40,16 @@ export function useUserWallet() {
     void fetchWallet();
   }, [fetchWallet]);
 
-  const createTopupOrder = useCallback(async (amount: number) => {
-    const res = await fetch(
-      buildApiUrl(API_ENDPOINTS.wallet.createTopupOrder),
-      {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ amount }),
+  const createTopupOrder = useCallback(
+    async (amount: number): Promise<ICreateWalletTopupOrderResponse> => {
+      const result = await createWalletTopupOrderAction({ amount });
+      if (!result.success || !result.data) {
+        throw new Error(result.error ?? 'Failed to create top-up order');
       }
-    );
-
-    if (!res.ok) throw new Error('Failed to create top-up order');
-
-    const payload = (await res.json()) as ApiEnvelope<TopupOrderResponse>;
-    return payload.data;
-  }, []);
+      return result.data;
+    },
+    []
+  );
 
   const verifyTopup = useCallback(
     async (input: {
@@ -73,17 +57,10 @@ export function useUserWallet() {
       paymentId: string;
       signature: string;
     }) => {
-      const res = await fetch(buildApiUrl(API_ENDPOINTS.wallet.verifyTopup), {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      });
-
-      if (!res.ok) throw new Error('Failed to verify top-up payment');
-
+      const result = await verifyWalletTopupAction(input);
+      if (!result.success) {
+        throw new Error(result.error ?? 'Failed to verify top-up payment');
+      }
       await fetchWallet();
     },
     [fetchWallet]
@@ -91,17 +68,10 @@ export function useUserWallet() {
 
   const withdraw = useCallback(
     async (amount: number) => {
-      const res = await fetch(buildApiUrl(API_ENDPOINTS.wallet.withdraw), {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ amount }),
-      });
-
-      if (!res.ok) throw new Error('Failed to withdraw wallet amount');
-
+      const result = await withdrawWalletAction({ amount });
+      if (!result.success) {
+        throw new Error(result.error ?? 'Failed to withdraw wallet amount');
+      }
       await fetchWallet();
     },
     [fetchWallet]

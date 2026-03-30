@@ -7,3 +7,10 @@ export interface IUserWallet {
   heldBalance: number;
   currency: WalletCurrency;
 }
+
+export interface ICreateWalletTopupOrderResponse {
+  orderId: string;
+  amountInPaise: number;
+  currency: string;
+  gatewayKey: string;
+}
