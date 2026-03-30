@@ -27,6 +27,19 @@ export const API_ENDPOINTS = {
     notifications: '/user/notifications',
     notificationsStream: '/user/notifications/stream',
     myAuctions: '/user/my-auctions',
+    wallet: '/user/wallet',
+  },
+  wallet: {
+    get: '/wallet',
+    withdraw: '/wallet/debit',
+    createTopupOrder: '/wallet/topup/create-order',
+    verifyTopup: '/wallet/topup/verify',
+  },
+  payments: {
+    list: '/payments',
+    createOrder: '/payments/create-order',
+    verify: '/payments/verify',
+    decline: '/payments/decline',
   },
 
   kyc: {
@@ -78,6 +91,7 @@ export const API_ENDPOINTS = {
     requestAuctionCategory: '/seller/auction-category/request',
     getSellerAuctions: '/seller/auctions',
     getSellerAuctionById: (id: string) => `/seller/auctions/${id}`,
+    getSellerAuctionPayments: '/seller/payments',
   },
 } as const;
 
