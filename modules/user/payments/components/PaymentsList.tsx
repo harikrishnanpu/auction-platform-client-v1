@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { formatInr } from '@/lib/format-inr';
+import { formatInr } from '@/utils/format-inr';
 import { PaymentDueDate } from './PaymentDueDate';
 import { PaymentPhaseBadge } from './PaymentPhaseBadge';
 import { PaymentStatusBadge } from './PaymentStatusBadge';
@@ -48,6 +48,7 @@ export function PaymentsList({
               Created {new Date(item.createdAt).toLocaleString()}
             </p>
           </div>
+
           <div className="flex flex-wrap items-center gap-2">
             <PaymentStatusBadge status={item.status} />
             {item.status === 'PENDING' ? (

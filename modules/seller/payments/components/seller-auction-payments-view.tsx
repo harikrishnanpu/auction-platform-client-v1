@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { formatInr } from '@/lib/format-inr';
+import { formatInr } from '@/utils/format-inr';
 import { PaymentDueDate } from '@/modules/user/payments/components/PaymentDueDate';
 import { PaymentPhaseBadge } from '@/modules/user/payments/components/PaymentPhaseBadge';
 import { PaymentStatusBadge } from '@/modules/user/payments/components/PaymentStatusBadge';

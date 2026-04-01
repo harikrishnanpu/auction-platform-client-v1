@@ -182,6 +182,7 @@ export function AuctionRoom({
           }
         }}
       />
+
       <div className="mx-auto max-w-6xl px-3 pb-12 pt-5 sm:px-5 lg:pb-14 lg:pt-6">
         <div className="space-y-3">
           {error ? <AuctionRoomAlert message={error} /> : null}
