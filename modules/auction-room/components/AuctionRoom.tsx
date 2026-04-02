@@ -33,6 +33,7 @@ import { AuctionRoomDetailsSection } from './AuctionRoomDetailsSection';
 import { AuctionRoomHero } from './AuctionRoomHero';
 import { AuctionRoomLiveBidFeed } from './AuctionRoomLiveBidFeed';
 import { AuctionRoomMetaBadges } from './AuctionRoomMetaBadges';
+import { AuctionRoomFallbackEndedPanel } from './AuctionRoomFallbackEndedPanel';
 import { AuctionRoomSellerPanel } from './AuctionRoomSellerPanel';
 import { AuctionRoomParticipantsPanel } from './AuctionRoomParticipantsPanel';
 import { AuctionResultModal } from './AuctionResultModal';
@@ -50,6 +51,9 @@ export function AuctionRoom({
   const [chatOpen, setChatOpen] = useState(false);
   const { user } = useUserStore();
   const [isResultModalDismissed, setIsResultModalDismissed] = useState(false);
+  const [auctionStatusOverride, setAuctionStatusOverride] = useState<
+    string | null
+  >(null);
 
   const {
     auction,
@@ -64,6 +68,8 @@ export function AuctionRoom({
     pauseAuction,
     resumeAuction,
     endAuction,
+    sendFallbackPublicNotification,
+    markAuctionFailed,
   } = useAuctionRoomSocket({
     auctionId,
     mode,
@@ -91,7 +97,8 @@ export function AuctionRoom({
   );
 
   const endCountdown = useAuctionRoomCountdown(auction?.endAt);
-  const auctionStatusStr = (auction?.status as unknown as string) ?? null;
+  const auctionStatusStr =
+    auctionStatusOverride ?? (auction?.status as unknown as string) ?? null;
   const isAuctionActive = isAuctionActiveForBidding(
     auctionStatusStr ?? undefined
   );
@@ -252,6 +259,15 @@ export function AuctionRoom({
                     onPause={handlePause}
                     onResume={handleResume}
                     onEnd={handleEnd}
+                  />
+                ) : null}
+
+                {canControlAuction && auctionStatusStr === 'FALLBACK_ENDED' ? (
+                  <AuctionRoomFallbackEndedPanel
+                    auctionId={auctionId}
+                    onStatusUpdated={setAuctionStatusOverride}
+                    onSendPublicNotification={sendFallbackPublicNotification}
+                    onMarkAuctionFailed={markAuctionFailed}
                   />
                 ) : null}
 

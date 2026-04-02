@@ -263,7 +263,7 @@ export function useAuctionRoomSocket({
   const emitAuctionControl = useCallback(
     (
       event: AuctionSocketControlEvent
-    ): Promise<{ success: boolean; error?: string }> => {
+    ): Promise<{ success: boolean; data?: unknown; error?: string }> => {
       const socket = socketRef.current;
       if (!socket) {
         return Promise.resolve({ success: false, error: 'Not connected' });
@@ -277,7 +277,7 @@ export function useAuctionRoomSocket({
             });
             return;
           }
-          resolve({ success: true });
+          resolve({ success: true, data: ack?.data });
         });
       });
     },
@@ -299,6 +299,19 @@ export function useAuctionRoomSocket({
     [emitAuctionControl]
   );
 
+  const sendFallbackPublicNotification = useCallback(
+    () =>
+      emitAuctionControl(
+        AUCTION_SOCKET_EVENTS.SEND_FALLBACK_PUBLIC_NOTIFICATION
+      ),
+    [emitAuctionControl]
+  );
+
+  const markAuctionFailed = useCallback(
+    () => emitAuctionControl(AUCTION_SOCKET_EVENTS.MARK_AUCTION_FAILED),
+    [emitAuctionControl]
+  );
+
   return {
     snapshot,
     auction: snapshot?.auction ?? initialAuction ?? null,
@@ -314,5 +327,7 @@ export function useAuctionRoomSocket({
     pauseAuction,
     resumeAuction,
     endAuction,
+    sendFallbackPublicNotification,
+    markAuctionFailed,
   };
 }

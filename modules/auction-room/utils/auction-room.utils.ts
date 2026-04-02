@@ -107,6 +107,8 @@ export function auctionStatusLabel(status: string): string {
     case 'SOLD':
     case 'COMPLETED':
       return 'Ended';
+    case 'FALLBACK_ENDED':
+      return 'Fallback ended';
     case 'CANCELLED':
       return 'Cancelled';
     default:
@@ -137,7 +139,14 @@ export function isAuctionEndedByStatus(
 ): boolean {
   if (!status) return endCountdown === '0:00';
   const s = status.toUpperCase();
-  if (s === 'ENDED' || s === 'SOLD' || s === 'COMPLETED') return true;
+  if (
+    s === 'ENDED' ||
+    s === 'SOLD' ||
+    s === 'COMPLETED' ||
+    s === 'FALLBACK_ENDED'
+  ) {
+    return true;
+  }
   return endCountdown === '0:00';
 }
 
