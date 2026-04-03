@@ -5,6 +5,10 @@ import { io, type Socket } from 'socket.io-client';
 
 import { env } from '@/env';
 import type { IAuctionDto } from '@/types/auction.type';
+import type {
+  IPaymentGatewayOrder,
+  IVerifyGatewayPaymentInput,
+} from '@/types/payment-gateway.type';
 
 import {
   AUCTION_SOCKET_EVENTS,
@@ -312,6 +316,96 @@ export function useAuctionRoomSocket({
     [emitAuctionControl]
   );
 
+  const payFallbackPublic = useCallback((): Promise<{
+    success: boolean;
+    data?: IPaymentGatewayOrder;
+    error?: string;
+  }> => {
+    const socket = socketRef.current;
+    if (!socket) {
+      return Promise.resolve({ success: false, error: 'Not connected' });
+    }
+    return new Promise((resolve) => {
+      socket.emit(
+        AUCTION_SOCKET_EVENTS.PAY_FALLBACK_PUBLIC,
+        { auctionId },
+        (ack?: SocketControlAck) => {
+          if (ack?.success === false) {
+            resolve({
+              success: false,
+              error: ack.error ?? 'Request failed',
+            });
+            return;
+          }
+          resolve({
+            success: true,
+            data: ack?.data as IPaymentGatewayOrder | undefined,
+          });
+        }
+      );
+    });
+  }, [auctionId]);
+
+  const declineFallbackPublic = useCallback((): Promise<{
+    success: boolean;
+    data?: unknown;
+    error?: string;
+  }> => {
+    const socket = socketRef.current;
+    if (!socket) {
+      return Promise.resolve({ success: false, error: 'Not connected' });
+    }
+    return new Promise((resolve) => {
+      socket.emit(
+        AUCTION_SOCKET_EVENTS.DECLINE_FALLBACK_PUBLIC,
+        { auctionId },
+        (ack?: SocketControlAck) => {
+          if (ack?.success === false) {
+            resolve({
+              success: false,
+              error: ack.error ?? 'Request failed',
+            });
+            return;
+          }
+          resolve({ success: true, data: ack?.data });
+        }
+      );
+    });
+  }, [auctionId]);
+
+  const verifyFallbackPublicAuctionPayment = useCallback(
+    (
+      input: IVerifyGatewayPaymentInput
+    ): Promise<{
+      success: boolean;
+      data?: unknown;
+      error?: string;
+    }> => {
+      const socket = socketRef.current;
+      if (!socket) {
+        return Promise.resolve({ success: false, error: 'Not connected' });
+      }
+      return new Promise((resolve) => {
+        socket.emit(
+          AUCTION_SOCKET_EVENTS.VERIFY_FALLBACK_PUBLIC_AUCTION_PAYMENT,
+          { auctionId, ...input },
+          (ack?: SocketControlAck) => {
+            if (ack?.success === false) {
+              resolve({
+                success: false,
+                error: ack.error ?? 'Verification failed',
+              });
+              return;
+            }
+
+            resolve({ success: true, data: ack?.data });
+          }
+        );
+      });
+    },
+    [auctionId]
+  );
+
   return {
     snapshot,
     auction: snapshot?.auction ?? initialAuction ?? null,
@@ -329,5 +423,8 @@ export function useAuctionRoomSocket({
     endAuction,
     sendFallbackPublicNotification,
     markAuctionFailed,
+    payFallbackPublic,
+    declineFallbackPublic,
+    verifyFallbackPublicAuctionPayment,
   };
 }

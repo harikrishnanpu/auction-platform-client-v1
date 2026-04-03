@@ -29,8 +29,9 @@ const STATUS_OPTIONS: Array<{ label: string; value: string }> = [
   { label: 'All statuses', value: 'ALL' },
   { label: 'Draft', value: 'DRAFT' },
   { label: 'Published', value: 'PUBLISHED' },
+  { label: 'Ended', value: 'ENDED' },
+  { label: 'Sold', value: 'SOLD' },
   { label: 'Cancelled', value: 'CANCELLED' },
-  { label: 'Completed', value: 'COMPLETED' },
 ];
 
 const AUCTION_TYPE_OPTIONS: Array<{ label: string; value: string }> = [

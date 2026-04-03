@@ -16,8 +16,8 @@ import { useAuctionRoomCountdown } from '../hooks/useAuctionRoomCountdown';
 import { useBidCooldown } from '../hooks/useBidCooldown';
 import type { AuctionRoomMode } from '../../../socket/useAuctionRoomSocket';
 import { useAuctionRoomSocket } from '../../../socket/useAuctionRoomSocket';
+import { auctionStatusLabel } from '@/utils/auction-utils';
 import {
-  auctionStatusLabel,
   computeNextBidMin,
   isAuctionActiveForBidding,
   isAuctionEndedByStatus,
@@ -34,6 +34,7 @@ import { AuctionRoomHero } from './AuctionRoomHero';
 import { AuctionRoomLiveBidFeed } from './AuctionRoomLiveBidFeed';
 import { AuctionRoomMetaBadges } from './AuctionRoomMetaBadges';
 import { AuctionRoomFallbackEndedPanel } from './AuctionRoomFallbackEndedPanel';
+import { AuctionRoomFallbackPublicNotificationPanel } from './AuctionRoomFallbackPublicNotificationPanel';
 import { AuctionRoomSellerPanel } from './AuctionRoomSellerPanel';
 import { AuctionRoomParticipantsPanel } from './AuctionRoomParticipantsPanel';
 import { AuctionResultModal } from './AuctionResultModal';
@@ -70,6 +71,9 @@ export function AuctionRoom({
     endAuction,
     sendFallbackPublicNotification,
     markAuctionFailed,
+    payFallbackPublic,
+    declineFallbackPublic,
+    verifyFallbackPublicAuctionPayment,
   } = useAuctionRoomSocket({
     auctionId,
     mode,
@@ -115,7 +119,10 @@ export function AuctionRoom({
   }, [currentBid?.userId, user?.id]);
 
   const resultModalOpen =
-    mode === 'USER' && isAuctionEnded && !isResultModalDismissed;
+    mode === 'USER' &&
+    isAuctionEnded &&
+    auctionStatusStr !== 'FALLBACK_PUBLIC_NOTIFICATION' &&
+    !isResultModalDismissed;
 
   const handlePlaceBid = useCallback(
     async (amount: number) => {
@@ -268,6 +275,23 @@ export function AuctionRoom({
                     onStatusUpdated={setAuctionStatusOverride}
                     onSendPublicNotification={sendFallbackPublicNotification}
                     onMarkAuctionFailed={markAuctionFailed}
+                  />
+                ) : null}
+
+                {mode === 'USER' &&
+                auctionStatusStr === 'FALLBACK_PUBLIC_NOTIFICATION' &&
+                auction ? (
+                  <AuctionRoomFallbackPublicNotificationPanel
+                    auctionId={auctionId}
+                    auctionTitle={auction.title}
+                    startPrice={auction.startPrice}
+                    canInteract={canInteract}
+                    onStatusUpdated={setAuctionStatusOverride}
+                    payFallbackPublic={payFallbackPublic}
+                    verifyFallbackPublicAuctionPayment={
+                      verifyFallbackPublicAuctionPayment
+                    }
+                    onDecline={declineFallbackPublic}
                   />
                 ) : null}
 

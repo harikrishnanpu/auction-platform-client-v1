@@ -94,28 +94,6 @@ export function isCountdownLowUrgency(endCountdown: string | null): boolean {
   );
 }
 
-export function auctionStatusLabel(status: string): string {
-  switch (status) {
-    case 'ACTIVE':
-    case 'PUBLISHED':
-      return 'Live';
-    case 'PAUSED':
-      return 'Paused';
-    case 'DRAFT':
-      return 'Draft';
-    case 'ENDED':
-    case 'SOLD':
-    case 'COMPLETED':
-      return 'Ended';
-    case 'FALLBACK_ENDED':
-      return 'Fallback ended';
-    case 'CANCELLED':
-      return 'Cancelled';
-    default:
-      return status;
-  }
-}
-
 export function auctionMediaUrl(auction: IAuctionDto | null): string {
   const a0 = auction?.assets?.[0];
   return a0?.fileKey ? getAuctionAssetUrl(a0.fileKey) : '';
@@ -142,8 +120,8 @@ export function isAuctionEndedByStatus(
   if (
     s === 'ENDED' ||
     s === 'SOLD' ||
-    s === 'COMPLETED' ||
-    s === 'FALLBACK_ENDED'
+    s === 'FALLBACK_ENDED' ||
+    s === 'FALLBACK_PUBLIC_NOTIFICATION'
   ) {
     return true;
   }

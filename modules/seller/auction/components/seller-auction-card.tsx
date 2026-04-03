@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import {
+  auctionStatusLabel,
   formatAuctionDateTime,
   formatAuctionPrice,
   getAuctionCategoryName,
@@ -20,27 +21,14 @@ function statusAccent(status: AuctionStatus): string {
       return 'border-l-emerald-500';
     case 'DRAFT':
       return 'border-l-amber-500';
-    case 'COMPLETED':
-      return 'border-l-sky-500';
+    case 'SOLD':
+      return 'border-l-emerald-600';
+    case 'ENDED':
+      return 'border-l-slate-500';
     case 'CANCELLED':
       return 'border-l-destructive';
     default:
       return 'border-l-muted-foreground/40';
-  }
-}
-
-function statusLabel(status: AuctionStatus): string {
-  switch (status) {
-    case 'PUBLISHED':
-      return 'Live';
-    case 'DRAFT':
-      return 'Draft';
-    case 'COMPLETED':
-      return 'Done';
-    case 'CANCELLED':
-      return 'Off';
-    default:
-      return status;
   }
 }
 
@@ -50,8 +38,10 @@ function statusBadgeClass(status: AuctionStatus): string {
       return 'border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-700 dark:text-emerald-300';
     case 'DRAFT':
       return 'border-amber-500/25 bg-amber-500/[0.08] text-amber-800 dark:text-amber-200';
-    case 'COMPLETED':
-      return 'border-sky-500/25 bg-sky-500/[0.08] text-sky-800 dark:text-sky-200';
+    case 'SOLD':
+      return 'border-emerald-600/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200';
+    case 'ENDED':
+      return 'border-border bg-muted/50 text-muted-foreground';
     case 'CANCELLED':
       return 'border-destructive/25 bg-destructive/10 text-destructive';
     default:
@@ -124,7 +114,7 @@ export function SellerAuctionCard({
                   statusBadgeClass(auction.status)
                 )}
               >
-                {statusLabel(auction.status)}
+                {auctionStatusLabel(auction.status)}
               </Badge>
             </div>
 

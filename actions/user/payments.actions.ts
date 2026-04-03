@@ -1,11 +1,12 @@
 'use server';
 
 import { paymentsService } from '@/services/user/payments.service';
-import type {
-  ICreatePaymentOrderResponse,
-  IUserPaymentsPage,
-} from '@/modules/user/payments/types/payments.types';
+import type { IUserPaymentsPage } from '@/modules/user/payments/types/payments.types';
 import { ApiResponse } from '@/types/api.index';
+import type {
+  IPaymentGatewayOrder,
+  IVerifyGatewayPaymentInput,
+} from '@/types/payment-gateway.type';
 
 export const getUserPaymentsAction = async (params: {
   page: number;
@@ -23,15 +24,12 @@ export const declinePaymentAction = async (params: {
 
 export const createPaymentOrderAction = async (params: {
   paymentId: string;
-}): Promise<ApiResponse<ICreatePaymentOrderResponse>> => {
+}): Promise<ApiResponse<IPaymentGatewayOrder>> => {
   return await paymentsService.createPaymentOrder(params);
 };
 
-export const verifyPaymentAction = async (params: {
-  paymentId: string;
-  orderId: string;
-  gatewayPaymentId: string;
-  signature: string;
-}): Promise<ApiResponse<null>> => {
+export const verifyPaymentAction = async (
+  params: IVerifyGatewayPaymentInput
+): Promise<ApiResponse<null>> => {
   return await paymentsService.verifyPayment(params);
 };

@@ -6,12 +6,12 @@ import {
   getUserPaymentsAction,
   verifyPaymentAction,
 } from '@/actions/user/payments.actions';
-import { useCallback, useEffect, useState } from 'react';
 import type {
-  ICreatePaymentOrderResponse,
-  IUserPaymentsPage,
-  PaymentStatus,
-} from '../types/payments.types';
+  IPaymentGatewayOrder,
+  IVerifyGatewayPaymentInput,
+} from '@/types/payment-gateway.type';
+import { useCallback, useEffect, useState } from 'react';
+import type { IUserPaymentsPage, PaymentStatus } from '../types/payments.types';
 
 export function useUserPayments({
   page,
@@ -52,7 +52,7 @@ export function useUserPayments({
   }, [fetchPayments]);
 
   const createPaymentOrder = useCallback(
-    async (paymentId: string): Promise<ICreatePaymentOrderResponse> => {
+    async (paymentId: string): Promise<IPaymentGatewayOrder> => {
       const result = await createPaymentOrderAction({ paymentId });
       if (!result.success || !result.data) {
         throw new Error(result.error ?? 'Failed to create payment order');
@@ -63,12 +63,7 @@ export function useUserPayments({
   );
 
   const verifyPayment = useCallback(
-    async (input: {
-      paymentId: string;
-      orderId: string;
-      gatewayPaymentId: string;
-      signature: string;
-    }) => {
+    async (input: IVerifyGatewayPaymentInput) => {
       const result = await verifyPaymentAction(input);
       if (!result.success) {
         throw new Error(result.error ?? 'Failed to verify payment');

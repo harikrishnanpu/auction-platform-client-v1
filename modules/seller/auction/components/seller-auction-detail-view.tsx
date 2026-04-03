@@ -1,8 +1,9 @@
 import Image from 'next/image';
 
 import { Badge } from '@/components/ui/badge';
-import type { IAuctionDto, AuctionStatus } from '@/types/auction.type';
+import type { IAuctionDto } from '@/types/auction.type';
 import {
+  auctionStatusLabel,
   formatAuctionDateTime,
   formatAuctionPrice,
   getAuctionAssetUrl,
@@ -10,21 +11,6 @@ import {
   getAuctionTypeLabel,
 } from '@/utils/auction-utils';
 import { cn } from '@/lib/utils';
-
-function statusLabel(status: AuctionStatus): string {
-  switch (status) {
-    case 'PUBLISHED':
-      return 'Live';
-    case 'DRAFT':
-      return 'Draft';
-    case 'COMPLETED':
-      return 'Done';
-    case 'CANCELLED':
-      return 'Off';
-    default:
-      return status;
-  }
-}
 
 export function SellerAuctionDetailView({ auction }: { auction: IAuctionDto }) {
   const categoryName = getAuctionCategoryName(auction);
@@ -51,7 +37,7 @@ export function SellerAuctionDetailView({ auction }: { auction: IAuctionDto }) {
                 {typeLabel}
               </Badge>
               <Badge variant="secondary" className="h-6 text-[11px]">
-                {statusLabel(auction.status)}
+                {auctionStatusLabel(auction.status)}
               </Badge>
             </div>
           </div>

@@ -41,7 +41,7 @@ export function PaymentsList({
               <PaymentPhaseBadge phase={item.phase} />
             </div>
             <p className="text-xs text-muted-foreground">
-              Auction Ref: {item.referenceId}
+              Auction Ref: {item.paymentId}
             </p>
             <PaymentDueDate dueAt={item.dueAt} />
             <p className="text-xs text-muted-foreground">

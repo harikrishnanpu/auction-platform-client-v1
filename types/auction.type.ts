@@ -4,9 +4,10 @@ export type AuctionStatus =
   | 'DRAFT'
   | 'PUBLISHED'
   | 'CANCELLED'
-  | 'COMPLETED'
+  | 'ENDED'
+  | 'SOLD'
   | 'FALLBACK_ENDED'
-  | 'ENDED';
+  | 'FALLBACK_PUBLIC_NOTIFICATION';
 
 export interface CreateAuctionInput {
   auctionType: AuctionType;
