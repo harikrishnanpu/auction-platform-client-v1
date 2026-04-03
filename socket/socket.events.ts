@@ -7,7 +7,7 @@ export const AUCTION_SOCKET_EVENTS = {
   END: 'auction:end',
   SEND_FALLBACK_PUBLIC_NOTIFICATION: 'auction:sendFallbackPublicNotification',
   PAY_FALLBACK_PUBLIC: 'auction:createPaymentOrderForPublicFallbackAuction',
-  DECLINE_FALLBACK_PUBLIC: 'auction:declineFallbackPublic',
+  DECLINE_FALLBACK_PUBLIC: 'auction:declinePaymentForPublicFallbackAuction',
   VERIFY_FALLBACK_PUBLIC_AUCTION_PAYMENT:
     'auction:verifyPaymentForPublicFallbackAuction',
   MARK_AUCTION_FAILED: 'auction:failAuction',
