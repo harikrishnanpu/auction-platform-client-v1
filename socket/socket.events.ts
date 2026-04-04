@@ -1,6 +1,7 @@
 export const AUCTION_SOCKET_EVENTS = {
   JOIN: 'auction:join',
   PLACE_BID: 'auction:placeBid',
+  ADD_AUCTION_PARTICIPANT: 'auction:addAuctionParticipant',
   SEND_CHAT: 'auction:sendChatMessage',
   PAUSE: 'auction:pause',
   RESUME: 'auction:resume',

@@ -283,6 +283,32 @@ export function useAuctionRoomSocket({
     [auctionId]
   );
 
+  const addAuctionParticipant = useCallback((): Promise<{
+    success: boolean;
+    error?: string;
+  }> => {
+    const socket = socketRef.current;
+    if (!socket) {
+      return Promise.resolve({ success: false, error: 'Not connected' });
+    }
+    return new Promise((resolve) => {
+      socket.emit(
+        AUCTION_SOCKET_EVENTS.ADD_AUCTION_PARTICIPANT,
+        { auctionId },
+        (ack?: SocketControlAck) => {
+          if (ack?.success === false) {
+            resolve({
+              success: false,
+              error: ack.error ?? 'Could not join auction',
+            });
+            return;
+          }
+          resolve({ success: true });
+        }
+      );
+    });
+  }, [auctionId]);
+
   const sendChatMessage = useCallback(
     (message: string) => {
       socketRef.current?.emit(AUCTION_SOCKET_EVENTS.SEND_CHAT, {
@@ -354,6 +380,7 @@ export function useAuctionRoomSocket({
     if (!socket) {
       return Promise.resolve({ success: false, error: 'Not connected' });
     }
+
     return new Promise((resolve) => {
       socket.emit(
         AUCTION_SOCKET_EVENTS.PAY_FALLBACK_PUBLIC,
@@ -449,6 +476,7 @@ export function useAuctionRoomSocket({
     error,
     roomId,
     placeBid,
+    addAuctionParticipant,
     sendChatMessage,
     pauseAuction,
     resumeAuction,

@@ -1,7 +1,9 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+
+import { getWalletAction } from '@/actions/user/wallet.actions';
 
 import type { IAuctionDto, AuctionType } from '@/types/auction.type';
 import {
@@ -20,6 +22,8 @@ import { useBidCooldown } from '../hooks/useBidCooldown';
 import type { AuctionRoomMode } from '../../../socket/useAuctionRoomSocket';
 import { useAuctionRoomSocket } from '../../../socket/useAuctionRoomSocket';
 import {
+  auctionParticipationDepositAmount,
+  checkIsPlaceBidEligible,
   computeNextBidMin,
   isLiveAuctionType,
   isSealedAuctionType,
@@ -37,6 +41,7 @@ import { AuctionRoomLiveBidFeed } from './AuctionRoomLiveBidFeed';
 import { AuctionRoomMetaBadges } from './AuctionRoomMetaBadges';
 import { AuctionRoomParticipantsPanel } from './AuctionRoomParticipantsPanel';
 import { AuctionRoomSellerPanel } from './AuctionRoomSellerPanel';
+import { AuctionPlaceBidTermsModal } from './AuctionPlaceBidTermsModal';
 import { AuctionResultModal } from './AuctionResultModal';
 import { AuctionSoldSummaryCard } from './AuctionSoldSummaryCard';
 import { FallbackPublicParticipantStatsCard } from './FallbackPublicParticipantStatsCard';
@@ -58,6 +63,10 @@ export function AuctionRoomCore({
   showFallbackParticipantStats,
 }: AuctionRoomCoreProps) {
   const { user } = useUserStore();
+  const [placeBidTermsOpen, setPlaceBidTermsOpen] = useState(false);
+  const [lockParticipantBusy, setLockParticipantBusy] = useState(false);
+  const [walletMain, setWalletMain] = useState<number | null>(null);
+  const [walletCurrency, setWalletCurrency] = useState('INR');
   const [isResultModalDismissed, setIsResultModalDismissed] = useState(false);
   const [auctionStatusOverride, setAuctionStatusOverride] = useState<
     string | null
@@ -70,6 +79,7 @@ export function AuctionRoomCore({
     connectionState,
     error,
     placeBid,
+    addAuctionParticipant,
     chatMessages,
     sendChatMessage,
     participants,
@@ -131,6 +141,26 @@ export function AuctionRoomCore({
     };
   }, [soldSummary, auctionStatusStr, currentBid, participants]);
 
+  useEffect(() => {
+    if (!placeBidTermsOpen || mode !== 'USER') return;
+    let cancelled = false;
+    void (async () => {
+      const res = await getWalletAction();
+      if (cancelled) return;
+      if (res.success && res.data) {
+        setWalletMain(res.data.mainBalance);
+        setWalletCurrency(res.data.currency ?? 'INR');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [placeBidTermsOpen, mode]);
+
+  const participationDeposit = auction
+    ? auctionParticipationDepositAmount(auction.startPrice)
+    : 0;
+
   const resultOutcome = useMemo<'WIN' | 'LOSS' | 'ENDED'>(() => {
     const winnerUserId = currentBid?.userId ?? null;
     if (winnerUserId && user?.id === winnerUserId) return 'WIN';
@@ -147,16 +177,33 @@ export function AuctionRoomCore({
 
   const handlePlaceBid = useCallback(
     async (amount: number) => {
+      if (mode === 'USER' && !checkIsPlaceBidEligible(user?.id, participants)) {
+        setPlaceBidTermsOpen(true);
+        return { success: false as const };
+      }
+
       const res = await placeBid(amount);
       if (res.success && auction) {
         startBidCooldown(auction.bidCooldownSeconds ?? 0);
-      } else if (!res.success) {
-        toast.error(res.error ?? 'Could not place bid');
+      } else if (!res.success && res.error) {
+        toast.error(res.error);
       }
       return res;
     },
-    [placeBid, auction, startBidCooldown]
+    [auction, mode, participants, placeBid, startBidCooldown, user?.id]
   );
+
+  const handleLockParticipation = useCallback(async () => {
+    setLockParticipantBusy(true);
+    const res = await addAuctionParticipant();
+    setLockParticipantBusy(false);
+    if (!res.success) {
+      toast.error(res.error ?? 'Could not lock amount');
+      return;
+    }
+    toast.success('You can place bids now');
+    setPlaceBidTermsOpen(false);
+  }, [addAuctionParticipant]);
 
   const canControlAuction = mode === 'SELLER' || mode === 'ADMIN';
 
@@ -170,6 +217,17 @@ export function AuctionRoomCore({
 
   return (
     <div className="min-h-screen bg-linear-to-b from-amber-950/4 via-background to-background dark:from-amber-400/5">
+      <AuctionPlaceBidTermsModal
+        open={placeBidTermsOpen}
+        onOpenChange={setPlaceBidTermsOpen}
+        depositAmount={participationDeposit}
+        walletMain={walletMain}
+        walletCurrency={walletCurrency}
+        canInteract={canInteract}
+        lockBusy={lockParticipantBusy}
+        onLockAmount={() => void handleLockParticipation()}
+      />
+
       <AuctionResultModal
         open={resultModalOpen}
         outcome={resultOutcome}

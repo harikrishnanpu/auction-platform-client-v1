@@ -132,3 +132,15 @@ export function isAuctionEndedByStatus(
 export function isAuctionActiveForBidding(status: string | undefined): boolean {
   return (status ?? '').toUpperCase() === 'ACTIVE';
 }
+
+export function checkIsPlaceBidEligible(
+  userId: string | undefined,
+  participants: Array<{ userId: string }>
+): boolean {
+  if (!userId) return false;
+  return participants.some((p) => p.userId === userId);
+}
+
+export function auctionParticipationDepositAmount(startPrice: number): number {
+  return startPrice * 0.1;
+}
