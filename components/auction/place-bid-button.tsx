@@ -7,11 +7,9 @@ import { cn } from '@/lib/utils';
 
 export type PlaceBidButtonProps = {
   className?: string;
-  /** When &gt; 0, button shows wait timer and is disabled. */
   cooldownRemainingSeconds: number;
   pending?: boolean;
   disabled: boolean;
-  /** Use `submit` inside a form; omit `onClick`. */
   type?: 'button' | 'submit';
   onClick?: () => void;
 };

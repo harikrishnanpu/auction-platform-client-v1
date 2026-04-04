@@ -94,26 +94,6 @@ export function isCountdownLowUrgency(endCountdown: string | null): boolean {
   );
 }
 
-export function auctionStatusLabel(status: string): string {
-  switch (status) {
-    case 'ACTIVE':
-    case 'PUBLISHED':
-      return 'Live';
-    case 'PAUSED':
-      return 'Paused';
-    case 'DRAFT':
-      return 'Draft';
-    case 'ENDED':
-    case 'SOLD':
-    case 'COMPLETED':
-      return 'Ended';
-    case 'CANCELLED':
-      return 'Cancelled';
-    default:
-      return status;
-  }
-}
-
 export function auctionMediaUrl(auction: IAuctionDto | null): string {
   const a0 = auction?.assets?.[0];
   return a0?.fileKey ? getAuctionAssetUrl(a0.fileKey) : '';
@@ -137,11 +117,30 @@ export function isAuctionEndedByStatus(
 ): boolean {
   if (!status) return endCountdown === '0:00';
   const s = status.toUpperCase();
-  if (s === 'ENDED' || s === 'SOLD' || s === 'COMPLETED') return true;
+  if (
+    s === 'ENDED' ||
+    s === 'SOLD' ||
+    s === 'FALLBACK_ENDED' ||
+    s === 'FALLBACK_PUBLIC_NOTIFICATION'
+  ) {
+    return true;
+  }
   return endCountdown === '0:00';
 }
 
 /** Only ACTIVE auctions accept bids (paused/draft/etc. do not). */
 export function isAuctionActiveForBidding(status: string | undefined): boolean {
   return (status ?? '').toUpperCase() === 'ACTIVE';
+}
+
+export function checkIsPlaceBidEligible(
+  userId: string | undefined,
+  participants: Array<{ userId: string }>
+): boolean {
+  if (!userId) return false;
+  return participants.some((p) => p.userId === userId);
+}
+
+export function auctionParticipationDepositAmount(startPrice: number): number {
+  return startPrice * 0.1;
 }

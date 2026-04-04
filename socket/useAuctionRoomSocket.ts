@@ -5,6 +5,10 @@ import { io, type Socket } from 'socket.io-client';
 
 import { env } from '@/env';
 import type { IAuctionDto } from '@/types/auction.type';
+import type {
+  IPaymentGatewayOrder,
+  IVerifyGatewayPaymentInput,
+} from '@/types/payment-gateway.type';
 
 import {
   AUCTION_SOCKET_EVENTS,
@@ -21,11 +25,24 @@ export interface IAuctionRoomBid {
   createdAt: string;
 }
 
+export interface IFallbackPublicParticipantStats {
+  pending: number;
+  rejected: number;
+}
+
+export interface IAuctionSoldSummary {
+  winnerUserName: string;
+  winnerUserId: string;
+  soldAmount: number;
+}
+
 export interface IAuctionRoomSnapshot {
   auction: IAuctionDto;
   currentBid: IAuctionRoomBid | null;
   liveFeed: IAuctionRoomBid[];
   participants?: IAuctionRoomParticipant[];
+  fallbackPublicParticipantStats?: IFallbackPublicParticipantStats;
+  soldSummary?: IAuctionSoldSummary;
 }
 
 export interface IAuctionRoomParticipant {
@@ -52,7 +69,9 @@ export interface IAuctionRoomChatMessage {
   createdAt: string;
 }
 
-type AuctionJoinedEvent = IAuctionRoomSnapshot;
+type AuctionJoinedEvent = IAuctionRoomSnapshot & {
+  chatMessages?: IAuctionRoomChatMessage[];
+};
 
 type SocketControlAck = {
   success: boolean;
@@ -122,14 +141,10 @@ export function useAuctionRoomSocket({
     });
 
     socket.on(AUCTION_SOCKET_EVENTS.JOINED, (joined: AuctionJoinedEvent) => {
-      setSnapshot(joined);
-      const maybeChat = (
-        joined as AuctionJoinedEvent & {
-          chatMessages?: IAuctionRoomChatMessage[];
-        }
-      ).chatMessages;
-      if (Array.isArray(maybeChat)) {
-        setChatMessages(maybeChat);
+      const { chatMessages: joinedChat, ...room } = joined;
+      setSnapshot(room);
+      if (Array.isArray(joinedChat)) {
+        setChatMessages(joinedChat);
       }
     });
 
@@ -197,6 +212,24 @@ export function useAuctionRoomSocket({
       }
     );
 
+    socket.on(
+      AUCTION_SOCKET_EVENTS.FALLBACK_STATS_UPDATED,
+      (payload: {
+        auctionId: string;
+        fallbackPublicParticipantStats: IFallbackPublicParticipantStats;
+      }) => {
+        if (payload.auctionId !== auctionId) return;
+        setSnapshot((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            fallbackPublicParticipantStats:
+              payload.fallbackPublicParticipantStats,
+          };
+        });
+      }
+    );
+
     socket.on(AUCTION_SOCKET_EVENTS.ERROR, (payload: { message?: string }) => {
       console.log('ERROR', payload);
       const message = payload?.message ?? 'Socket error';
@@ -250,6 +283,32 @@ export function useAuctionRoomSocket({
     [auctionId]
   );
 
+  const addAuctionParticipant = useCallback((): Promise<{
+    success: boolean;
+    error?: string;
+  }> => {
+    const socket = socketRef.current;
+    if (!socket) {
+      return Promise.resolve({ success: false, error: 'Not connected' });
+    }
+    return new Promise((resolve) => {
+      socket.emit(
+        AUCTION_SOCKET_EVENTS.ADD_AUCTION_PARTICIPANT,
+        { auctionId },
+        (ack?: SocketControlAck) => {
+          if (ack?.success === false) {
+            resolve({
+              success: false,
+              error: ack.error ?? 'Could not join auction',
+            });
+            return;
+          }
+          resolve({ success: true });
+        }
+      );
+    });
+  }, [auctionId]);
+
   const sendChatMessage = useCallback(
     (message: string) => {
       socketRef.current?.emit(AUCTION_SOCKET_EVENTS.SEND_CHAT, {
@@ -263,7 +322,7 @@ export function useAuctionRoomSocket({
   const emitAuctionControl = useCallback(
     (
       event: AuctionSocketControlEvent
-    ): Promise<{ success: boolean; error?: string }> => {
+    ): Promise<{ success: boolean; data?: unknown; error?: string }> => {
       const socket = socketRef.current;
       if (!socket) {
         return Promise.resolve({ success: false, error: 'Not connected' });
@@ -277,7 +336,7 @@ export function useAuctionRoomSocket({
             });
             return;
           }
-          resolve({ success: true });
+          resolve({ success: true, data: ack?.data });
         });
       });
     },
@@ -299,20 +358,133 @@ export function useAuctionRoomSocket({
     [emitAuctionControl]
   );
 
+  const sendFallbackPublicNotification = useCallback(
+    () =>
+      emitAuctionControl(
+        AUCTION_SOCKET_EVENTS.SEND_FALLBACK_PUBLIC_NOTIFICATION
+      ),
+    [emitAuctionControl]
+  );
+
+  const markAuctionFailed = useCallback(
+    () => emitAuctionControl(AUCTION_SOCKET_EVENTS.MARK_AUCTION_FAILED),
+    [emitAuctionControl]
+  );
+
+  const payFallbackPublic = useCallback((): Promise<{
+    success: boolean;
+    data?: IPaymentGatewayOrder;
+    error?: string;
+  }> => {
+    const socket = socketRef.current;
+    if (!socket) {
+      return Promise.resolve({ success: false, error: 'Not connected' });
+    }
+
+    return new Promise((resolve) => {
+      socket.emit(
+        AUCTION_SOCKET_EVENTS.PAY_FALLBACK_PUBLIC,
+        { auctionId },
+        (ack?: SocketControlAck) => {
+          if (ack?.success === false) {
+            resolve({
+              success: false,
+              error: ack.error ?? 'Request failed',
+            });
+            return;
+          }
+          resolve({
+            success: true,
+            data: ack?.data as IPaymentGatewayOrder | undefined,
+          });
+        }
+      );
+    });
+  }, [auctionId]);
+
+  const declineFallbackPublic = useCallback((): Promise<{
+    success: boolean;
+    data?: unknown;
+    error?: string;
+  }> => {
+    const socket = socketRef.current;
+    if (!socket) {
+      return Promise.resolve({ success: false, error: 'Not connected' });
+    }
+    return new Promise((resolve) => {
+      socket.emit(
+        AUCTION_SOCKET_EVENTS.DECLINE_FALLBACK_PUBLIC,
+        { auctionId },
+        (ack?: SocketControlAck) => {
+          if (ack?.success === false) {
+            resolve({
+              success: false,
+              error: ack.error ?? 'Request failed',
+            });
+            return;
+          }
+          resolve({ success: true, data: ack?.data });
+        }
+      );
+    });
+  }, [auctionId]);
+
+  const verifyFallbackPublicAuctionPayment = useCallback(
+    (
+      input: IVerifyGatewayPaymentInput
+    ): Promise<{
+      success: boolean;
+      data?: unknown;
+      error?: string;
+    }> => {
+      const socket = socketRef.current;
+      if (!socket) {
+        return Promise.resolve({ success: false, error: 'Not connected' });
+      }
+      return new Promise((resolve) => {
+        socket.emit(
+          AUCTION_SOCKET_EVENTS.VERIFY_FALLBACK_PUBLIC_AUCTION_PAYMENT,
+          { auctionId, ...input },
+          (ack?: SocketControlAck) => {
+            if (ack?.success === false) {
+              resolve({
+                success: false,
+                error: ack.error ?? 'Verification failed',
+              });
+              return;
+            }
+
+            resolve({ success: true, data: ack?.data });
+          }
+        );
+      });
+    },
+    [auctionId]
+  );
+
   return {
     snapshot,
     auction: snapshot?.auction ?? initialAuction ?? null,
     currentBid: snapshot?.currentBid ?? null,
     liveFeed: snapshot?.liveFeed ?? [],
     participants: snapshot?.participants ?? [],
+    fallbackPublicParticipantStats:
+      snapshot?.fallbackPublicParticipantStats ?? null,
+    soldSummary: snapshot?.soldSummary ?? null,
     chatMessages,
     connectionState,
     error,
     roomId,
     placeBid,
+    addAuctionParticipant,
     sendChatMessage,
     pauseAuction,
     resumeAuction,
     endAuction,
+    sendFallbackPublicNotification,
+    markAuctionFailed,
+    payFallbackPublic,
+    declineFallbackPublic,
+    verifyFallbackPublicAuctionPayment,
   };
 }

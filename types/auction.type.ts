@@ -1,6 +1,13 @@
 export type AuctionType = 'LONG' | 'LIVE' | 'SEALED';
 export type AuctionAssetType = 'IMAGE' | 'VIDEO';
-export type AuctionStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED';
+export type AuctionStatus =
+  | 'DRAFT'
+  | 'PUBLISHED'
+  | 'CANCELLED'
+  | 'ENDED'
+  | 'SOLD'
+  | 'FALLBACK_ENDED'
+  | 'FALLBACK_PUBLIC_NOTIFICATION';
 
 export interface CreateAuctionInput {
   auctionType: AuctionType;

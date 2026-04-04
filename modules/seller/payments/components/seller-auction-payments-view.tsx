@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { formatInr } from '@/lib/format-inr';
+import { formatInr } from '@/utils/format-inr';
 import { PaymentDueDate } from '@/modules/user/payments/components/PaymentDueDate';
 import { PaymentPhaseBadge } from '@/modules/user/payments/components/PaymentPhaseBadge';
 import { PaymentStatusBadge } from '@/modules/user/payments/components/PaymentStatusBadge';
@@ -53,7 +53,7 @@ function SellerPaymentsList({ items }: { items: ISellerAuctionPaymentItem[] }) {
             </div>
             <p className="text-sm font-medium text-foreground">
               <Link
-                href={`/seller/auction/${item.auctionId}`}
+                href={`/seller/auctions/${item.auctionId}`}
                 className="text-primary hover:underline"
               >
                 {item.auctionTitle}

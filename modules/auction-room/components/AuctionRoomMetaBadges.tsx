@@ -42,8 +42,14 @@ export function AuctionRoomMetaBadges({
             'border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300',
           statusLabel === 'Paused' &&
             'border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200',
-          (statusLabel === 'Ended' || statusLabel === 'Cancelled') &&
-            'border-border bg-muted/60 text-muted-foreground'
+          statusLabel === 'Sold' &&
+            'border-emerald-600/45 bg-emerald-500/12 text-emerald-900 dark:text-emerald-200',
+          statusLabel === 'Ended' &&
+            'border-border bg-muted/60 text-muted-foreground',
+          statusLabel === 'Cancelled' &&
+            'border-destructive/30 bg-destructive/10 text-destructive',
+          statusLabel === 'Public offer' &&
+            'border-sky-500/40 bg-sky-500/10 text-sky-900 dark:text-sky-200'
         )}
       >
         {statusLabel}

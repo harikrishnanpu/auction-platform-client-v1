@@ -284,7 +284,7 @@ export function SellerAuctionEditDraftContainer({
         return;
       }
       toast.success('Auction published.');
-      router.push(`/seller/auction/${auction.id}`);
+      router.push(`/seller/auctions/${auction.id}`);
     } catch (err) {
       const msg = getErrorMessage(err) ?? 'Something went wrong';
       form.setError('root', { message: msg });

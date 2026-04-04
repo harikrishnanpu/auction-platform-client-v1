@@ -1,4 +1,5 @@
-import type { IAuctionDto, AuctionStatus } from '@/types/auction.type';
+import type { IAuctionDto } from '@/types/auction.type';
+import { auctionStatusLabel } from '@/utils/auction-utils';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -17,10 +18,6 @@ function formatDate(value: unknown): string {
     month: 'short',
     day: '2-digit',
   });
-}
-
-function statusLabel(status: AuctionStatus): string {
-  return status;
 }
 
 export function SellerAuctionsSimpleTable({
@@ -72,7 +69,7 @@ export function SellerAuctionsSimpleTable({
                 <Badge
                   variant={a.status === 'PUBLISHED' ? 'secondary' : 'outline'}
                 >
-                  {statusLabel(a.status)}
+                  {auctionStatusLabel(a.status)}
                 </Badge>
               </TableCell>
               <TableCell className="text-xs text-muted-foreground">

@@ -59,7 +59,7 @@ export function UserAuctionsCards({
   return (
     <div className={cn('flex w-full flex-col gap-2', className)}>
       {rows.map((a) => (
-        <SellerAuctionCard key={a.id} auction={a} href={`/auctions/${a.id}`} />
+        <SellerAuctionCard key={a.id} auction={a} href={`/auction/${a.id}`} />
       ))}
     </div>
   );

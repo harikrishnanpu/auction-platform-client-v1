@@ -89,12 +89,33 @@ export function AuctionRoomSellerPanel({
             </Button>
           ) : null}
 
-          {auctionStatus === 'ENDED' ||
-          auctionStatus === 'SOLD' ||
-          auctionStatus === 'COMPLETED' ? (
+          {auctionStatus === 'SOLD' ? (
+            <p className="flex items-center gap-2 rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-3 py-2 text-xs text-muted-foreground">
+              <Ban className="size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              Sold — winner payment completed. No further actions are available.
+            </p>
+          ) : null}
+
+          {auctionStatus === 'ENDED' ? (
             <p className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
               <Ban className="size-3.5 shrink-0" />
               This auction has ended. No further actions are available.
+            </p>
+          ) : null}
+
+          {auctionStatus === 'FALLBACK_ENDED' ? (
+            <p className="flex items-center gap-2 rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-muted-foreground">
+              <Ban className="size-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
+              Fallback period ended. Use the actions below to notify bidders or
+              close the auction.
+            </p>
+          ) : null}
+
+          {auctionStatus === 'FALLBACK_PUBLIC_NOTIFICATION' ? (
+            <p className="flex items-center gap-2 rounded-lg border border-sky-500/25 bg-sky-500/5 px-3 py-2 text-xs text-muted-foreground">
+              <Ban className="size-3.5 shrink-0 text-sky-600 dark:text-sky-400" />
+              Bidders can pay the start price or decline. No pause or end
+              controls here.
             </p>
           ) : null}
 
@@ -103,7 +124,8 @@ export function AuctionRoomSellerPanel({
           auctionStatus !== 'PAUSED' &&
           auctionStatus !== 'ENDED' &&
           auctionStatus !== 'SOLD' &&
-          auctionStatus !== 'COMPLETED' ? (
+          auctionStatus !== 'FALLBACK_ENDED' &&
+          auctionStatus !== 'FALLBACK_PUBLIC_NOTIFICATION' ? (
             <p className="text-xs text-muted-foreground">
               Controls are not available for status:{' '}
               <span className="font-mono">{auctionStatus}</span>

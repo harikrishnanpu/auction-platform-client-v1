@@ -1,9 +1,10 @@
 import { API_ENDPOINTS, buildApiUrl, buildQuery } from '@/apiInstance';
 import { apiFetch } from '@/lib/fetch';
+import type { IUserPaymentsPage } from '@/modules/user/payments/types/payments.types';
 import type {
-  ICreatePaymentOrderResponse,
-  IUserPaymentsPage,
-} from '@/modules/user/payments/types/payments.types';
+  IPaymentGatewayOrder,
+  IVerifyGatewayPaymentInput,
+} from '@/types/payment-gateway.type';
 import { ApiResponse } from '@/types/api.index';
 import { cookies } from 'next/headers';
 
@@ -42,9 +43,9 @@ export const paymentsService = {
 
   createPaymentOrder: async (params: {
     paymentId: string;
-  }): Promise<ApiResponse<ICreatePaymentOrderResponse>> => {
+  }): Promise<ApiResponse<IPaymentGatewayOrder>> => {
     const cookieStorage = await cookies();
-    return await apiFetch<ICreatePaymentOrderResponse>(
+    return await apiFetch<IPaymentGatewayOrder>(
       buildApiUrl(API_ENDPOINTS.payments.createOrder),
       {
         method: 'POST',
@@ -54,12 +55,9 @@ export const paymentsService = {
     );
   },
 
-  verifyPayment: async (params: {
-    paymentId: string;
-    orderId: string;
-    gatewayPaymentId: string;
-    signature: string;
-  }): Promise<ApiResponse<null>> => {
+  verifyPayment: async (
+    params: IVerifyGatewayPaymentInput
+  ): Promise<ApiResponse<null>> => {
     const cookieStorage = await cookies();
     return await apiFetch<null>(
       buildApiUrl(API_ENDPOINTS.payments.verify),

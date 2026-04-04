@@ -22,14 +22,14 @@ export default async function SellerAuctionDraftPage({
   if (!res.success || !res.data) return null;
 
   if (res.data.status !== 'DRAFT') {
-    redirect(`/seller/auction/${id}`);
+    redirect(`/seller/auctions/${id}`);
   }
 
   // Render publish as a simple form action (server action).
   async function publishAction() {
     'use server';
     await publishSellerAuctionAction(id);
-    redirect(`/seller/auction/${id}`);
+    redirect(`/seller/auctions/${id}`);
   }
 
   return (

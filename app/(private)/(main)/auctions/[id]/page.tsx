@@ -1,38 +1,20 @@
-import { AuctionRoom } from '@/modules/auction-room/components/AuctionRoom';
 import { redirect } from 'next/navigation';
 
-import { authGetSesssion } from '@/actions/auth/auth.actions';
-import { getSellerAuctionByIdAction } from '@/actions/auction/auction.actions';
-import { UserRole } from '@/types/user.type';
-
-export default async function UserAuctionDetailPage({
+export default async function LegacyAuctionsIdRedirect({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const resolvedParams = await params;
-  const id = resolvedParams.id;
-
-  const sessionRes = await authGetSesssion();
-  if (sessionRes.success && sessionRes.data) {
-    const authUser = sessionRes.data;
-    const isSellerRole = authUser.roles?.includes(UserRole.SELLER) ?? false;
-
-    if (isSellerRole) {
-      const sellerAuctionRes = await getSellerAuctionByIdAction(id);
-      if (
-        sellerAuctionRes.success &&
-        sellerAuctionRes.data &&
-        sellerAuctionRes.data.sellerId === authUser.id
-      ) {
-        redirect(`/seller/auction/${id}`);
-      }
-    }
+  const { id } = await params;
+  const sp = searchParams ? await searchParams : {};
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) {
+    if (v === undefined) continue;
+    if (Array.isArray(v)) v.forEach((x) => q.append(k, x));
+    else q.set(k, v);
   }
-
-  return (
-    <div className="bg-background">
-      <AuctionRoom auctionId={id} mode="USER" />
-    </div>
-  );
+  const suffix = q.toString() ? `?${q.toString()}` : '';
+  redirect(`/auction/${id}${suffix}`);
 }

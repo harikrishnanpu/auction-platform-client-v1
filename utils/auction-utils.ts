@@ -1,5 +1,30 @@
 import type { AuctionType, IAuctionDto } from '@/types/auction.type';
 
+/** Human-readable auction status (ENDED = closed; SOLD = sale completed, winner paid). */
+export function auctionStatusLabel(status: string): string {
+  switch (status.toUpperCase()) {
+    case 'ACTIVE':
+    case 'PUBLISHED':
+      return 'Live';
+    case 'PAUSED':
+      return 'Paused';
+    case 'DRAFT':
+      return 'Draft';
+    case 'ENDED':
+      return 'Ended';
+    case 'SOLD':
+      return 'Sold';
+    case 'FALLBACK_ENDED':
+      return 'Fallback ended';
+    case 'FALLBACK_PUBLIC_NOTIFICATION':
+      return 'Public offer';
+    case 'CANCELLED':
+      return 'Cancelled';
+    default:
+      return status;
+  }
+}
+
 export function getAuctionTypeLabel(type: AuctionType): string {
   const map: Record<AuctionType, string> = {
     LONG: 'Long',

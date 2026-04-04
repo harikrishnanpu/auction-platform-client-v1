@@ -249,7 +249,7 @@ export function useCreateAuctionForm() {
         }
 
         toast.success('Auction created as draft.');
-        router.push(`/seller/auction/${result.data.id}`);
+        router.push(`/seller/auction/${result.data.id}/draft`);
       } catch (err) {
         const msg = getErrorMessage(err) ?? 'Something went wrong';
         form.setError('root', { message: msg });
