@@ -53,7 +53,7 @@ function SellerPaymentsList({ items }: { items: ISellerAuctionPaymentItem[] }) {
             </div>
             <p className="text-sm font-medium text-foreground">
               <Link
-                href={`/seller/auction/${item.auctionId}`}
+                href={`/seller/auctions/${item.auctionId}`}
                 className="text-primary hover:underline"
               >
                 {item.auctionTitle}

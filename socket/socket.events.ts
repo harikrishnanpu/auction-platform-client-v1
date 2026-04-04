@@ -16,6 +16,7 @@ export const AUCTION_SOCKET_EVENTS = {
   BID_PLACED: 'auction:bidPlaced',
   CHAT_MESSAGE: 'auction:chatMessage',
   UPDATED: 'auction:updated',
+  FALLBACK_STATS_UPDATED: 'auction:fallbackStatsUpdated',
   PARTICIPANTS_UPDATED: 'auction:participantsUpdated',
   ERROR: 'auction:error',
 } as const;

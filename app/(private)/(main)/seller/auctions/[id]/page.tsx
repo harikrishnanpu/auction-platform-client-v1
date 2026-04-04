@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation';
 
 import { getSellerAuctionByIdAction } from '@/actions/auction/auction.actions';
+import { SellerAuctionRoomView } from '@/modules/auction-room/views/SellerAuctionRoomView';
 
-export default async function LegacySellerAuctionIdRedirect({
+export default async function SellerAuctionsDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -17,5 +18,9 @@ export default async function LegacySellerAuctionIdRedirect({
     redirect(`/seller/auction/${id}/draft`);
   }
 
-  redirect(`/seller/auctions/${id}`);
+  return (
+    <div className="bg-background">
+      <SellerAuctionRoomView auctionId={id} initialAuction={res.data} />
+    </div>
+  );
 }

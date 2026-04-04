@@ -13,6 +13,7 @@ type FallbackBusy = 'public' | 'failed' | null;
 
 type AuctionRoomFallbackEndedPanelProps = {
   auctionId: string;
+  allowSendPublicNotification?: boolean;
   onStatusUpdated?: (status: string) => void;
   onSendPublicNotification?: () => Promise<{
     success: boolean;
@@ -27,6 +28,7 @@ type AuctionRoomFallbackEndedPanelProps = {
 };
 
 export function AuctionRoomFallbackEndedPanel({
+  allowSendPublicNotification = true,
   onStatusUpdated,
   onSendPublicNotification,
   onMarkAuctionFailed,
@@ -80,23 +82,29 @@ export function AuctionRoomFallbackEndedPanel({
   return (
     <AuctionRoomSectionCard
       title="Fallback period ended"
-      description="No winning bid was confirmed. Choose how to proceed."
+      description={
+        allowSendPublicNotification
+          ? 'No winning bid was confirmed. Choose how to proceed.'
+          : 'No winning bid was confirmed. You can mark the auction as failed.'
+      }
     >
       {error ? (
         <AuctionRoomAlert message={error} variant="destructive" />
       ) : null}
 
       <div className="flex flex-col gap-1.5">
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 justify-start gap-1.5 rounded-md text-xs"
-          disabled={busy != null}
-          onClick={() => run('public')}
-        >
-          <Bell className="size-3.5" />
-          {busy === 'public' ? 'Sending…' : 'Send public notification'}
-        </Button>
+        {allowSendPublicNotification ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 justify-start gap-1.5 rounded-md text-xs"
+            disabled={busy != null}
+            onClick={() => run('public')}
+          >
+            <Bell className="size-3.5" />
+            {busy === 'public' ? 'Sending…' : 'Send public notification'}
+          </Button>
+        ) : null}
         <Button
           variant="destructive"
           size="sm"

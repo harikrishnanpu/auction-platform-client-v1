@@ -25,11 +25,24 @@ export interface IAuctionRoomBid {
   createdAt: string;
 }
 
+export interface IFallbackPublicParticipantStats {
+  pending: number;
+  rejected: number;
+}
+
+export interface IAuctionSoldSummary {
+  winnerUserName: string;
+  winnerUserId: string;
+  soldAmount: number;
+}
+
 export interface IAuctionRoomSnapshot {
   auction: IAuctionDto;
   currentBid: IAuctionRoomBid | null;
   liveFeed: IAuctionRoomBid[];
   participants?: IAuctionRoomParticipant[];
+  fallbackPublicParticipantStats?: IFallbackPublicParticipantStats;
+  soldSummary?: IAuctionSoldSummary;
 }
 
 export interface IAuctionRoomParticipant {
@@ -56,7 +69,9 @@ export interface IAuctionRoomChatMessage {
   createdAt: string;
 }
 
-type AuctionJoinedEvent = IAuctionRoomSnapshot;
+type AuctionJoinedEvent = IAuctionRoomSnapshot & {
+  chatMessages?: IAuctionRoomChatMessage[];
+};
 
 type SocketControlAck = {
   success: boolean;
@@ -126,14 +141,10 @@ export function useAuctionRoomSocket({
     });
 
     socket.on(AUCTION_SOCKET_EVENTS.JOINED, (joined: AuctionJoinedEvent) => {
-      setSnapshot(joined);
-      const maybeChat = (
-        joined as AuctionJoinedEvent & {
-          chatMessages?: IAuctionRoomChatMessage[];
-        }
-      ).chatMessages;
-      if (Array.isArray(maybeChat)) {
-        setChatMessages(maybeChat);
+      const { chatMessages: joinedChat, ...room } = joined;
+      setSnapshot(room);
+      if (Array.isArray(joinedChat)) {
+        setChatMessages(joinedChat);
       }
     });
 
@@ -196,6 +207,24 @@ export function useAuctionRoomSocket({
                 ? { status: payload.status as unknown as IAuctionDto['status'] }
                 : {}),
             },
+          };
+        });
+      }
+    );
+
+    socket.on(
+      AUCTION_SOCKET_EVENTS.FALLBACK_STATS_UPDATED,
+      (payload: {
+        auctionId: string;
+        fallbackPublicParticipantStats: IFallbackPublicParticipantStats;
+      }) => {
+        if (payload.auctionId !== auctionId) return;
+        setSnapshot((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            fallbackPublicParticipantStats:
+              payload.fallbackPublicParticipantStats,
           };
         });
       }
@@ -412,6 +441,9 @@ export function useAuctionRoomSocket({
     currentBid: snapshot?.currentBid ?? null,
     liveFeed: snapshot?.liveFeed ?? [],
     participants: snapshot?.participants ?? [],
+    fallbackPublicParticipantStats:
+      snapshot?.fallbackPublicParticipantStats ?? null,
+    soldSummary: snapshot?.soldSummary ?? null,
     chatMessages,
     connectionState,
     error,

@@ -57,7 +57,7 @@ export interface SellerAuctionCardProps {
 
 export function SellerAuctionCard({
   auction,
-  href = `/seller/auction/${auction.id}`,
+  href = `/seller/auctions/${auction.id}`,
   className,
 }: SellerAuctionCardProps) {
   const categoryName = getAuctionCategoryName(auction);

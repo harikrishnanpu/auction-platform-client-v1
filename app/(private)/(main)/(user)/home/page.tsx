@@ -36,7 +36,7 @@ export default async function HomePage() {
             <SellerAuctionCard
               key={a.id}
               auction={a}
-              href={`/auctions/${a.id}`}
+              href={`/auction/${a.id}`}
             />
           ))
         )}

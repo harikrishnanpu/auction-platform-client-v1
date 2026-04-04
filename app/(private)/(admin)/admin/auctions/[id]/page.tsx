@@ -1,4 +1,4 @@
-import { AuctionRoom } from '@/modules/auction-room/components/AuctionRoom';
+import { AdminAuctionRoomView } from '@/modules/auction-room/views/AdminAuctionRoomView';
 
 export default async function AdminAuctionRoomPage({
   params,
@@ -10,7 +10,7 @@ export default async function AdminAuctionRoomPage({
 
   return (
     <div className="min-h-[60vh] bg-background">
-      <AuctionRoom auctionId={id} mode="ADMIN" />
+      <AdminAuctionRoomView auctionId={id} />
     </div>
   );
 }
