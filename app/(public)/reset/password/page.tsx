@@ -1,5 +1,5 @@
 import AuthNavbar from '@/components/layout/navbars/AuthNavbar';
-import { ResetPasswordForm } from '@/modules/reset/password/components/reset-password-form';
+import { ResetPasswordForm } from '@/features/reset/password/components/reset-password-form';
 
 export default function RecoverPasswordPage() {
   return (

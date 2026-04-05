@@ -1,4 +1,4 @@
-import { WalletPageView } from '@/modules/user/wallet/components/WalletPageView';
+import { WalletPageView } from '@/features/user/wallet/components/WalletPageView';
 
 export default function ProfileWalletPage() {
   return (

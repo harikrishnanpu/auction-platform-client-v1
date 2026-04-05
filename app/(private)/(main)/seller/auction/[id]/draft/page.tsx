@@ -6,7 +6,7 @@ import {
   publishSellerAuctionAction,
 } from '@/actions/auction/auction.actions';
 import { Button } from '@/components/ui/button';
-import { SellerAuctionDetailView } from '@/modules/seller/auction/components/seller-auction-detail-view';
+import { SellerAuctionDetailView } from '@/features/seller/auction/components/seller-auction-detail-view';
 import { Badge } from '@/components/ui/badge';
 
 export default async function SellerAuctionDraftPage({

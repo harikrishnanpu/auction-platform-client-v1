@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { ChangePasswordForm } from '@/modules/reset/password/components/change-password-form';
+import { ChangePasswordForm } from '@/features/reset/password/components/change-password-form';
 import AuthNavbar from '@/components/layout/navbars/AuthNavbar';
 
 function ChangePasswordFallback() {

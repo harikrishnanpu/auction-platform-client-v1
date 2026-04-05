@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { getLatestAuctionsAction } from '@/actions/auction/auction.actions';
-import { SellerAuctionCard } from '@/modules/seller/auction/components/seller-auction-card';
+import { SellerAuctionCard } from '@/features/seller/auction/components/seller-auction-card';
 import { Button } from '@/components/ui/button';
 
 export default async function HomePage() {

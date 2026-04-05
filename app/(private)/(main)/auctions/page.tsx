@@ -6,12 +6,12 @@ import Link from 'next/link';
 import { getAuctionCategoriesForSellerAction } from '@/actions/auction-category/auction-category.actions';
 import { getBrowseAuctionsAction } from '@/actions/auction/auction.actions';
 import { Button } from '@/components/ui/button';
-import { SellerAuctionsPagination } from '@/modules/seller/auction/components/seller-auctions-pagination';
+import { SellerAuctionsPagination } from '@/features/seller/auction/components/seller-auctions-pagination';
 import {
   UserAuctionsCards,
   UserAuctionsCardsSkeleton,
-} from '@/modules/user/auctions/components/user-auctions-cards';
-import { UserAuctionFilters } from '@/modules/user/auctions/components/user-auction-filters';
+} from '@/features/user/auctions/components/user-auctions-cards';
+import { UserAuctionFilters } from '@/features/user/auctions/components/user-auction-filters';
 import type {
   AuctionCategory,
   AuctionType,

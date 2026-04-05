@@ -1,5 +1,5 @@
 import { getAuctionCategoriesForSellerAction } from '@/actions/auction-category/auction-category.actions';
-import { SellerAuctionCategoryRequestForm } from '@/modules/seller/auction/categories/components/seller-auction-category-request-form';
+import { SellerAuctionCategoryRequestForm } from '@/features/seller/auction/categories/components/seller-auction-category-request-form';
 
 export default async function SellerAuctionCategoryRequestPage() {
   const res = await getAuctionCategoriesForSellerAction();

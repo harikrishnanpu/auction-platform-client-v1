@@ -1,4 +1,4 @@
-import { AdminAuctionCategoriesView } from '@/modules/admin/auctions/components/categories/categories-view';
+import { AdminAuctionCategoriesView } from '@/features/admin/auctions/components/categories/categories-view';
 import { getAdminAuctionCategoriesAction } from '@/actions/admin/auction-category.actions';
 
 export default async function AdminAuctionCategoriesPage() {

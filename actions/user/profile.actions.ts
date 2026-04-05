@@ -1,6 +1,6 @@
 'use server';
-import { ZodChangePasswordFormValues } from '@/modules/user/profile/schemes/changeprofilePassword.schema';
-import { ZodEditProfileFormValues } from '@/modules/user/profile/schemes/editProfile.schema';
+import { ZodChangePasswordFormValues } from '@/features/user/profile/schemes/changeprofilePassword.schema';
+import { ZodEditProfileFormValues } from '@/features/user/profile/schemes/editProfile.schema';
 import { profileService } from '@/services/user/profile.service';
 import { ApiResponse } from '@/types/api.index';
 import { IUser } from '@/types/user.type';

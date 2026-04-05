@@ -1,5 +1,5 @@
 'use server';
-import type { ISellerAuctionPaymentsPage } from '@/modules/seller/payments/types/seller-payments.types';
+import type { ISellerAuctionPaymentsPage } from '@/features/seller/payments/types/seller-payments.types';
 import { sellerService } from '@/services/seller/seller.service';
 import { ApiResponse } from '@/types/api.index';
 import { AuctionCategory } from '@/types/auction.type';

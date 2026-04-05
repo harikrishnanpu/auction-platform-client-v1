@@ -1,11 +1,11 @@
 import { API_ENDPOINTS, buildApiUrl, buildQuery } from '@/apiInstance';
 import { IgetllSellersParams, IgetllUsersParams } from '@/types/admin.type';
 import { ApiResponse } from '@/types/api.index';
-import { UserInfo } from '@/types/user.type';
+import { IUser } from '@/types/user.type';
 import { KycProfile } from '@/types/kyc.type';
 import { getErrorMessage } from '@/utils/get-app-error';
 
-export interface SellerInfo extends UserInfo {
+export interface SellerInfo extends IUser {
   kyc?: KycProfile;
   kycStatus?: string;
 }
@@ -16,7 +16,7 @@ export const adminService = {
     cookieString: string
   ): Promise<
     ApiResponse<{
-      users: UserInfo[];
+      users: IUser[];
       total: number;
       page: number;
       limit: number;
@@ -91,7 +91,7 @@ export const adminService = {
   getAdminUser: async (
     cookieString: string,
     id: string
-  ): Promise<ApiResponse<UserInfo>> => {
+  ): Promise<ApiResponse<IUser>> => {
     try {
       const res = await fetch(
         buildApiUrl(`${API_ENDPOINTS.admin.getAdminUser}/${id}`),
@@ -115,7 +115,7 @@ export const adminService = {
         throw new Error(response.error ?? response.message);
       }
 
-      const user: UserInfo = response.data?.user ?? response.data;
+      const user: IUser = response.data?.user ?? response.data;
       return { success: true, data: user };
     } catch (err: unknown) {
       return { success: false, data: null, error: getErrorMessage(err) };

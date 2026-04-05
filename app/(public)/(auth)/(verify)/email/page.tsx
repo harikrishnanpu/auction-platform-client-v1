@@ -1,5 +1,5 @@
 import AuthNavbar from '@/components/layout/navbars/AuthNavbar';
-import { VerifyEmailForm } from '@/modules/verify/email/components/verify-email-form';
+import { VerifyEmailForm } from '@/features/verify/email/components/verify-email-form';
 
 export default function VerifyEmailPage() {
   return (

@@ -1,4 +1,4 @@
-import { AdminAuctionRoomView } from '@/modules/auction-room/views/AdminAuctionRoomView';
+import { AdminAuctionRoomView } from '@/features/auction-room/views/AdminAuctionRoomView';
 
 export default async function AdminAuctionRoomPage({
   params,

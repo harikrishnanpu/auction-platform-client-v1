@@ -18,7 +18,7 @@ import { logoutAction } from '@/actions/auth/auth.actions';
 import { useRouter } from 'next/navigation';
 import useUserStore from '@/store/user.store';
 import { AuthProvider } from '@/types/user.type';
-import { useNotifications } from '@/modules/user/notifications/hooks/use-notifications';
+import { useNotifications } from '@/features/user/notifications/hooks/use-notifications';
 
 export function DashboardHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

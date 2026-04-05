@@ -1,16 +1,16 @@
 import { API_ENDPOINTS, buildApiUrl } from '@/apiInstance';
-import { ZodLoginFormValues } from '@/modules/auth/schemes/login-from.schema';
-import { ZodRegisterFormValues } from '@/modules/auth/schemes/register-form.schema';
+import { ZodLoginFormValues } from '@/features/auth/schemes/login-from.schema';
+import { ZodRegisterFormValues } from '@/features/auth/schemes/register-form.schema';
 import { cookies } from 'next/headers';
 import { ApiResponse } from '@/types/api.index';
 import { getErrorMessage } from '@/utils/get-app-error';
 import { IUser } from '@/types/user.type';
 import { apiFetch } from '@/lib/fetch';
 import { OtpPurpose } from '@/constants/auth/otp.constants';
-import { ZodVerifyEmailValues } from '@/modules/verify/email/schemes/verify-email.schema';
-import { ZodCompleteProfileValues } from '@/modules/complete-profile/schemes/complete-profile-schema';
-import { ZodForgotPasswordValues } from '@/modules/reset/password/schems/forget-password.schema';
-import { ZodChangePasswordValues } from '@/modules/reset/password/schems/change-password.schema';
+import { ZodVerifyEmailValues } from '@/features/verify/email/schemes/verify-email.schema';
+import { ZodCompleteProfileValues } from '@/features/complete-profile/schemes/complete-profile-schema';
+import { ZodForgotPasswordValues } from '@/features/reset/password/schems/forget-password.schema';
+import { ZodChangePasswordValues } from '@/features/reset/password/schems/change-password.schema';
 
 const getSession = async (): Promise<ApiResponse<IUser>> => {
   const cookieStorage = await cookies();

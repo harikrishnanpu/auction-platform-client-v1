@@ -2,13 +2,13 @@
 
 import { useEffect, useRef } from 'react';
 import useUserStore from '@/store/user.store';
-import { UserInfo } from '@/types/user.type';
+import { IUser } from '@/types/user.type';
 
 export default function UserProvider({
   user,
   children,
 }: {
-  user: UserInfo | null;
+  user: IUser | null;
   children: React.ReactNode;
 }) {
   const setUserStore = useUserStore((state) => state.setUser);

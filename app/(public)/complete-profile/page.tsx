@@ -1,5 +1,5 @@
 import AuthNavbar from '@/components/layout/navbars/AuthNavbar';
-import { CompleteProfileForm } from '@/modules/complete-profile/components/complete-profile-form';
+import { CompleteProfileForm } from '@/features/complete-profile/components/complete-profile-form';
 
 export default function CompleteProfilePage() {
   return (

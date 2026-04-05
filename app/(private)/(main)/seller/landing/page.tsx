@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getKycStatusAction } from '@/actions/kyc/kyc.action';
-import { SellerLandingView } from '@/modules/seller/landing/components/landing-view';
+import { SellerLandingView } from '@/features/seller/landing/components/landing-view';
 import { KycStatusEnum } from '@/types/kyc.type';
 
 export default async function SellerLandingPage() {

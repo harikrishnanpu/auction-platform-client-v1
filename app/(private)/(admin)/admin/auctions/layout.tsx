@@ -1,5 +1,5 @@
-import { AdminAuctionsSidebar } from '@/modules/admin/auctions/components/auctions-sidebar';
-import { AdminAuctionsMobileSidebar } from '@/modules/admin/auctions/components/mobile-sidebar';
+import { AdminAuctionsSidebar } from '@/features/admin/auctions/components/auctions-sidebar';
+import { AdminAuctionsMobileSidebar } from '@/features/admin/auctions/components/mobile-sidebar';
 
 export default function AdminAuctionsLayout({
   children,

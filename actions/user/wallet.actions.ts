@@ -3,7 +3,7 @@
 import type {
   ICreateWalletTopupOrderResponse,
   IUserWallet,
-} from '@/modules/user/wallet/types/wallet.types';
+} from '@/features/user/wallet/types/wallet.types';
 import { walletService } from '@/services/user/wallet.service';
 import { ApiResponse } from '@/types/api.index';
 

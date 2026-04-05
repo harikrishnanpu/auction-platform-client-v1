@@ -1,7 +1,7 @@
 import { API_ENDPOINTS, buildApiUrl } from '@/apiInstance';
 import { apiFetch } from '@/lib/fetch';
-import { ZodChangePasswordFormValues } from '@/modules/user/profile/schemes/changeprofilePassword.schema';
-import { ZodEditProfileFormValues } from '@/modules/user/profile/schemes/editProfile.schema';
+import { ZodChangePasswordFormValues } from '@/features/user/profile/schemes/changeprofilePassword.schema';
+import { ZodEditProfileFormValues } from '@/features/user/profile/schemes/editProfile.schema';
 import { ApiResponse } from '@/types/api.index';
 import { IUser } from '@/types/user.type';
 import { getErrorMessage } from '@/utils/get-app-error';

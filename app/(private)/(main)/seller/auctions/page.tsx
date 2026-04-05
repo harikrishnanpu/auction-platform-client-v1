@@ -11,10 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   SellerAuctionsCards,
   SellerAuctionsCardsSkeleton,
-} from '@/modules/seller/auction/components/seller-auctions-cards';
-import { SellerAuctionFilters } from '@/modules/seller/auction/components/seller-auction-filters';
-import { SellerAuctionsPagination } from '@/modules/seller/auction/components/seller-auctions-pagination';
-import { SellerListingSectionSkeleton } from '@/modules/seller/components/seller-shell-skeleton';
+} from '@/features/seller/auction/components/seller-auctions-cards';
+import { SellerAuctionFilters } from '@/features/seller/auction/components/seller-auction-filters';
+import { SellerAuctionsPagination } from '@/features/seller/auction/components/seller-auctions-pagination';
+import { SellerListingSectionSkeleton } from '@/features/seller/components/seller-shell-skeleton';
 import type {
   AuctionStatus,
   AuctionType,

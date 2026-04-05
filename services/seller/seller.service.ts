@@ -1,7 +1,7 @@
 import { API_ENDPOINTS, buildApiUrl, buildQuery } from '@/apiInstance';
 import { apiFetch } from '@/lib/fetch';
 import { ApiResponse } from '@/types/api.index';
-import type { ISellerAuctionPaymentsPage } from '@/modules/seller/payments/types/seller-payments.types';
+import type { ISellerAuctionPaymentsPage } from '@/features/seller/payments/types/seller-payments.types';
 import { AuctionCategory } from '@/types/auction.type';
 import { getErrorMessage } from '@/utils/get-app-error';
 import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';

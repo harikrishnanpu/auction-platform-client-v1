@@ -1,5 +1,5 @@
 import { getKycStatusAction } from '@/actions/kyc/kyc.action';
-import SellerAreaShell from '@/modules/seller/components/seller-area-shell';
+import SellerAreaShell from '@/features/seller/components/seller-area-shell';
 import SellerLayoutInitializer from './seller-layout-initializer';
 
 export default async function SellerLayout({

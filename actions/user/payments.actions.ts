@@ -1,7 +1,7 @@
 'use server';
 
 import { paymentsService } from '@/services/user/payments.service';
-import type { IUserPaymentsPage } from '@/modules/user/payments/types/payments.types';
+import type { IUserPaymentsPage } from '@/features/user/payments/types/payments.types';
 import { ApiResponse } from '@/types/api.index';
 import type {
   IPaymentGatewayOrder,

@@ -1,6 +1,6 @@
 import { API_ENDPOINTS, buildApiUrl, buildQuery } from '@/apiInstance';
 import { apiFetch } from '@/lib/fetch';
-import type { IUserPaymentsPage } from '@/modules/user/payments/types/payments.types';
+import type { IUserPaymentsPage } from '@/features/user/payments/types/payments.types';
 import type {
   IPaymentGatewayOrder,
   IVerifyGatewayPaymentInput,

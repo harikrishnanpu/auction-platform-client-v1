@@ -1,6 +1,6 @@
 import { getAuctionCategoriesForSellerAction } from '@/actions/auction-category/auction-category.actions';
 import { getSellerAuctionByIdAction } from '@/actions/auction/auction.actions';
-import { SellerAuctionEditDraftContainer } from '@/modules/seller/auction/components/seller-auction-edit-draft-container';
+import { SellerAuctionEditDraftContainer } from '@/features/seller/auction/components/seller-auction-edit-draft-container';
 
 export default async function EditSellerAuctionPage({
   params,
