@@ -1,6 +1,6 @@
 'use client';
 
-import { RotateCcw } from 'lucide-react';
+import { Funnel, RotateCcw, Sparkles } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,29 +50,37 @@ export function SellerAuctionFilters({
   onReset,
 }: SellerAuctionFiltersProps) {
   return (
-    <Card className="mt-4 rounded-lg border-border/70 bg-card/10">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-0.5">
-            <CardTitle className="text-base">Filters</CardTitle>
+    <Card className="mt-4 overflow-hidden rounded-2xl border-border/70 bg-linear-to-b from-card to-card/70 shadow-[0_14px_32px_-28px_rgba(15,23,42,0.9)]">
+      <CardHeader className="border-b border-border/60 bg-muted/20 pb-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Funnel className="size-4 text-blue-500" />
+              Manage auction filters
+            </CardTitle>
             <p className="text-[11px] text-muted-foreground">
-              Search, refine, and paginate your auctions.
+              Search and refine your listings by status, type, category, and
+              sort.
             </p>
           </div>
           {activeFilterCount > 0 ? (
-            <Badge variant="secondary" className="bg-muted text-[11px]">
+            <Badge
+              variant="secondary"
+              className="gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-[11px] text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+            >
+              <Sparkles className="size-3" />
               {activeFilterCount} active
             </Badge>
           ) : (
-            <Badge variant="outline" className="text-[11px]">
+            <Badge variant="outline" className="rounded-full text-[11px]">
               Default
             </Badge>
           )}
         </div>
       </CardHeader>
 
-      <CardContent className="pt-0">
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+      <CardContent className="pt-4">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           <div className="md:col-span-2 xl:col-span-3">
             <SearchInput
               placeholder="Search title..."
@@ -92,7 +100,7 @@ export function SellerAuctionFilters({
                 onUpdate('status', v as IGetAllSellerAuctionsFilter['status'])
               }
             >
-              <SelectTrigger className="h-9 rounded-lg text-sm">
+              <SelectTrigger className="h-10 rounded-xl text-sm">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -118,7 +126,7 @@ export function SellerAuctionFilters({
                 )
               }
             >
-              <SelectTrigger className="h-9 rounded-lg text-sm">
+              <SelectTrigger className="h-10 rounded-xl text-sm">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
@@ -139,7 +147,7 @@ export function SellerAuctionFilters({
               value={filters.categoryId}
               onValueChange={(v) => onUpdate('categoryId', v)}
             >
-              <SelectTrigger className="h-9 rounded-lg text-sm">
+              <SelectTrigger className="h-10 rounded-xl text-sm">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -161,7 +169,7 @@ export function SellerAuctionFilters({
               value={filters.sort}
               onValueChange={(v) => onUpdate('sort', v)}
             >
-              <SelectTrigger className="h-9 rounded-lg text-sm">
+              <SelectTrigger className="h-10 rounded-xl text-sm">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent>
@@ -184,7 +192,7 @@ export function SellerAuctionFilters({
                 onUpdate('order', v as IGetAllSellerAuctionsFilter['order'])
               }
             >
-              <SelectTrigger className="h-9 rounded-lg text-sm">
+              <SelectTrigger className="h-10 rounded-xl text-sm">
                 <SelectValue placeholder="Order" />
               </SelectTrigger>
               <SelectContent>
@@ -202,7 +210,7 @@ export function SellerAuctionFilters({
               value={String(filters.limit)}
               onValueChange={(v) => onUpdate('limit', Number(v))}
             >
-              <SelectTrigger className="h-9 rounded-lg text-sm">
+              <SelectTrigger className="h-10 rounded-xl text-sm">
                 <SelectValue placeholder="Limit" />
               </SelectTrigger>
               <SelectContent>
@@ -216,14 +224,14 @@ export function SellerAuctionFilters({
           </div>
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-3">
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 p-2.5">
           <p className="text-[11px] text-muted-foreground">
             Showing results for current filters.
           </p>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="h-8 text-xs"
+            className="h-8 rounded-lg text-xs"
             onClick={onReset}
           >
             <RotateCcw className="size-3.5" />

@@ -1,11 +1,17 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import {
+  Activity,
   ArrowRight,
+  Clock3,
   Bell,
+  CalendarClock,
+  Gavel,
   Share2,
   Heart,
   TrendingUp,
-  Eye,
+  Timer,
+  Sparkles,
   CheckCircle2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -73,25 +79,31 @@ function StatusPill({ status }: { status: IAuctionDto['status'] }) {
   );
 }
 
-type RibbonVariant = 'live' | 'hot' | 'new' | 'sold';
+type BadgeVariant = 'live' | 'upcoming' | 'ended';
 
-function Ribbon({ label, variant }: { label: string; variant: RibbonVariant }) {
-  const colors: Record<RibbonVariant, string> = {
-    live: 'bg-red-500 text-white',
-    hot: 'bg-orange-500 text-white',
-    new: 'bg-blue-600 text-white',
-    sold: 'bg-slate-500 text-white',
+function TopBadge({
+  label,
+  variant,
+}: {
+  label: string;
+  variant: BadgeVariant;
+}) {
+  const colors: Record<BadgeVariant, string> = {
+    live: 'bg-red-500/90 text-white',
+    upcoming: 'bg-blue-600/90 text-white',
+    ended: 'bg-slate-500/90 text-white',
   };
+
   return (
-    <div
+    <span
       className={cn(
-        'absolute right-[-22px] top-[14px] z-10 w-[90px] rotate-[35deg]',
-        'py-[3px] text-center text-[9px] font-bold uppercase tracking-[0.08em]',
+        'inline-flex items-center rounded-full px-2 py-1',
+        'text-[10px] font-semibold uppercase tracking-[0.08em] backdrop-blur-sm',
         colors[variant]
       )}
     >
       {label}
-    </div>
+    </span>
   );
 }
 
@@ -121,15 +133,26 @@ function Tag({
   );
 }
 
-function StatChip({ label, value }: { label: string; value: string }) {
+function StatChip({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon?: ReactNode;
+}) {
   return (
-    <div className="flex flex-1 flex-col gap-px rounded-lg border border-blue-100 bg-blue-50 px-2 py-1.5 dark:border-blue-900/50 dark:bg-blue-950/50">
-      <span className="text-[8.5px] font-semibold uppercase tracking-[0.05em] text-blue-400 dark:text-blue-500">
-        {label}
-      </span>
-      <span className="text-[11px] font-bold tabular-nums text-blue-800 dark:text-blue-300">
-        {value}
-      </span>
+    <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2.5 py-2 dark:border-slate-800 dark:bg-slate-900/60">
+      <div className="text-blue-600 dark:text-blue-400">{icon}</div>
+      <div className="min-w-0">
+        <span className="block truncate text-[9px] font-semibold uppercase tracking-[0.05em] text-slate-500 dark:text-slate-400">
+          {label}
+        </span>
+        <span className="block truncate text-[11px] font-bold tabular-nums text-slate-800 dark:text-slate-200">
+          {value}
+        </span>
+      </div>
     </div>
   );
 }
@@ -144,8 +167,8 @@ function TimeBox({
   highlight?: 'warn' | 'info' | null;
 }) {
   return (
-    <div className="flex flex-col gap-0.5 rounded-[9px] border border-slate-100 bg-slate-50 px-2.5 py-1.5 dark:border-slate-800 dark:bg-slate-900/60">
-      <span className="text-[9px] font-semibold uppercase tracking-[0.06em] text-slate-400 dark:text-slate-600">
+    <div className="flex flex-col gap-0.5 rounded-xl border border-slate-200/80 bg-slate-50/80 px-2.5 py-2 dark:border-slate-800 dark:bg-slate-900/60">
+      <span className="text-[9px] font-semibold uppercase tracking-[0.06em] text-slate-500 dark:text-slate-500">
         {label}
       </span>
       <span
@@ -164,19 +187,29 @@ function TimeBox({
 
 // ─── Cover overlay widgets ────────────────────────────────────────────────────
 
-function CoverCounter({ count, isLive }: { count: number; isLive: boolean }) {
+function CoverCounter({
+  count,
+  isLive,
+  isEnded,
+}: {
+  count: number;
+  isLive: boolean;
+  isEnded: boolean;
+}) {
   return (
-    <div className="absolute bottom-2.5 right-2.5 z-10 flex items-center gap-1.5 rounded-lg border border-white/15 bg-black/60 px-2 py-1 backdrop-blur-md">
+    <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-xl border border-white/20 bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
       {isLive ? (
         <TrendingUp className="size-3 text-blue-300" aria-hidden />
+      ) : isEnded ? (
+        <Gavel className="size-3 text-blue-300" aria-hidden />
       ) : (
-        <Eye className="size-3 text-blue-300" aria-hidden />
+        <Activity className="size-3 text-blue-300" aria-hidden />
       )}
       <span className="text-[11px] font-bold tabular-nums text-white">
         {count}
       </span>
       <span className="text-[9px] text-white/55">
-        {isLive ? 'bids' : 'watching'}
+        {isLive ? 'bids' : isEnded ? 'closed' : 'watching'}
       </span>
     </div>
   );
@@ -198,7 +231,7 @@ function BidTicker({
       : 0;
 
   return (
-    <div className="flex items-center gap-2.5 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 dark:border-blue-900/50 dark:bg-blue-950/60">
+    <div className="flex items-center gap-2.5 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2.5 dark:border-blue-900/50 dark:bg-blue-950/60">
       <TrendingUp
         className="size-3.5 shrink-0 text-blue-600 dark:text-blue-400"
         aria-hidden
@@ -229,7 +262,7 @@ function InterestBar({
   opensIn: string;
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-900/60">
       <div className="flex items-center justify-between text-[9.5px] font-medium text-slate-500 dark:text-slate-500">
         <span>{opensIn}</span>
         <span>{percent}% interest</span>
@@ -247,7 +280,7 @@ function InterestBar({
 /** ENDED: final price stamp */
 function FinalPriceBadge({ finalPrice }: { finalPrice: number }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-900/60">
+    <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-900/60">
       <CheckCircle2 className="size-3.5 shrink-0 text-slate-400" aria-hidden />
       <div className="flex flex-col">
         <span className="text-[9px] font-semibold uppercase tracking-[0.06em] text-slate-400">
@@ -307,32 +340,24 @@ export function AuctionCard({
   const isUpcoming = auction.status === 'UPCOMING';
   const isEnded = auction.status === 'ENDED';
 
-  const resolvedRibbon =
-    ribbonLabel ?? (isLive ? 'Hot' : isUpcoming ? 'New' : 'Sold');
-  const ribbonVariant: RibbonVariant = isLive
-    ? 'hot'
+  const resolvedBadge =
+    ribbonLabel ?? (isLive ? 'Hot lot' : isUpcoming ? 'New' : 'Sold');
+  const badgeVariant: BadgeVariant = isLive
+    ? 'live'
     : isUpcoming
-      ? 'new'
-      : 'sold';
+      ? 'upcoming'
+      : 'ended';
 
   const displayCount = bidCount ?? (isLive ? 0 : (watcherCount ?? 0));
-
-  const topBorder = isLive
-    ? 'border-t-red-500'
-    : isUpcoming
-      ? 'border-t-blue-600'
-      : 'border-t-slate-300 dark:border-t-slate-700';
 
   return (
     <div
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-[18px]',
-        'border border-slate-200 bg-white',
+        'group relative flex h-full flex-col overflow-hidden rounded-2xl',
+        'border border-slate-200 bg-white shadow-[0_8px_28px_-24px_rgba(15,23,42,0.9)]',
         'dark:border-slate-800 dark:bg-[#0d1526]',
-        'transition-[border-color,transform] duration-200',
-        'hover:-translate-y-1 hover:border-blue-300 dark:hover:border-blue-700',
-        'border-t-[2.5px]',
-        topBorder,
+        'transition-[border-color,transform,box-shadow] duration-200',
+        'hover:-translate-y-1 hover:border-blue-300 hover:shadow-[0_14px_42px_-26px_rgba(37,99,235,0.55)] dark:hover:border-blue-700',
         isEnded && 'opacity-75',
         className
       )}
@@ -353,7 +378,7 @@ export function AuctionCard({
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-900 to-blue-950">
+            <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-slate-900 to-blue-950">
               <svg
                 className="opacity-[0.12]"
                 width="56"
@@ -370,27 +395,26 @@ export function AuctionCard({
           )}
 
           {/* Bottom fade */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
 
-          {/* Ribbon (overflow hidden on parent clips it) */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <Ribbon label={resolvedRibbon} variant={ribbonVariant} />
-          </div>
-
-          {/* Status pill */}
-          <div className="absolute bottom-2.5 left-2.5 z-10">
+          <div className="absolute left-3 top-3 z-10 flex items-center gap-2">
             <StatusPill status={auction.status} />
+            <TopBadge label={resolvedBadge} variant={badgeVariant} />
           </div>
 
           {/* Bid / watcher counter */}
           {displayCount > 0 && (
-            <CoverCounter count={displayCount} isLive={isLive} />
+            <CoverCounter
+              count={displayCount}
+              isLive={isLive}
+              isEnded={isEnded}
+            />
           )}
         </div>
       </Link>
 
       {/* ── Body ── */}
-      <div className="flex flex-1 flex-col gap-2.5 px-3.5 pb-0 pt-3">
+      <div className="flex flex-1 flex-col gap-3 px-3.5 pb-0 pt-3.5">
         {/* Tags */}
         <div className="flex flex-wrap gap-1.5">
           <Tag variant="cat">{auction.category.name}</Tag>
@@ -403,10 +427,29 @@ export function AuctionCard({
           href={href}
           className="block rounded outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         >
-          <h3 className="line-clamp-2   text-[16px] leading-[1.4] text-slate-900 transition-colors group-hover:text-blue-700 dark:text-slate-100 dark:group-hover:text-blue-400">
+          <h3 className="line-clamp-2 text-[16px] font-semibold leading-[1.4] text-slate-900 transition-colors group-hover:text-blue-700 dark:text-slate-100 dark:group-hover:text-blue-400">
             {auction.title}
           </h3>
         </Link>
+
+        <div className="flex items-baseline justify-between rounded-xl border border-slate-200/80 bg-white/70 px-3 py-2 dark:border-slate-800 dark:bg-slate-950/30">
+          <div>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-500">
+              Start Price
+            </span>
+            <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              {formatAuctionPrice(auction.startPrice)}
+            </p>
+          </div>
+          <div className="text-right">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-500">
+              Min Increment
+            </span>
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+              {formatAuctionPrice(auction.minIncrement)}
+            </p>
+          </div>
+        </div>
 
         {/* Unique per-status panel */}
         {isLive && (
@@ -439,23 +482,29 @@ export function AuctionCard({
         {/* Stats strip */}
         <div className="flex gap-1.5">
           <StatChip
-            label="Min Bid"
-            value={formatAuctionPrice(auction.minIncrement)}
+            label="Anti-Snipe"
+            value={`${auction.antiSnipSeconds}s`}
+            icon={<Timer className="size-3.5" />}
           />
-          <StatChip label="Anti-Snipe" value={`${auction.antiSnipSeconds}s`} />
+          <StatChip
+            label="Cooldown"
+            value={`${auction.bidCooldownSeconds}s`}
+            icon={<Clock3 className="size-3.5" />}
+          />
           <StatChip
             label={auction.maxExtensionCount > 0 ? 'Max Ext.' : 'Cooldown'}
             value={
               auction.maxExtensionCount > 0
                 ? `${auction.maxExtensionCount}×`
-                : `${auction.bidCooldownSeconds}s`
+                : 'None'
             }
+            icon={<CalendarClock className="size-3.5" />}
           />
         </div>
       </div>
 
       {/* ── Footer ── */}
-      <div className="mt-auto flex items-center gap-2 p-3">
+      <div className="mt-auto flex items-center gap-2 border-t border-slate-200/70 p-3 dark:border-slate-800/70">
         {isLive && (
           <>
             <Link
@@ -498,19 +547,28 @@ export function AuctionCard({
             <IconBtn label="Watch auction">
               <Heart className="size-3.5" aria-hidden />
             </IconBtn>
+            <IconBtn label="Share auction">
+              <Share2 className="size-3.5" aria-hidden />
+            </IconBtn>
           </>
         )}
 
         {isEnded && (
-          <span
-            className={cn(
-              'flex flex-1 cursor-not-allowed items-center justify-center rounded-[10px]',
-              'bg-slate-100 px-3 py-2.5 text-[12px] font-bold text-slate-400',
-              'dark:bg-slate-900 dark:text-slate-600'
-            )}
-          >
-            Auction Closed
-          </span>
+          <>
+            <span
+              className={cn(
+                'flex flex-1 cursor-not-allowed items-center justify-center gap-1.5 rounded-[10px]',
+                'bg-slate-100 px-3 py-2.5 text-[12px] font-bold text-slate-500',
+                'dark:bg-slate-900 dark:text-slate-400'
+              )}
+            >
+              <CheckCircle2 className="size-3.5" aria-hidden />
+              Auction Closed
+            </span>
+            <IconBtn label="Share result">
+              <Sparkles className="size-3.5" aria-hidden />
+            </IconBtn>
+          </>
         )}
       </div>
     </div>

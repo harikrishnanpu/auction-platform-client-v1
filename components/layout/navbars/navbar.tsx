@@ -116,7 +116,7 @@ export function DashboardHeader() {
                 <Bell size={20} />
                 {totalCount > 0 ? (
                   <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-red-500 px-1 text-center text-[10px] font-semibold leading-4 text-white">
-                    {totalCount > 9 ? '9+' : totalCount}
+                    {totalCount}
                   </span>
                 ) : null}
               </button>
