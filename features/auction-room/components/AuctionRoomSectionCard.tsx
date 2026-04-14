@@ -22,16 +22,18 @@ export function AuctionRoomSectionCard({
   children,
 }: AuctionRoomSectionCardProps) {
   return (
-    <Card className="rounded-lg border-border/60 bg-card/70 shadow-sm">
-      <CardHeader className="px-3 py-2 pb-1">
-        <CardTitle className="text-xs font-semibold">{title}</CardTitle>
+    <Card className="rounded-xl border-border/50 bg-card/30 shadow-none">
+      <CardHeader className="space-y-0 px-2.5 py-1.5 pb-0">
+        <CardTitle className="text-[10px] font-semibold">{title}</CardTitle>
         {description ? (
-          <CardDescription className="text-[10px] leading-tight">
+          <CardDescription className="text-[9px] leading-snug">
             {description}
           </CardDescription>
         ) : null}
       </CardHeader>
-      <CardContent className="space-y-2 px-3 pb-3">{children}</CardContent>
+      <CardContent className="space-y-1.5 px-2.5 pb-2 pt-1">
+        {children}
+      </CardContent>
     </Card>
   );
 }

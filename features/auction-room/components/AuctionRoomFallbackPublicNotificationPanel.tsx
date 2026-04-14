@@ -169,16 +169,16 @@ export function AuctionRoomFallbackPublicNotificationPanel({
       ) : null}
 
       <div className="flex flex-col gap-1.5">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-[10px] text-muted-foreground">
           Start price:{' '}
           <span className="font-semibold tabular-nums text-foreground">
             {formatAuctionPrice(startPrice)}
           </span>
         </p>
-        <div className="flex flex-col gap-1.5 sm:flex-row">
+        <div className="flex flex-col gap-1 sm:flex-row">
           <Button
             size="sm"
-            className="h-8 flex-1 justify-center gap-1.5 rounded-md text-xs"
+            className="h-7 flex-1 justify-center gap-1 rounded-md text-[11px]"
             disabled={disabled}
             onClick={() => void runPay()}
           >
@@ -188,7 +188,7 @@ export function AuctionRoomFallbackPublicNotificationPanel({
           <Button
             variant="outline"
             size="sm"
-            className="h-8 flex-1 justify-center gap-1.5 rounded-md text-xs"
+            className="h-7 flex-1 justify-center gap-1 rounded-md text-[11px]"
             disabled={disabled}
             onClick={() => void runDecline()}
           >

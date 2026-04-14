@@ -4,9 +4,10 @@ import type { ReactNode } from 'react';
 
 import type { IAuctionDto } from '@/types/auction.type';
 import {
-  SellerAuctionCard,
-  SellerAuctionCardSkeleton,
-} from '@/features/seller/auction/components/seller-auction-card';
+  AuctionCard,
+  AuctionCardSkeleton,
+} from '@/features/auction/components/auction-card';
+import { AuctionListingGrid } from '@/features/auction/components/auction-listing-grid';
 import { cn } from '@/lib/utils';
 
 function sortAuctionsByStartDesc(auctions: IAuctionDto[]): IAuctionDto[] {
@@ -57,11 +58,11 @@ export function UserAuctionsCards({
   }
 
   return (
-    <div className={cn('flex w-full flex-col gap-2', className)}>
+    <AuctionListingGrid className={className}>
       {rows.map((a) => (
-        <SellerAuctionCard key={a.id} auction={a} href={`/auction/${a.id}`} />
+        <AuctionCard key={a.id} auction={a} href={`/auction/${a.id}`} />
       ))}
-    </div>
+    </AuctionListingGrid>
   );
 }
 
@@ -73,10 +74,10 @@ export function UserAuctionsCardsSkeleton({
   className?: string;
 }) {
   return (
-    <div className={cn('flex w-full flex-col gap-2', className)}>
+    <AuctionListingGrid className={className}>
       {Array.from({ length: count }).map((_, i) => (
-        <SellerAuctionCardSkeleton key={i} />
+        <AuctionCardSkeleton key={i} />
       ))}
-    </div>
+    </AuctionListingGrid>
   );
 }

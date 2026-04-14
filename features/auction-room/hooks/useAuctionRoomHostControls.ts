@@ -36,14 +36,16 @@ export function useAuctionRoomHostControls({
     }
   }, [resumeAuction]);
 
-  const handleEnd = useCallback(async () => {
+  const handleEnd = useCallback(async (): Promise<boolean> => {
     setActionBusy('end');
     setActionError(null);
     const res = await endAuction();
     setActionBusy(null);
     if (!res.success) {
       setActionError(res.error ?? 'Failed to end auction');
+      return false;
     }
+    return true;
   }, [endAuction]);
 
   return {

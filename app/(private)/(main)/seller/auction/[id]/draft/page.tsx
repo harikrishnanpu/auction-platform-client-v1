@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { SellerAuctionDetailView } from '@/features/seller/auction/components/seller-auction-detail-view';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 export default async function SellerAuctionDraftPage({
   params,
@@ -25,10 +26,13 @@ export default async function SellerAuctionDraftPage({
     redirect(`/seller/auctions/${id}`);
   }
 
-  // Render publish as a simple form action (server action).
   async function publishAction() {
     'use server';
-    await publishSellerAuctionAction(id);
+    const result = await publishSellerAuctionAction(id);
+    if (!result.success) {
+      console.log(result.error);
+      return;
+    }
     redirect(`/seller/auctions/${id}`);
   }
 

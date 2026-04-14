@@ -1,5 +1,88 @@
-import type { AuctionType, IAuctionDto } from '@/types/auction.type';
+import type {
+  AuctionAssetType,
+  AuctionType,
+  IAuctionDto,
+} from '@/types/auction.type';
 import { formatAuctionPrice, getAuctionAssetUrl } from '@/utils/auction-utils';
+
+export type AuctionRoomMediaItem = {
+  url: string;
+  assetType: AuctionAssetType;
+  position: number;
+};
+
+/** Stable gallery order: by `position`, then file order. */
+export function getAuctionMediaItems(
+  auction: IAuctionDto | null
+): AuctionRoomMediaItem[] {
+  if (!auction?.assets?.length) return [];
+  return [...auction.assets]
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+    .map((raw, idx) => ({
+      url: raw.fileKey ? getAuctionAssetUrl(raw.fileKey) : '',
+      assetType: raw.assetType ?? 'IMAGE',
+      position: raw.position ?? idx,
+    }))
+    .filter((item) => Boolean(item.url));
+}
+
+export type UserBidStanding =
+  | 'winning'
+  | 'outbid'
+  | 'watching'
+  | 'no_bids_yet'
+  | 'sealed_invite'
+  | 'sealed_placed'
+  | 'live_soon'
+  | 'need_join';
+
+/**
+ * Bidder-facing standing while the auction is active (USER mode only).
+ * Sealed auctions never expose win/lose before close.
+ */
+export function computeUserBidStanding(params: {
+  mode: 'SELLER' | 'USER' | 'ADMIN';
+  userId: string | undefined;
+  isParticipant: boolean;
+  isAuctionActive: boolean;
+  isAuctionEnded: boolean;
+  isLiveRoom: boolean;
+  isSealedRoom: boolean;
+  currentBidUserId: string | null | undefined;
+  liveFeed: { userId: string }[];
+}): UserBidStanding | null {
+  const {
+    mode,
+    userId,
+    isParticipant,
+    isAuctionActive,
+    isAuctionEnded,
+    isLiveRoom,
+    isSealedRoom,
+    currentBidUserId,
+    liveFeed,
+  } = params;
+
+  if (mode !== 'USER' || isAuctionEnded || !isAuctionActive) return null;
+  if (!userId) return null;
+  if (!isParticipant) return 'need_join';
+
+  if (isLiveRoom) return 'live_soon';
+
+  const hasUserBid = liveFeed.some((b) => b.userId === userId);
+
+  if (isSealedRoom) {
+    return hasUserBid ? 'sealed_placed' : 'sealed_invite';
+  }
+
+  if (!currentBidUserId) {
+    return hasUserBid ? 'winning' : 'no_bids_yet';
+  }
+
+  if (currentBidUserId === userId) return 'winning';
+  if (hasUserBid) return 'outbid';
+  return 'watching';
+}
 
 export function isSealedAuctionType(
   auctionType: AuctionType | undefined
@@ -95,8 +178,8 @@ export function isCountdownLowUrgency(endCountdown: string | null): boolean {
 }
 
 export function auctionMediaUrl(auction: IAuctionDto | null): string {
-  const a0 = auction?.assets?.[0];
-  return a0?.fileKey ? getAuctionAssetUrl(a0.fileKey) : '';
+  const items = getAuctionMediaItems(auction);
+  return items[0]?.url ?? '';
 }
 
 export function formatCountdown(ms: number): string {

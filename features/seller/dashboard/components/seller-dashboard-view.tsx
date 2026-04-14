@@ -85,7 +85,7 @@ export default function SellerDashboardView() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
-      <div className="mx-auto max-w-5xl space-y-4 px-3 py-4 sm:px-4">
+      <div className="mx-auto max-w-7xl space-y-4 px-3 py-4 sm:px-4">
         <header className="flex flex-col gap-3 border-b border-border/60 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <h1 className="text-lg font-semibold tracking-tight text-foreground">
@@ -164,7 +164,6 @@ export default function SellerDashboardView() {
                 <SellerAuctionsCards
                   auctions={auctions}
                   limit={5}
-                  className="mx-auto max-w-3xl"
                   sortMode="none"
                   emptyAction={
                     <Button asChild className="h-8 text-xs" size="sm">

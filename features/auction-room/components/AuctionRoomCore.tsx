@@ -25,6 +25,7 @@ import {
   auctionParticipationDepositAmount,
   checkIsPlaceBidEligible,
   computeNextBidMin,
+  computeUserBidStanding,
   isLiveAuctionType,
   isSealedAuctionType,
 } from '../utils/auction-room.utils';
@@ -36,14 +37,15 @@ import { AuctionRoomConnectionStatus } from './AuctionRoomConnectionStatus';
 import { AuctionRoomDetailsSection } from './AuctionRoomDetailsSection';
 import { AuctionRoomFallbackEndedPanel } from './AuctionRoomFallbackEndedPanel';
 import { AuctionRoomFallbackPublicNotificationPanel } from './AuctionRoomFallbackPublicNotificationPanel';
-import { AuctionRoomHero } from './AuctionRoomHero';
 import { AuctionRoomLiveBidFeed } from './AuctionRoomLiveBidFeed';
+import { AuctionRoomMediaGallery } from './AuctionRoomMediaGallery';
 import { AuctionRoomMetaBadges } from './AuctionRoomMetaBadges';
 import { AuctionRoomParticipantsPanel } from './AuctionRoomParticipantsPanel';
 import { AuctionRoomSellerPanel } from './AuctionRoomSellerPanel';
 import { AuctionPlaceBidTermsModal } from './AuctionPlaceBidTermsModal';
 import { AuctionResultModal } from './AuctionResultModal';
 import { AuctionSoldSummaryCard } from './AuctionSoldSummaryCard';
+import { AuctionRoomYourPosition } from './AuctionRoomYourPosition';
 import { FallbackPublicParticipantStatsCard } from './FallbackPublicParticipantStatsCard';
 import useUserStore from '@/store/user.store';
 
@@ -77,6 +79,7 @@ export function AuctionRoomCore({
     currentBid,
     liveFeed,
     connectionState,
+    roomReady,
     error,
     placeBid,
     addAuctionParticipant,
@@ -109,7 +112,7 @@ export function AuctionRoomCore({
       endAuction,
     });
 
-  const canInteract = connectionState === 'connected' && !error;
+  const canInteract = connectionState === 'connected' && roomReady && !error;
   const isSealedRoom = isSealedAuctionType(auction?.auctionType);
   const isLiveRoom = isLiveAuctionType(auction?.auctionType);
 
@@ -125,6 +128,36 @@ export function AuctionRoomCore({
 
   const { auctionStatusStr, endCountdown, isAuctionActive, isAuctionEnded } =
     useAuctionRoomStatus(auction, auctionStatusOverride);
+
+  const isParticipant = Boolean(
+    user?.id && checkIsPlaceBidEligible(user.id, participants)
+  );
+
+  const userBidStanding = useMemo(
+    () =>
+      computeUserBidStanding({
+        mode,
+        userId: user?.id,
+        isParticipant,
+        isAuctionActive,
+        isAuctionEnded,
+        isLiveRoom,
+        isSealedRoom,
+        currentBidUserId: currentBid?.userId,
+        liveFeed,
+      }),
+    [
+      mode,
+      user?.id,
+      isParticipant,
+      isAuctionActive,
+      isAuctionEnded,
+      isLiveRoom,
+      isSealedRoom,
+      currentBid?.userId,
+      liveFeed,
+    ]
+  );
 
   const soldSummaryDisplay = useMemo(() => {
     if (soldSummary) return soldSummary;
@@ -216,7 +249,7 @@ export function AuctionRoomCore({
     : '—';
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-amber-950/4 via-background to-background dark:from-amber-400/5">
+    <div className="relative min-h-screen bg-background">
       <AuctionPlaceBidTermsModal
         open={placeBidTermsOpen}
         onOpenChange={setPlaceBidTermsOpen}
@@ -239,48 +272,58 @@ export function AuctionRoomCore({
         }}
       />
 
-      <div className="mx-auto max-w-6xl px-3 pb-12 pt-5 sm:px-5 lg:pb-14 lg:pt-6">
+      <div className="relative mx-auto max-w-6xl px-3 pb-10 pt-4 sm:px-4 lg:px-6">
         <div className="space-y-3">
           {error ? <AuctionRoomAlert message={error} /> : null}
 
           <Sheet open={chatOpen} onOpenChange={setChatOpen}>
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:items-start lg:gap-6 xl:gap-8">
-              <section className="min-w-0 space-y-2.5 lg:max-w-md">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 space-y-1.5">
-                    <h1 className="text-balance text-base font-semibold leading-snug tracking-tight text-foreground sm:text-lg">
-                      {auction?.title ?? (
-                        <span className="text-muted-foreground">
-                          Loading auction…
-                        </span>
-                      )}
-                    </h1>
-                    <AuctionRoomMetaBadges
-                      categoryName={categoryName}
-                      typeLabel={typeLabel}
-                      statusLabel={statusLabel}
-                      connectionSlot={
-                        <AuctionRoomConnectionStatus state={connectionState} />
-                      }
+            <header className="flex flex-col gap-2 border-b border-border/40 pb-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <h1 className="text-balance text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+                  {auction?.title ?? (
+                    <span className="text-muted-foreground">
+                      Loading auction…
+                    </span>
+                  )}
+                </h1>
+                <AuctionRoomMetaBadges
+                  categoryName={categoryName}
+                  typeLabel={typeLabel}
+                  statusLabel={statusLabel}
+                  connectionSlot={
+                    <AuctionRoomConnectionStatus
+                      state={connectionState}
+                      roomReady={roomReady}
                     />
-                  </div>
-                  <SheetTrigger asChild>
-                    <Button
-                      size="xs"
-                      variant="outline"
-                      className="h-7 shrink-0 rounded-lg px-2.5 text-xs"
-                    >
-                      Chat
-                    </Button>
-                  </SheetTrigger>
-                </div>
+                  }
+                />
+              </div>
+              <SheetTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 shrink-0 rounded-full border-border/60 px-3 text-[11px] font-medium"
+                >
+                  Chat
+                </Button>
+              </SheetTrigger>
+            </header>
 
-                <AuctionRoomHero auction={auction} />
-
+            <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-12 xl:gap-5">
+              <div className="min-w-0 space-y-3 xl:col-span-7">
+                <AuctionRoomMediaGallery
+                  key={auction?.id ?? auctionId}
+                  auction={auction}
+                />
                 <AuctionRoomDetailsSection auction={auction} />
-              </section>
+              </div>
 
-              <aside className="min-w-0 space-y-3 lg:sticky lg:top-5">
+              <aside className="min-w-0 space-y-2 xl:sticky xl:top-4 xl:col-span-5 xl:self-start">
+                {mode === 'USER' ? (
+                  <AuctionRoomYourPosition standing={userBidStanding} />
+                ) : null}
+
                 {auctionStatusStr === 'SOLD' && soldSummaryDisplay ? (
                   <AuctionSoldSummaryCard
                     winnerUserName={soldSummaryDisplay.winnerUserName}
@@ -359,15 +402,19 @@ export function AuctionRoomCore({
                   mode={mode}
                   isSealedRoom={isSealedRoom}
                   isLiveRoom={isLiveRoom}
+                  currentUserId={user?.id}
                 />
 
-                <AuctionRoomParticipantsPanel participants={participants} />
+                <AuctionRoomParticipantsPanel
+                  participants={participants}
+                  currentUserId={user?.id}
+                />
               </aside>
             </div>
 
             <SheetContent
               side="left"
-              className="flex h-full w-[min(100vw,18rem)] flex-col gap-0 p-0 sm:max-w-[18rem]"
+              className="flex h-full w-[min(100vw,20rem)] flex-col gap-0 border-border/40 p-0 sm:max-w-sm"
               onClick={(e) => {
                 e.stopPropagation();
               }}

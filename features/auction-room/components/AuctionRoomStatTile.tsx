@@ -20,21 +20,21 @@ export function AuctionRoomStatTile({
   return (
     <div
       className={cn(
-        'rounded-lg border border-border/60 bg-card/50 p-2 shadow-sm transition-colors hover:bg-card/80',
+        'rounded-lg border border-border/35 bg-background/30 px-1.5 py-1 transition-colors hover:bg-background/50',
         className
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="flex items-center justify-between gap-1">
+        <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">
           {label}
         </p>
         {icon ? (
-          <span className="text-muted-foreground/70 [&_svg]:size-3.5">
+          <span className="text-muted-foreground/60 [&_svg]:size-2.5">
             {icon}
           </span>
         ) : null}
       </div>
-      <div className="mt-1 text-xs font-medium leading-snug text-foreground">
+      <div className="mt-px text-[11px] font-medium leading-tight text-foreground">
         {children}
       </div>
     </div>

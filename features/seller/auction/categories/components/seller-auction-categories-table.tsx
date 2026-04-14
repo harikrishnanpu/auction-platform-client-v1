@@ -26,7 +26,6 @@ export function SellerAuctionCategoriesTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>ID</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Slug</TableHead>
             <TableHead>Parent</TableHead>
@@ -40,7 +39,6 @@ export function SellerAuctionCategoriesTable({
         <TableBody>
           {rows.map((r) => (
             <TableRow key={r.id}>
-              <TableCell className="font-mono text-xs">{r.id}</TableCell>
               <TableCell className="font-medium">{r.name}</TableCell>
               <TableCell className="text-xs font-mono text-muted-foreground">
                 {r.slug}
@@ -65,7 +63,7 @@ export function SellerAuctionCategoriesTable({
                 </TableCell>
               ) : null}
               <TableCell className="text-xs text-muted-foreground">
-                {r.submittedBy || '-'}
+                {r.submittedByUser || '-'}
               </TableCell>
             </TableRow>
           ))}

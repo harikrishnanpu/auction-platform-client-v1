@@ -132,51 +132,46 @@ export function AuctionRoomBidPanel({
     inputDisabled || isSubmitting || !isValid || cooldownRemainingSeconds > 0;
 
   return (
-    <Card
-      className={cn(
-        'rounded-lg border-border/60 shadow-sm',
-        'bg-linear-to-br from-card via-card to-amber-500/4 dark:to-amber-400/6'
-      )}
-    >
-      <CardHeader className="space-y-0 pb-2">
-        <div className="flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+    <Card className="rounded-xl border-border/50 bg-card/30 shadow-none">
+      <CardHeader className="space-y-0 border-b border-border/35 px-2.5 py-2">
+        <div className="flex items-start gap-2">
+          <span className="mt-px flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Gavel className="size-3.5" aria-hidden />
           </span>
-          <div>
+          <div className="min-w-0">
             <CardTitle className="text-xs font-semibold tracking-tight">
               {headline.title}
             </CardTitle>
-            <CardDescription className="text-[10px] leading-tight">
+            <CardDescription className="text-[10px] leading-snug">
               {headline.description}
             </CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2 px-2.5 pb-2.5 pt-2">
         <div>
-          <p className="text-2xl font-bold tabular-nums tracking-tight text-foreground sm:text-3xl">
+          <p className="text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl">
             {primaryDisplay}
           </p>
-          {nextBidMin != null ? (
-            <p className="mt-1 text-xs text-muted-foreground">
-              Minimum start price{' '}
-              <span className="font-semibold text-foreground tabular-nums">
-                {formatAuctionPrice(auction?.startPrice ?? nextBidMin)}
+          {auction ? (
+            <p className="mt-0.5 text-[10px] text-muted-foreground">
+              Opens at{' '}
+              <span className="font-medium tabular-nums text-foreground/90">
+                {formatAuctionPrice(auction.startPrice)}
               </span>
             </p>
           ) : null}
         </div>
 
-        <div className="grid gap-1.5 rounded-lg border border-border/60 bg-background/60 p-2.5">
+        <div className="rounded-lg border border-border/40 bg-background/50 px-2 py-1.5">
           <div className="flex items-center justify-between gap-2">
-            <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-              <Hourglass className="size-3.5 shrink-0" aria-hidden />
+            <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+              <Hourglass className="size-3 shrink-0" aria-hidden />
               Time left
             </span>
             <span
               className={cn(
-                'font-mono text-sm font-semibold tabular-nums',
+                'font-mono text-xs font-semibold tabular-nums',
                 isCountdownLowUrgency(endCountdown) &&
                   'text-amber-700 dark:text-amber-400'
               )}
@@ -184,21 +179,22 @@ export function AuctionRoomBidPanel({
               {isAuctionEnded ? 'Ended' : (endCountdown ?? '—')}
             </span>
           </div>
-          <div className="flex flex-wrap gap-1.5 text-[10px] text-muted-foreground">
-            <Badge variant="outline" className="px-1.5 py-0 font-normal">
-              Cooldown {auction?.bidCooldownSeconds ?? 0}s
-            </Badge>
-          </div>
+          <Badge
+            variant="outline"
+            className="mt-1 h-4 w-fit rounded px-1.5 text-[9px] font-normal"
+          >
+            Cooldown {auction?.bidCooldownSeconds ?? 0}s
+          </Badge>
         </div>
 
         {showPlaceBid ? (
           <form
-            className="space-y-1.5"
+            className="space-y-2"
             onSubmit={handleSubmit(onValidSubmit)}
             noValidate
           >
             <div className="space-y-1">
-              <Label htmlFor="place-bid-amount" className="text-xs">
+              <Label htmlFor="place-bid-amount" className="text-[10px]">
                 Your bid
               </Label>
               <Input
@@ -207,18 +203,18 @@ export function AuctionRoomBidPanel({
                 autoComplete="off"
                 placeholder={
                   nextBidMin != null
-                    ? `nextBidMin: ${nextBidMin}`
-                    : 'Enter your bid amount'
+                    ? `Min ${formatAuctionPrice(nextBidMin)}`
+                    : 'Amount'
                 }
                 disabled={inputDisabled}
                 className={cn(
-                  'h-9 rounded-md border-border/80 bg-background text-xs tabular-nums',
+                  'h-8 rounded-lg border-border/50 bg-background text-xs tabular-nums',
                   errors.amount && 'border-destructive'
                 )}
                 {...amountField}
               />
               {errors.amount?.message ? (
-                <p className="text-[11px] text-destructive" role="alert">
+                <p className="text-[10px] text-destructive" role="alert">
                   {errors.amount.message}
                 </p>
               ) : null}
@@ -228,6 +224,7 @@ export function AuctionRoomBidPanel({
               disabled={submitDisabled}
               cooldownRemainingSeconds={cooldownRemainingSeconds}
               pending={isSubmitting}
+              className="h-8 rounded-lg text-[11px]"
             />
           </form>
         ) : null}

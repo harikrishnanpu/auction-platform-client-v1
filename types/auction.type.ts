@@ -7,7 +7,12 @@ export type AuctionStatus =
   | 'ENDED'
   | 'SOLD'
   | 'FALLBACK_ENDED'
-  | 'FALLBACK_PUBLIC_NOTIFICATION';
+  | 'FALLBACK_PUBLIC_NOTIFICATION'
+  /** Some APIs use these for schedule; cards treat them like published phases */
+  | 'LIVE'
+  | 'UPCOMING'
+  | 'ACTIVE'
+  | 'PAUSED';
 
 export interface CreateAuctionInput {
   auctionType: AuctionType;
@@ -84,6 +89,7 @@ export interface AuctionCategory {
   status: AuctionCategoryStatus;
   rejectionReason?: string;
   submittedBy: string;
+  submittedByUser: string | null;
 }
 
 export interface AuctionAssetForm {

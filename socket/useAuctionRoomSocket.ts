@@ -111,6 +111,8 @@ export function useAuctionRoomSocket({
 
   const [error, setError] = useState<string | null>(null);
 
+  const [roomReady, setRoomReady] = useState(false);
+
   const roomId = useMemo(() => `auction:${auctionId}`, [auctionId]);
 
   useEffect(() => {
@@ -143,6 +145,7 @@ export function useAuctionRoomSocket({
     socket.on(AUCTION_SOCKET_EVENTS.JOINED, (joined: AuctionJoinedEvent) => {
       const { chatMessages: joinedChat, ...room } = joined;
       setSnapshot(room);
+      setRoomReady(true);
       if (Array.isArray(joinedChat)) {
         setChatMessages(joinedChat);
       }
@@ -253,6 +256,7 @@ export function useAuctionRoomSocket({
       socket.disconnect();
       socketRef.current = null;
       setConnectionState('disconnected');
+      setRoomReady(false);
       setChatMessages([]);
     };
   }, [auctionId, mode]);
@@ -464,6 +468,7 @@ export function useAuctionRoomSocket({
 
   return {
     snapshot,
+    roomReady,
     auction: snapshot?.auction ?? initialAuction ?? null,
     currentBid: snapshot?.currentBid ?? null,
     liveFeed: snapshot?.liveFeed ?? [],

@@ -1,6 +1,5 @@
 import type { AuctionType, IAuctionDto } from '@/types/auction.type';
 
-/** Human-readable auction status (ENDED = closed; SOLD = sale completed, winner paid). */
 export function auctionStatusLabel(status: string): string {
   switch (status.toUpperCase()) {
     case 'ACTIVE':
@@ -34,7 +33,6 @@ export function getAuctionTypeLabel(type: AuctionType): string {
   return map[type] ?? type;
 }
 
-/** Category name from nested DTO (defensive for partial API payloads). */
 export function getAuctionCategoryName(auction: IAuctionDto): string {
   const c = auction.category;
   if (c && typeof c === 'object' && typeof c.name === 'string' && c.name.trim())

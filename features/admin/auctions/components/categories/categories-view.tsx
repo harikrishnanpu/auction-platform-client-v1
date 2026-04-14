@@ -105,9 +105,6 @@ export function AdminAuctionCategoriesView({
         cell: (row) => (
           <div className="min-w-[220px]">
             <div className="font-semibold text-foreground">{row.name}</div>
-            <div className="text-xs text-muted-foreground font-mono">
-              {row.id}
-            </div>
           </div>
         ),
       },

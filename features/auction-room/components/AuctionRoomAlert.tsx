@@ -19,16 +19,16 @@ export function AuctionRoomAlert({
     <div
       role="alert"
       className={cn(
-        'flex gap-3 rounded-2xl border px-4 py-3 text-sm',
+        'flex gap-1.5 rounded-lg border px-2 py-1.5 text-[10px] leading-snug',
         variant === 'destructive' &&
-          'border-destructive/30 bg-destructive/10 text-destructive',
+          'border-destructive/25 bg-destructive/10 text-destructive',
         variant === 'warning' &&
-          'border-amber-500/35 bg-amber-500/10 text-amber-950 dark:text-amber-100',
+          'border-amber-500/30 bg-amber-500/10 text-amber-950 dark:text-amber-100',
         className
       )}
     >
-      <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden />
-      <p className="leading-relaxed">{message}</p>
+      <AlertCircle className="mt-px size-3 shrink-0" aria-hidden />
+      <p>{message}</p>
     </div>
   );
 }

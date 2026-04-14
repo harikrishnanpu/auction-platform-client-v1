@@ -1,5 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { SellerAuctionCardSkeleton } from '@/features/seller/auction/components/seller-auction-card';
+import { AuctionCardSkeleton } from '@/features/auction/components/auction-card';
+import { AuctionListingGrid } from '@/features/auction/components/auction-listing-grid';
 
 export function SellerHeaderSkeleton() {
   return (
@@ -18,11 +19,11 @@ export function SellerHeaderSkeleton() {
 
 export function SellerAuctionListSkeleton({ count = 5 }: { count?: number }) {
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-2">
+    <AuctionListingGrid>
       {Array.from({ length: count }).map((_, i) => (
-        <SellerAuctionCardSkeleton key={i} />
+        <AuctionCardSkeleton key={i} />
       ))}
-    </div>
+    </AuctionListingGrid>
   );
 }
 
@@ -46,7 +47,7 @@ export function SellerListingSectionSkeleton() {
 export function SellerShellSkeleton() {
   return (
     <div className="min-h-[50vh] bg-background">
-      <div className="mx-auto max-w-5xl space-y-4 px-3 py-4 sm:px-4">
+      <div className="mx-auto max-w-7xl space-y-4 px-3 py-4 sm:px-4">
         <SellerHeaderSkeleton />
         <SellerListingSectionSkeleton />
       </div>

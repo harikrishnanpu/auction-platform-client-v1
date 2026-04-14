@@ -5,11 +5,6 @@ import type { IAuctionDto } from '@/types/auction.type';
 import type { AuctionRoomMode } from '../../../socket/useAuctionRoomSocket';
 
 import { AuctionRoomCore } from './AuctionRoomCore';
-
-/**
- * Back-compat wrapper: maps `mode` to role flags. Prefer UserAuctionRoomView,
- * SellerAuctionRoomView, or AdminAuctionRoomView from `modules/auction-room/views/`.
- */
 export function AuctionRoom({
   auctionId,
   mode,

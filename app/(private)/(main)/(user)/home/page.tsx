@@ -1,7 +1,8 @@
 import Link from 'next/link';
 
 import { getLatestAuctionsAction } from '@/actions/auction/auction.actions';
-import { SellerAuctionCard } from '@/features/seller/auction/components/seller-auction-card';
+import { AuctionCard } from '@/features/auction/components/auction-card';
+import { AuctionListingGrid } from '@/features/auction/components/auction-listing-grid';
 import { Button } from '@/components/ui/button';
 
 export default async function HomePage() {
@@ -10,7 +11,7 @@ export default async function HomePage() {
   const auctions = res.success && res.data ? res.data.auctions : [];
 
   return (
-    <div className="mx-auto max-w-5xl px-3 py-6">
+    <div className="mx-auto max-w-7xl px-3 py-6 sm:px-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-lg font-semibold tracking-tight text-foreground">
@@ -26,21 +27,17 @@ export default async function HomePage() {
         </Button>
       </div>
 
-      <div className="mt-4 flex flex-col gap-2">
+      <AuctionListingGrid className="mt-4">
         {auctions.length === 0 ? (
-          <div className="rounded-lg border border-border/70 bg-muted/10 p-4 text-sm text-muted-foreground">
+          <div className="col-span-full rounded-xl border border-border/70 bg-muted/10 p-4 text-sm text-muted-foreground">
             No auctions available right now.
           </div>
         ) : (
           auctions.map((a) => (
-            <SellerAuctionCard
-              key={a.id}
-              auction={a}
-              href={`/auction/${a.id}`}
-            />
+            <AuctionCard key={a.id} auction={a} href={`/auction/${a.id}`} />
           ))
         )}
-      </div>
+      </AuctionListingGrid>
     </div>
   );
 }

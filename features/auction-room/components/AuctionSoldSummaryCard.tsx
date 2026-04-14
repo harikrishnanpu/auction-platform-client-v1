@@ -2,13 +2,7 @@
 
 import { Trophy } from 'lucide-react';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type AuctionSoldSummaryCardProps = {
   winnerUserName: string;
@@ -28,23 +22,20 @@ export function AuctionSoldSummaryCard({
   soldAmount,
 }: AuctionSoldSummaryCardProps) {
   return (
-    <Card className="rounded-lg border-emerald-500/30 bg-emerald-500/5 shadow-sm">
-      <CardHeader className="px-3 py-2 pb-1">
-        <CardTitle className="flex items-center gap-1.5 text-xs font-semibold">
-          <Trophy className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-          Auction sold
+    <Card className="rounded-xl border-emerald-500/25 bg-emerald-500/[0.04] shadow-none">
+      <CardHeader className="space-y-0 px-2.5 py-1.5 pb-0">
+        <CardTitle className="flex items-center gap-1 text-[10px] font-semibold">
+          <Trophy className="size-2.5 text-emerald-600 dark:text-emerald-400" />
+          Sold
         </CardTitle>
-        <CardDescription className="text-[10px] leading-tight">
-          Winning bidder and final price.
-        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-1 px-3 pb-3 text-xs">
+      <CardContent className="space-y-0.5 px-2.5 pb-2 pt-1 text-[9px] leading-snug">
         <p>
-          <span className="text-muted-foreground">Winner: </span>
+          <span className="text-muted-foreground">Winner · </span>
           <span className="font-medium text-foreground">{winnerUserName}</span>
         </p>
         <p>
-          <span className="text-muted-foreground">Sold price: </span>
+          <span className="text-muted-foreground">Price · </span>
           <span className="font-semibold tabular-nums text-foreground">
             {formatSoldAmount(soldAmount)}
           </span>

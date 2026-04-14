@@ -52,24 +52,24 @@ export function FallbackPublicParticipantStatsCard({
   ];
 
   return (
-    <Card className="rounded-lg border-border/60 bg-card/70 shadow-sm">
-      <CardHeader className="px-3 py-2 pb-1">
-        <CardTitle className="text-xs font-semibold">
+    <Card className="rounded-xl border-border/50 bg-card/30 shadow-none">
+      <CardHeader className="px-2.5 py-1.5 pb-0">
+        <CardTitle className="text-[10px] font-semibold">
           Fallback public responses
         </CardTitle>
-        <CardDescription className="text-[10px] leading-tight">
+        <CardDescription className="text-[9px] leading-tight">
           Pending vs rejected participants (public offer round).
         </CardDescription>
       </CardHeader>
-      <CardContent className="px-3 pb-3">
+      <CardContent className="px-2.5 pb-2 pt-1">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[200px] w-full"
+          className="aspect-auto h-[140px] w-full"
         >
           <BarChart
             accessibilityLayer
             data={data}
-            margin={{ left: 8, right: 8, top: 8, bottom: 8 }}
+            margin={{ left: 4, right: 4, top: 4, bottom: 4 }}
           >
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis

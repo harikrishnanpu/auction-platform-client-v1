@@ -21,35 +21,35 @@ export function AuctionRoomMetaBadges({
   className,
 }: AuctionRoomMetaBadgesProps) {
   return (
-    <div className={cn('flex flex-wrap items-center gap-1.5', className)}>
+    <div className={cn('flex flex-wrap items-center gap-1', className)}>
       <Badge
         variant="secondary"
-        className="rounded-md border-0 bg-primary/10 px-1.5 py-0 text-[10px] font-medium text-primary"
+        className="h-5 rounded-full border-0 bg-foreground/[0.06] px-2 text-[9px] font-medium leading-none text-foreground/90"
       >
         {categoryName}
       </Badge>
       <Badge
         variant="outline"
-        className="rounded-md px-1.5 py-0 text-[10px] font-medium"
+        className="h-5 rounded-full border-border/55 px-2 text-[9px] font-normal leading-none"
       >
         {typeLabel}
       </Badge>
       <Badge
         variant="outline"
         className={cn(
-          'rounded-md px-1.5 py-0 text-[10px] font-semibold',
+          'h-5 rounded-full px-2 text-[9px] font-semibold leading-none',
           statusLabel === 'Live' &&
-            'border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300',
+            'border-emerald-500/35 bg-emerald-500/[0.08] text-emerald-800 dark:text-emerald-300',
           statusLabel === 'Paused' &&
-            'border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200',
+            'border-amber-500/35 bg-amber-500/[0.08] text-amber-900 dark:text-amber-200',
           statusLabel === 'Sold' &&
-            'border-emerald-600/45 bg-emerald-500/12 text-emerald-900 dark:text-emerald-200',
+            'border-emerald-600/35 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200',
           statusLabel === 'Ended' &&
-            'border-border bg-muted/60 text-muted-foreground',
+            'border-border bg-muted/50 text-muted-foreground',
           statusLabel === 'Cancelled' &&
             'border-destructive/30 bg-destructive/10 text-destructive',
           statusLabel === 'Public offer' &&
-            'border-sky-500/40 bg-sky-500/10 text-sky-900 dark:text-sky-200'
+            'border-sky-500/35 bg-sky-500/[0.08] text-sky-900 dark:text-sky-200'
         )}
       >
         {statusLabel}

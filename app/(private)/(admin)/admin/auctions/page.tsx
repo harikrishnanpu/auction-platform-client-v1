@@ -8,9 +8,10 @@ import { getAdminAuctionsAction } from '@/actions/admin/auction.actions';
 import { Button } from '@/components/ui/button';
 import { SellerAuctionsPagination } from '@/features/seller/auction/components/seller-auctions-pagination';
 import {
-  SellerAuctionCard,
-  SellerAuctionCardSkeleton,
-} from '@/features/seller/auction/components/seller-auction-card';
+  AuctionCard,
+  AuctionCardSkeleton,
+} from '@/features/auction/components/auction-card';
+import { AuctionListingGrid } from '@/features/auction/components/auction-listing-grid';
 import { AdminAuctionFilters } from '@/features/admin/auctions/components/auctions-view/admin-auction-filters';
 import type {
   AuctionCategory,
@@ -167,20 +168,20 @@ export default function AdminAuctionsPage() {
 
       <div className="mt-4">
         {loading ? (
-          <div className="flex w-full flex-col gap-2">
+          <AuctionListingGrid>
             {Array.from({ length: Math.min(filters.limit, 8) }).map((_, i) => (
-              <SellerAuctionCardSkeleton key={i} />
+              <AuctionCardSkeleton key={i} />
             ))}
-          </div>
+          </AuctionListingGrid>
         ) : error ? (
           <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-3 text-center">
             <p className="text-xs font-medium text-destructive">{error}</p>
             <p className="mt-1 text-[11px] text-muted-foreground">Try again.</p>
           </div>
         ) : (
-          <div className="flex w-full flex-col gap-2">
+          <AuctionListingGrid>
             {(response?.auctions ?? []).length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-4 py-10 text-center">
+              <div className="col-span-full rounded-xl border border-dashed border-border/60 bg-muted/10 px-4 py-10 text-center">
                 <div className="text-sm font-medium text-foreground">
                   No auctions yet
                 </div>
@@ -199,14 +200,16 @@ export default function AdminAuctionsPage() {
               </div>
             ) : (
               (response?.auctions ?? []).map((a) => (
-                <SellerAuctionCard
+                <AuctionCard
                   key={a.id}
                   auction={a}
                   href={`/admin/auctions/${a.id}`}
+                  showSellerId
+                  ctaLabel="Review"
                 />
               ))
             )}
-          </div>
+          </AuctionListingGrid>
         )}
 
         <SellerAuctionsPagination
