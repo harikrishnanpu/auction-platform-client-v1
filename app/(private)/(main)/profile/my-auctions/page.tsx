@@ -1,4 +1,4 @@
-import { ProfileMyAuctionsView } from '@/modules/user/auctions/components/profile-my-auctions-view';
+import { ProfileMyAuctionsView } from '@/features/user/auctions/components/profile-my-auctions-view';
 
 export default function ProfileMyAuctionsPage() {
   return (

@@ -1,4 +1,4 @@
-import { ProfilePaymentsView } from '@/modules/user/payments/components/ProfilePaymentsView';
+import { ProfilePaymentsView } from '@/features/user/payments/components/ProfilePaymentsView';
 
 export default function ProfilePaymentsPage() {
   return (

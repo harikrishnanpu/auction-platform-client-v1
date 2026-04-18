@@ -1,6 +1,6 @@
 import AuthNavbar from '@/components/layout/navbars/AuthNavbar';
 import TestimonialCard from '@/components/marketing/TestimonialCard';
-import LoginForm from '@/modules/auth/components/login/login-form';
+import LoginForm from '@/features/auth/components/login/login-form';
 
 export default function LoginPage() {
   return (

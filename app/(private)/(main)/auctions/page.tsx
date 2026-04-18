@@ -6,12 +6,12 @@ import Link from 'next/link';
 import { getAuctionCategoriesForSellerAction } from '@/actions/auction-category/auction-category.actions';
 import { getBrowseAuctionsAction } from '@/actions/auction/auction.actions';
 import { Button } from '@/components/ui/button';
-import { SellerAuctionsPagination } from '@/modules/seller/auction/components/seller-auctions-pagination';
+import { SellerAuctionsPagination } from '@/features/seller/auction/components/seller-auctions-pagination';
 import {
   UserAuctionsCards,
   UserAuctionsCardsSkeleton,
-} from '@/modules/user/auctions/components/user-auctions-cards';
-import { UserAuctionFilters } from '@/modules/user/auctions/components/user-auction-filters';
+} from '@/features/user/auctions/components/user-auctions-cards';
+import { UserAuctionFilters } from '@/features/user/auctions/components/user-auction-filters';
 import type {
   AuctionCategory,
   AuctionType,
@@ -133,7 +133,7 @@ export default function AuctionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-3 py-4">
+    <div className="mx-auto max-w-7xl px-3 py-4 sm:px-4">
       <header className="flex flex-col gap-3 border-b border-border/60 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-lg font-semibold tracking-tight text-foreground">

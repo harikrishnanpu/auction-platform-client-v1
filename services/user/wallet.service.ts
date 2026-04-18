@@ -2,7 +2,7 @@ import { API_ENDPOINTS, buildApiUrl } from '@/apiInstance';
 import type {
   ICreateWalletTopupOrderResponse,
   IUserWallet,
-} from '@/modules/user/wallet/types/wallet.types';
+} from '@/features/user/wallet/types/wallet.types';
 import { apiFetch } from '@/lib/fetch';
 import { ApiResponse } from '@/types/api.index';
 import { cookies } from 'next/headers';

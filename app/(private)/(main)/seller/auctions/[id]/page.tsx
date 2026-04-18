@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { getSellerAuctionByIdAction } from '@/actions/auction/auction.actions';
-import { SellerAuctionRoomView } from '@/modules/auction-room/views/SellerAuctionRoomView';
+import { SellerAuctionRoomView } from '@/features/auction-room/views/SellerAuctionRoomView';
 
 export default async function SellerAuctionsDetailPage({
   params,

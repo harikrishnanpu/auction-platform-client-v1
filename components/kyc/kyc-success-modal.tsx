@@ -26,7 +26,7 @@ export function KycSuccessModal({ isOpen, onClose }: SuccessModalProps) {
             <CheckCircle size={32} strokeWidth={3} />
           </div>
 
-          <h2 className="text-2xl font-bold font-serif text-slate-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold   text-slate-900 dark:text-white mb-2">
             Submission Successful!
           </h2>
 

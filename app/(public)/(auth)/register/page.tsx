@@ -1,6 +1,6 @@
 'use client';
 
-import { RegisterForm } from '@/modules/auth/components/register/register-form';
+import { RegisterForm } from '@/features/auth/components/register/register-form';
 import TestimonialCard from '@/components/marketing/TestimonialCard';
 import AuthNavbar from '@/components/layout/navbars/AuthNavbar';
 

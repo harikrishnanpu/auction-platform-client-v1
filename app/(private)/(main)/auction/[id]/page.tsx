@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { authGetSesssion } from '@/actions/auth/auth.actions';
 import { getSellerAuctionByIdAction } from '@/actions/auction/auction.actions';
-import { UserAuctionRoomView } from '@/modules/auction-room/views/UserAuctionRoomView';
+import { UserAuctionRoomView } from '@/features/auction-room/views/UserAuctionRoomView';
 import { UserRole } from '@/types/user.type';
 
 export default async function AuctionDetailPage({

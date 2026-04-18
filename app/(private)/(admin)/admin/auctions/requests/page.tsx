@@ -2,7 +2,7 @@ import {
   getAdminAuctionCategoriesAction,
   getAuctionCategoryRequestsAction,
 } from '@/actions/admin/auction-category.actions';
-import { AdminAuctionCategoryRequestsView } from '@/modules/admin/auctions/components/categories/requests-view';
+import { AdminAuctionCategoryRequestsView } from '@/features/admin/auctions/components/categories/requests-view';
 
 export default async function AdminAuctionCategoryRequestsPage() {
   const [categoriesRes, requestsRes] = await Promise.all([

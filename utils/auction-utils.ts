@@ -1,6 +1,5 @@
 import type { AuctionType, IAuctionDto } from '@/types/auction.type';
 
-/** Human-readable auction status (ENDED = closed; SOLD = sale completed, winner paid). */
 export function auctionStatusLabel(status: string): string {
   switch (status.toUpperCase()) {
     case 'ACTIVE':
@@ -34,7 +33,6 @@ export function getAuctionTypeLabel(type: AuctionType): string {
   return map[type] ?? type;
 }
 
-/** Category name from nested DTO (defensive for partial API payloads). */
 export function getAuctionCategoryName(auction: IAuctionDto): string {
   const c = auction.category;
   if (c && typeof c === 'object' && typeof c.name === 'string' && c.name.trim())
@@ -72,6 +70,16 @@ export function getAuctionAssetUrl(fileKey?: string): string {
   if (!fileKey) return '';
   if (fileKey.startsWith('http')) return fileKey;
   return `${AUCTION_ASSET_BASE_URL}/${fileKey}`;
+}
+
+/**
+ * Resolves a user avatar reference to a usable URL.
+ * Accepts either an S3 object key or an absolute URL.
+ */
+export function getUserAvatarUrl(avatar?: string | null): string {
+  if (!avatar) return '';
+  if (avatar.startsWith('http')) return avatar;
+  return `${AUCTION_ASSET_BASE_URL}/${avatar}`;
 }
 
 export const AUCTION_CONDITIONS = [

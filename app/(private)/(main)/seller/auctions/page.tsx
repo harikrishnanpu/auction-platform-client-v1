@@ -11,10 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   SellerAuctionsCards,
   SellerAuctionsCardsSkeleton,
-} from '@/modules/seller/auction/components/seller-auctions-cards';
-import { SellerAuctionFilters } from '@/modules/seller/auction/components/seller-auction-filters';
-import { SellerAuctionsPagination } from '@/modules/seller/auction/components/seller-auctions-pagination';
-import { SellerListingSectionSkeleton } from '@/modules/seller/components/seller-shell-skeleton';
+} from '@/features/seller/auction/components/seller-auctions-cards';
+import { SellerAuctionFilters } from '@/features/seller/auction/components/seller-auction-filters';
+import { SellerAuctionsPagination } from '@/features/seller/auction/components/seller-auctions-pagination';
+import { SellerListingSectionSkeleton } from '@/features/seller/components/seller-shell-skeleton';
 import type {
   AuctionStatus,
   AuctionType,
@@ -162,7 +162,7 @@ export default function SellerAuctionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-3 py-4">
+    <div className="mx-auto max-w-7xl px-3 py-4 sm:px-4">
       <header className="flex flex-col gap-3 border-b border-border/60 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-lg font-semibold tracking-tight text-foreground">

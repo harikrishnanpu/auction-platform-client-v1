@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getKycStatusAction } from '@/actions/kyc/kyc.action';
-import { SellerKycView } from '@/modules/seller/kyc/components/kyc-view';
+import { SellerKycView } from '@/features/seller/kyc/components/kyc-view';
 import { KycStatusEnum } from '@/types/kyc.type';
 
 export default async function SellerKycPage() {

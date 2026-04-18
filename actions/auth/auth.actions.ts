@@ -1,12 +1,12 @@
 'use server';
 
 import { OtpPurpose } from '@/constants/auth/otp.constants';
-import { ZodLoginFormValues } from '@/modules/auth/schemes/login-from.schema';
-import { ZodRegisterFormValues } from '@/modules/auth/schemes/register-form.schema';
-import { ZodCompleteProfileValues } from '@/modules/complete-profile/schemes/complete-profile-schema';
-import { ZodChangePasswordValues } from '@/modules/reset/password/schems/change-password.schema';
-import { ZodForgotPasswordValues } from '@/modules/reset/password/schems/forget-password.schema';
-import { ZodVerifyEmailValues } from '@/modules/verify/email/schemes/verify-email.schema';
+import { ZodLoginFormValues } from '@/features/auth/schemes/login-from.schema';
+import { ZodRegisterFormValues } from '@/features/auth/schemes/register-form.schema';
+import { ZodCompleteProfileValues } from '@/features/complete-profile/schemes/complete-profile-schema';
+import { ZodChangePasswordValues } from '@/features/reset/password/schems/change-password.schema';
+import { ZodForgotPasswordValues } from '@/features/reset/password/schems/forget-password.schema';
+import { ZodVerifyEmailValues } from '@/features/verify/email/schemes/verify-email.schema';
 import { authService } from '@/services/auth/auth.service';
 import { ApiResponse } from '@/types/api.index';
 import { IUser } from '@/types/user.type';

@@ -25,7 +25,7 @@ import { useState } from 'react';
 import {
   EditProfileFormValues,
   editProfileSchema,
-} from '@/modules/user/profile/schemes/editProfile.schema';
+} from '@/features/user/profile/schemes/editProfile.schema';
 
 interface EditProfileModalProps {
   user: User;

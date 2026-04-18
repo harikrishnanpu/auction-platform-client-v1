@@ -1,4 +1,4 @@
-import { CreateAuctionContainer } from '@/modules/seller/auction/components/create-auction-container';
+import { CreateAuctionContainer } from '@/features/seller/auction/components/create-auction-container';
 import { getAuctionCategoriesForSellerAction } from '@/actions/auction-category/auction-category.actions';
 
 export default async function CreateAuctionPage() {

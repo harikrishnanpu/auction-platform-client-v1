@@ -1,4 +1,4 @@
-import { ProfileNotificationsView } from '@/modules/user/notifications/components/ProfileNotificationsView';
+import { ProfileNotificationsView } from '@/features/user/notifications/components/ProfileNotificationsView';
 
 export default function ProfileNotificationsPage() {
   return (
