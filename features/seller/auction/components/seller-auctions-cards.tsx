@@ -60,12 +60,7 @@ export function SellerAuctionsCards({
   return (
     <AuctionListingGrid className={className}>
       {rows.map((a) => (
-        <AuctionCard
-          key={a.id}
-          auction={a}
-          href={`/seller/auctions/${a.id}`}
-          ctaLabel="Manage listing"
-        />
+        <AuctionCard key={a.id} auction={a} href={`/seller/auctions/${a.id}`} />
       ))}
     </AuctionListingGrid>
   );

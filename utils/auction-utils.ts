@@ -72,6 +72,16 @@ export function getAuctionAssetUrl(fileKey?: string): string {
   return `${AUCTION_ASSET_BASE_URL}/${fileKey}`;
 }
 
+/**
+ * Resolves a user avatar reference to a usable URL.
+ * Accepts either an S3 object key or an absolute URL.
+ */
+export function getUserAvatarUrl(avatar?: string | null): string {
+  if (!avatar) return '';
+  if (avatar.startsWith('http')) return avatar;
+  return `${AUCTION_ASSET_BASE_URL}/${avatar}`;
+}
+
 export const AUCTION_CONDITIONS = [
   'New',
   'Like New',

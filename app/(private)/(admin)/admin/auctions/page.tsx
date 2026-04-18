@@ -204,8 +204,6 @@ export default function AdminAuctionsPage() {
                   key={a.id}
                   auction={a}
                   href={`/admin/auctions/${a.id}`}
-                  showSellerId
-                  ctaLabel="Review"
                 />
               ))
             )}

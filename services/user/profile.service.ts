@@ -11,7 +11,7 @@ export const profileService = {
   getProfile: async (): Promise<ApiResponse<IUser>> => {
     const cookieStorage = await cookies();
     return await apiFetch<IUser>(
-      buildApiUrl(API_ENDPOINTS.user.profile),
+      buildApiUrl(API_ENDPOINTS.auth.me),
       { method: 'GET' },
       cookieStorage
     );

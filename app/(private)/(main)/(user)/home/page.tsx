@@ -1,136 +1,97 @@
-import Link from 'next/link';
-import { ArrowRight, Flame, Gavel, Sparkles, Timer } from 'lucide-react';
+import { Gavel, Handshake, Sparkles } from 'lucide-react';
 
 import { getLatestAuctionsAction } from '@/actions/auction/auction.actions';
 import { getProfileAction } from '@/actions/user/profile.actions';
-import { AuctionCard } from '@/features/auction/components/auction-card';
-import { AuctionListingGrid } from '@/features/auction/components/auction-listing-grid';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getUserHomeStatsAction } from '@/actions/user/home.actions';
+import { getMyAuctionsAction } from '@/actions/user/my-auctions.actions';
+import { HomeAuctionsGrid } from '@/features/user/home/components/home-auctions-grid';
+import { HomeEmptyState } from '@/features/user/home/components/home-empty-state';
+import { HomeHero } from '@/features/user/home/components/home-hero';
+import { HomeSection } from '@/features/user/home/components/home-section';
+import { HomeStats } from '@/features/user/home/components/home-stats';
+import type { IUserHomeStats } from '@/features/user/home/types/home.types';
+
+const FEATURED_LIMIT = 10;
+const PARTICIPATED_LIMIT = 5;
+
+const EMPTY_STATS: IUserHomeStats = {
+  liveCount: 0,
+  upcomingCount: 0,
+  endedCount: 0,
+  participatedCount: 0,
+};
 
 export default async function HomePage() {
-  const [latestRes, profileRes] = await Promise.all([
-    getLatestAuctionsAction(8),
-    getProfileAction(),
-  ]);
+  const [profileRes, statsRes, participatedRes, featuredRes] =
+    await Promise.all([
+      getProfileAction(),
+      getUserHomeStatsAction(),
+      getMyAuctionsAction({ limit: PARTICIPATED_LIMIT }),
+      getLatestAuctionsAction(FEATURED_LIMIT),
+    ]);
 
-  console.log('profileRes', profileRes);
-
-  const auctions =
-    latestRes.success && latestRes.data ? latestRes.data.auctions : [];
-  const userName = profileRes.success && profileRes.data?.name;
-
-  const liveCount = 0;
-  const upcomingCount = 0;
-  const endedCount = 0;
+  const profile = profileRes.success ? profileRes.data : null;
+  const stats = statsRes.success && statsRes.data ? statsRes.data : EMPTY_STATS;
+  const participated =
+    participatedRes.success && participatedRes.data
+      ? participatedRes.data.auctions
+      : [];
+  const featured =
+    featuredRes.success && featuredRes.data ? featuredRes.data.auctions : [];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5 px-3 py-5 sm:px-4">
-      <section className="rounded-2xl border border-border/70 bg-linear-to-br from-blue-500/10 via-background to-purple-500/10 p-4 sm:p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="min-w-0 space-y-2">
-            <p className="inline-flex items-center gap-1 rounded-full border border-blue-500/25 bg-blue-500/10 px-2.5 py-1 text-[11px] font-semibold text-blue-700 dark:text-blue-300">
-              <Sparkles className="size-3.5" />
-              Personalized dashboard
-            </p>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              Welcome back, {userName}
-            </h1>
-            <p className="max-w-2xl text-sm text-muted-foreground">
-              Track active opportunities, discover fresh listings, and jump into
-              live bidding faster from your home dashboard.
-            </p>
-          </div>
+    <div className="mx-auto max-w-7xl space-y-4 px-3 py-4 sm:px-4 sm:py-5">
+      <HomeHero
+        name={profile?.name}
+        avatarUrl={profile?.avatar_url || undefined}
+        isVerified={profile?.isVerified}
+      />
 
-          <div className="flex flex-wrap gap-2">
-            <Button asChild className="rounded-lg">
-              <Link href="/auctions">
-                Explore auctions
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="rounded-lg">
-              <Link href="/profile">View profile</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <HomeStats stats={stats} />
 
-      <section className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        <Card className="rounded-2xl border-border/70">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-              <Flame className="size-4 text-red-500" />
-              Live now
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{liveCount}</p>
-            <p className="text-xs text-muted-foreground">
-              Auctions taking bids right now
-            </p>
-          </CardContent>
-        </Card>
+      <HomeSection
+        icon={Sparkles}
+        title="Featured auctions"
+        description="A curated mix of live, upcoming, and recently closed lots."
+        linkHref="/auctions"
+        linkLabel="View all"
+      >
+        <HomeAuctionsGrid
+          auctions={featured}
+          limit={FEATURED_LIMIT}
+          empty={
+            <HomeEmptyState
+              icon={Gavel}
+              title="No auctions available right now"
+              description="Please check again shortly for fresh listings."
+              actionHref="/auctions"
+              actionLabel="Refresh"
+            />
+          }
+        />
+      </HomeSection>
 
-        <Card className="rounded-2xl border-border/70">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-              <Timer className="size-4 text-blue-500" />
-              Starting soon
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{upcomingCount}</p>
-            <p className="text-xs text-muted-foreground">
-              Upcoming listings to watch
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-2xl border-border/70">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-              <Gavel className="size-4 text-emerald-500" />
-              Recently closed
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{endedCount}</p>
-            <p className="text-xs text-muted-foreground">
-              Closed auctions in latest feed
-            </p>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className="rounded-2xl border border-border/70 bg-card/70 p-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <h2 className="text-lg font-semibold tracking-tight text-foreground">
-              Featured auctions
-            </h2>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              Curated mix of live, upcoming, and recently closed lots.
-            </p>
-          </div>
-
-          <Button asChild variant="outline" className="h-8 rounded-lg text-xs">
-            <Link href="/auctions">View all auctions</Link>
-          </Button>
-        </div>
-
-        <AuctionListingGrid className="mt-4">
-          {auctions.length === 0 ? (
-            <div className="col-span-full rounded-xl border border-dashed border-border/70 bg-muted/10 p-6 text-center text-sm text-muted-foreground">
-              No auctions available right now. Please check again shortly.
-            </div>
-          ) : (
-            auctions.map((a) => (
-              <AuctionCard key={a.id} auction={a} href={`/auction/${a.id}`} />
-            ))
-          )}
-        </AuctionListingGrid>
-      </section>
+      <HomeSection
+        icon={Handshake}
+        title="Your participated auctions"
+        description="Auctions you have joined, across all statuses."
+        linkHref="/profile/my-auctions"
+        linkLabel="View all"
+      >
+        <HomeAuctionsGrid
+          auctions={participated}
+          limit={PARTICIPATED_LIMIT}
+          empty={
+            <HomeEmptyState
+              icon={Handshake}
+              title="You haven't joined any auction yet"
+              description="Browse featured auctions above and place your first bid to see them here."
+              actionHref="/auctions"
+              actionLabel="Browse auctions"
+            />
+          }
+        />
+      </HomeSection>
     </div>
   );
 }

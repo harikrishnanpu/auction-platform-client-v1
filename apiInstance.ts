@@ -16,7 +16,7 @@ export const API_ENDPOINTS = {
   },
 
   user: {
-    profile: '/user/profile',
+    homeStats: '/user/home-stats',
     getAvatarUploadUrl: '/user/generate-avatar-upload-url',
     editProfile: '/user/edit-profile',
     sendProfileChangePasswordOtp: '/user/send-profile-change-password-otp',
