@@ -48,6 +48,7 @@ import { AuctionSoldSummaryCard } from './AuctionSoldSummaryCard';
 import { AuctionRoomYourPosition } from './AuctionRoomYourPosition';
 import { FallbackPublicParticipantStatsCard } from './FallbackPublicParticipantStatsCard';
 import useUserStore from '@/store/user.store';
+import { AuctionRoomLiveStreamPanel } from './AuctionRoomLiveStreamPanel';
 
 export type AuctionRoomCoreProps = {
   auctionId: string;
@@ -96,6 +97,9 @@ export function AuctionRoomCore({
     verifyFallbackPublicAuctionPayment,
     fallbackPublicParticipantStats,
     soldSummary,
+    isHostProducer,
+    localStream,
+    remoteStreams,
   } = useAuctionRoomSocket({
     auctionId,
     mode,
@@ -312,6 +316,12 @@ export function AuctionRoomCore({
 
             <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-12 xl:gap-5">
               <div className="min-w-0 space-y-3 xl:col-span-7">
+                <AuctionRoomLiveStreamPanel
+                  isLiveRoom={isLiveRoom}
+                  isHostProducer={isHostProducer}
+                  localStream={localStream}
+                  remoteStreams={remoteStreams}
+                />
                 <AuctionRoomMediaGallery
                   key={auction?.id ?? auctionId}
                   auction={auction}
