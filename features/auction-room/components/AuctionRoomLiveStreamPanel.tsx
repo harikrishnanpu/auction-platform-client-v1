@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 type StreamVideoProps = {
   stream: MediaStream;
@@ -14,6 +15,9 @@ function StreamVideo({ stream, muted = false, title }: StreamVideoProps) {
   useEffect(() => {
     if (!ref.current) return;
     ref.current.srcObject = stream;
+    ref.current.play().catch(() => {
+      console.log('autoplay failed');
+    });
   }, [stream]);
 
   return (
@@ -47,10 +51,43 @@ export function AuctionRoomLiveStreamPanel({
     kind: 'audio' | 'video';
   }>;
 }) {
+  const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
+  const [isAudioStarted, setIsAudioStarted] = useState(false);
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
+
   if (!isLiveRoom) return null;
 
   const videoStreams = remoteStreams.filter((item) => item.kind === 'video');
   const audioStreams = remoteStreams.filter((item) => item.kind === 'audio');
+
+  const handleAudioControl = () => {
+    const players = [...audioRefs.current.values()];
+    if (players.length === 0) return;
+
+    if (!isAudioStarted) {
+      Promise.allSettled(
+        players.map((player) => {
+          player.muted = false;
+          return player.play();
+        })
+      ).then((results) => {
+        const hasSuccess = results.some(
+          (result) => result.status === 'fulfilled'
+        );
+        if (hasSuccess) {
+          setIsAudioStarted(true);
+          setIsAudioMuted(false);
+        }
+      });
+      return;
+    }
+
+    const nextMuted = !isAudioMuted;
+    players.forEach((player) => {
+      player.muted = nextMuted;
+    });
+    setIsAudioMuted(nextMuted);
+  };
 
   return (
     <section className="space-y-2 rounded-xl border border-border/50 bg-card/60 p-3">
@@ -61,6 +98,21 @@ export function AuctionRoomLiveStreamPanel({
         </span>
       </div>
 
+      {audioStreams.length > 0 ? (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={handleAudioControl}
+        >
+          {!isAudioStarted
+            ? 'Play Audio'
+            : isAudioMuted
+              ? 'Unmute Audio'
+              : 'Mute Audio'}
+        </Button>
+      ) : null}
+
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {localStream && isHostProducer ? (
           <StreamVideo stream={localStream} muted title="Your stream (host)" />
@@ -70,18 +122,25 @@ export function AuctionRoomLiveStreamPanel({
           <StreamVideo
             key={item.producerId}
             stream={item.stream}
+            muted
             title={`Host stream ${item.producerId.slice(0, 6)}`}
           />
         ))}
       </div>
 
-      {/* Audio-only producers are consumed and played without a visible tile. */}
       {audioStreams.map((item) => (
         <audio
           key={item.producerId}
           autoPlay
+          playsInline
           ref={(el) => {
-            if (el) el.srcObject = item.stream;
+            if (!el) {
+              audioRefs.current.delete(item.producerId);
+              return;
+            }
+            audioRefs.current.set(item.producerId, el);
+            el.srcObject = item.stream;
+            el.muted = !isAudioStarted || isAudioMuted;
           }}
         />
       ))}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 
 import { Device } from 'mediasoup-client';
@@ -10,116 +10,27 @@ import type {
   IPaymentGatewayOrder,
   IVerifyGatewayPaymentInput,
 } from '@/types/payment-gateway.type';
+import type {
+  AuctionRoomMode,
+  IAuctionRoomSnapshot,
+  IAuctionRoomChatMessage,
+  IAuctionRoomParticipant,
+  IAuctionRoomBid,
+  IAuctionUpdatedPayload,
+  IFallbackPublicParticipantStats,
+  AuctionJoinedEvent,
+  SocketControlAck,
+  LiveCapabilitiesAck,
+  LiveTransportAck,
+  LiveConsumeAck,
+  RemoteStreamItem,
+} from '@/types/auctionRoom.types';
 
 import {
   AUCTION_SOCKET_EVENTS,
   type AuctionSocketControlEvent,
 } from './socket.events';
-import type {
-  Producer,
-  RtpCapabilities,
-  Transport,
-  Consumer,
-  IceParameters,
-  IceCandidate,
-  DtlsParameters,
-} from 'mediasoup-client/types';
-
-export type AuctionRoomMode = 'SELLER' | 'USER' | 'ADMIN';
-
-export interface IAuctionRoomBid {
-  id: string;
-  auctionId: string;
-  userId: string;
-  amount: number;
-  createdAt: string;
-}
-
-export interface IFallbackPublicParticipantStats {
-  pending: number;
-  rejected: number;
-}
-
-export interface IAuctionSoldSummary {
-  winnerUserName: string;
-  winnerUserId: string;
-  soldAmount: number;
-}
-
-export interface IAuctionRoomSnapshot {
-  auction: IAuctionDto;
-  currentBid: IAuctionRoomBid | null;
-  liveFeed: IAuctionRoomBid[];
-  participants?: IAuctionRoomParticipant[];
-  fallbackPublicParticipantStats?: IFallbackPublicParticipantStats;
-  soldSummary?: IAuctionSoldSummary;
-}
-
-export interface IAuctionRoomParticipant {
-  id: string;
-  auctionId: string;
-  userId: string;
-  userName: string;
-  joinedAt: string;
-}
-
-export interface IAuctionUpdatedPayload {
-  auctionId: string;
-  endAt?: string;
-  status?: string;
-  extensionCount?: number;
-}
-
-export interface IAuctionRoomChatMessage {
-  id: string;
-  auctionId: string;
-  userId: string;
-  userName: string;
-  message: string;
-  createdAt: string;
-}
-
-type AuctionJoinedEvent = IAuctionRoomSnapshot & {
-  chatMessages?: IAuctionRoomChatMessage[];
-  isLiveAuction: boolean;
-  isProducer: boolean;
-};
-
-type SocketControlAck = {
-  success: boolean;
-  data?: unknown;
-  error?: string;
-};
-
-type LiveCapabilitiesAck = {
-  roomId: string;
-  isHost: boolean;
-  rtpCapabilities: RtpCapabilities;
-  producerIds: string[];
-};
-
-type LiveTransportAck = {
-  id: string;
-  iceParameters: IceParameters;
-  iceCandidates: IceCandidate[];
-  dtlsParameters: DtlsParameters;
-};
-
-type LiveConsumeAck = {
-  id: string;
-  producerId: string;
-  kind: 'audio' | 'video';
-  rtpParameters: unknown;
-};
-
-type RemoteStreamItem = {
-  producerId: string;
-  stream: MediaStream;
-  kind: 'audio' | 'video';
-};
-
-type DeviceTransportOptions = Parameters<Device['createRecvTransport']>[0];
-type ConsumeOptions = Parameters<Transport['consume']>[0];
+import type { Producer, Transport, Consumer } from 'mediasoup-client/types';
 
 export function useAuctionRoomSocket({
   auctionId,
@@ -132,9 +43,8 @@ export function useAuctionRoomSocket({
 }) {
   const socketRef = useRef<Socket | null>(null);
   const deviceRef = useRef<Device | null>(null);
-  const sendTransportRef = useRef<Transport | null>(null);
-  const recvTransportRef = useRef<Transport | null>(null);
-  const localStreamRef = useRef<MediaStream | null>(null);
+  const transportRef = useRef<Transport | null>(null);
+
   const producerRef = useRef<Producer[]>([]);
   const consumerRef = useRef<Map<string, Consumer>>(new Map());
 
@@ -167,343 +77,208 @@ export function useAuctionRoomSocket({
 
   const roomId = useMemo(() => `auction:${auctionId}`, [auctionId]);
 
-  const getLiveCapabilities = useCallback(() => {
-    const socket = socketRef.current;
-    if (!socket) {
-      return Promise.resolve({
-        success: false as const,
-        error: 'Not connected',
-      });
-    }
+  const handleGetCapabilities = async (
+    socket: Socket,
+    roomId: string,
+    role: 'host' | 'viewer'
+  ) => {
+    socket.emit(
+      AUCTION_SOCKET_EVENTS.LIVE_AUCTION_GET_CAPABILITIES,
+      { auctionId },
+      async (raw: { success: boolean; data: LiveCapabilitiesAck }) => {
+        const device = new Device();
 
-    return new Promise<{
-      success: boolean;
-      data?: LiveCapabilitiesAck;
-      error?: string;
-    }>((resolve) => {
+        const { success, data } = raw;
+
+        if (!success) {
+          console.log(raw);
+          setError('Failed to get capabilities');
+          return;
+        }
+
+        await device.load({ routerRtpCapabilities: data.rtpCapabilities });
+
+        deviceRef.current = device;
+        console.log('device loaded !kdkd', data.rtpCapabilities);
+        await handleCreateTransport(socket, roomId, role, data.producerIds);
+      }
+    );
+  };
+
+  const handleCreateTransport = async (
+    socket: Socket,
+    roomId: string,
+    role: 'host' | 'viewer',
+    producerIds: string[]
+  ) => {
+    socket.emit(
+      AUCTION_SOCKET_EVENTS.LIVE_AUCTION_CREATE_TRANSPORT,
+      { auctionId },
+      async (params: { success: boolean; data: LiveTransportAck }) => {
+        if (!params || !params.success || !params.data) {
+          setError('Failed to create transport');
+          return;
+        }
+
+        const device = deviceRef.current!;
+        const transport =
+          role === 'host'
+            ? device.createSendTransport(params.data)
+            : device.createRecvTransport(params.data);
+
+        transportRef.current = transport;
+
+        transport.on('connect', ({ dtlsParameters }, callback) => {
+          console.log('connect dl,ts transport');
+          console.log(dtlsParameters);
+          socket.emit(
+            AUCTION_SOCKET_EVENTS.LIVE_AUCTION_CONNECT_TRANSPORT,
+            { auctionId, dtlsParameters },
+            (params: { success: boolean; error?: string }) => {
+              if (!params) {
+                console.log('connect error from server');
+                return;
+              }
+
+              if (!params.success) {
+                console.log('connect error from server');
+                return;
+              }
+
+              callback();
+            }
+          );
+        });
+
+        if (role === 'host') {
+          await handleProduce(socket, roomId, transport);
+        } else {
+          await handleConsume(socket, roomId, producerIds);
+        }
+      }
+    );
+  };
+
+  const handleProduce = async (
+    socket: Socket,
+    roomId: string,
+    transport: Transport
+  ) => {
+    transport.on('produce', ({ kind, rtpParameters }, callback) => {
       socket.emit(
-        AUCTION_SOCKET_EVENTS.LIVE_AUCTION_GET_CAPABILITIES,
-        { auctionId },
-        (ack?: SocketControlAck) => {
-          if (ack?.success === false) {
-            resolve({
-              success: false,
-              error: ack.error ?? 'Failed to load live capabilities',
-            });
-            return;
-          }
-          resolve({ success: true, data: ack?.data as LiveCapabilitiesAck });
+        AUCTION_SOCKET_EVENTS.LIVE_AUCTION_PRODUCE,
+        { auctionId, kind, rtpParameters },
+        (ack: { success: boolean; data?: { id: string } }) => {
+          if (!ack || !ack.success || !ack.data) return;
+          callback({ id: ack.data.id });
         }
       );
     });
-  }, [auctionId]);
 
-  const createLiveTransport = useCallback(
-    (transportType: 'send' | 'recv') => {
-      const socket = socketRef.current;
-      if (!socket) {
-        return Promise.resolve({
-          success: false as const,
-          error: 'Not connected',
-        });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+
+    setLocalStream(stream);
+
+    for (const track of stream.getTracks()) {
+      await transport.produce({ track });
+      console.log('producing:', track.kind);
+    }
+  };
+
+  const handleConsume = async (
+    socket: Socket,
+    roomId: string,
+    producerIds: string[]
+  ) => {
+    console.log('producerIds', producerIds);
+    // return;
+
+    for (const producerId of producerIds) {
+      await consumeStream(socket, roomId, producerId);
+    }
+
+    socket.on(
+      AUCTION_SOCKET_EVENTS.LIVE_AUCTION_NEW_PRODUCER,
+      async ({ producerId }: { producerId: string; kind: string }) => {
+        await consumeStream(socket, roomId, producerId);
+      }
+    );
+  };
+
+  const consumeStream = async (
+    socket: Socket,
+    roomId: string,
+    producerId: string
+  ) =>
+    new Promise<void>((resolve) => {
+      const device = deviceRef.current!;
+      const transport = transportRef.current!;
+
+      if (consumerRef.current.has(producerId)) {
+        resolve();
+        return;
       }
 
-      const event =
-        transportType === 'send'
-          ? AUCTION_SOCKET_EVENTS.LIVE_AUCTION_CREATE_SEND_TRANSPORT
-          : AUCTION_SOCKET_EVENTS.LIVE_AUCTION_CREATE_RECV_TRANSPORT;
-
-      return new Promise<{
-        success: boolean;
-        data?: LiveTransportAck;
-        error?: string;
-      }>((resolve) => {
-        socket.emit(event, { auctionId }, (ack?: SocketControlAck) => {
-          if (ack?.success === false) {
-            resolve({
-              success: false,
-              error: ack.error ?? 'Failed to create transport',
-            });
+      socket.emit(
+        AUCTION_SOCKET_EVENTS.LIVE_AUCTION_CONSUME,
+        {
+          auctionId,
+          producerId,
+          rtpCapabilities: device.rtpCapabilities,
+        },
+        async (params: { success: boolean; data: LiveConsumeAck }) => {
+          if (!params || !params.success || !params.data) {
+            console.log('consume error from server');
+            resolve();
             return;
           }
-          resolve({ success: true, data: ack?.data as LiveTransportAck });
-        });
-      });
-    },
-    [auctionId]
-  );
 
-  const connectLiveTransport = useCallback(
-    (transportType: 'send' | 'recv', dtlsParameters: unknown) => {
-      const socket = socketRef.current;
-      if (!socket) {
-        return Promise.resolve({
-          success: false as const,
-          error: 'Not connected',
-        });
-      }
+          console.log(params);
 
-      return new Promise<{ success: boolean; error?: string }>((resolve) => {
-        socket.emit(
-          AUCTION_SOCKET_EVENTS.LIVE_AUCTION_CONNECT_TRANSPORT,
-          {
-            auctionId,
-            transportType,
-            dtlsParameters,
-          },
-          (ack?: SocketControlAck) => {
-            if (ack?.success === false) {
-              resolve({
-                success: false,
-                error: ack.error ?? 'Failed to connect transport',
-              });
-              return;
-            }
-            resolve({ success: true });
-          }
-        );
-      });
-    },
-    [auctionId]
-  );
+          const consumer = await transport.consume({
+            id: params.data.id,
+            producerId: params.data.producerId,
+            kind: params.data.kind,
+            rtpParameters: params.data.rtpParameters,
+          });
+          consumerRef.current.set(producerId, consumer);
 
-  const produceLiveTrack = useCallback(
-    (kind: 'audio' | 'video', rtpParameters: unknown) => {
-      const socket = socketRef.current;
-      if (!socket) {
-        return Promise.resolve({
-          success: false as const,
-          error: 'Not connected',
-        });
-      }
+          console.log('consumer', consumer.track.readyState);
+          console.log('consumer', consumer.track.enabled);
 
-      return new Promise<{
-        success: boolean;
-        data?: { id: string };
-        error?: string;
-      }>((resolve) => {
-        socket.emit(
-          AUCTION_SOCKET_EVENTS.LIVE_AUCTION_PRODUCE,
-          { auctionId, kind, rtpParameters },
-          (ack?: SocketControlAck) => {
-            if (ack?.success === false) {
-              resolve({
-                success: false,
-                error: ack.error ?? 'Failed to produce track',
-              });
-              return;
-            }
-            resolve({ success: true, data: ack?.data as { id: string } });
-          }
-        );
-      });
-    },
-    [auctionId]
-  );
+          console.log('consume success from server', consumer);
 
-  const consumeLiveProducer = useCallback(
-    (producerId: string, rtpCapabilities: RtpCapabilities) => {
-      const socket = socketRef.current;
-      if (!socket) {
-        return Promise.resolve({
-          success: false as const,
-          error: 'Not connected',
-        });
-      }
+          setRemoteStreams((prev) => [
+            ...prev.filter(
+              (item) => item.producerId !== params.data.producerId
+            ),
+            {
+              producerId: params.data.producerId,
+              stream: new MediaStream([consumer.track]),
+              kind: params.data.kind,
+            },
+          ]);
 
-      return new Promise<{
-        success: boolean;
-        data?: LiveConsumeAck;
-        error?: string;
-      }>((resolve) => {
-        socket.emit(
-          AUCTION_SOCKET_EVENTS.LIVE_AUCTION_CONSUME,
-          { auctionId, producerId, rtpCapabilities },
-          (ack?: SocketControlAck) => {
-            if (ack?.success === false) {
-              resolve({
-                success: false,
-                error: ack.error ?? 'Failed to consume producer',
-              });
-              return;
-            }
-            resolve({ success: true, data: ack?.data as LiveConsumeAck });
-          }
-        );
-      });
-    },
-    [auctionId]
-  );
-
-  const resumeLiveConsumer = useCallback(
-    (consumerId: string) => {
-      const socket = socketRef.current;
-      if (!socket) {
-        return Promise.resolve({
-          success: false as const,
-          error: 'Not connected',
-        });
-      }
-
-      return new Promise<{ success: boolean; error?: string }>((resolve) => {
-        socket.emit(
-          AUCTION_SOCKET_EVENTS.LIVE_AUCTION_RESUME_CONSUMER,
-          { auctionId, consumerId },
-          (ack?: SocketControlAck) => {
-            if (ack?.success === false) {
-              resolve({
-                success: false,
-                error: ack.error ?? 'Failed to resume consumer',
-              });
-              return;
-            }
-            resolve({ success: true });
-          }
-        );
-      });
-    },
-    [auctionId]
-  );
-
-  const addRemoteConsumer = useCallback(
-    async (producerId: string) => {
-      const device = deviceRef.current;
-      const recvTransport = recvTransportRef.current;
-      if (!device || !recvTransport) return;
-      if (consumerRef.current.has(producerId)) return;
-
-      const consumeRes = await consumeLiveProducer(
-        producerId,
-        device.rtpCapabilities
-      );
-
-      if (!consumeRes.success || !consumeRes.data) return;
-      const consumeData = consumeRes.data;
-
-      const consumeOptions: ConsumeOptions = {
-        id: consumeData.id,
-        producerId: consumeData.producerId,
-        kind: consumeData.kind,
-        rtpParameters:
-          consumeData.rtpParameters as ConsumeOptions['rtpParameters'],
-      };
-
-      const consumer = await recvTransport.consume({
-        ...consumeOptions,
-      });
-
-      consumerRef.current.set(producerId, consumer);
-      const stream = new MediaStream([consumer.track]);
-      setRemoteStreams((prev) => [
-        ...prev.filter((item) => item.producerId !== producerId),
-        { producerId, stream, kind: consumeData.kind },
-      ]);
-
-      await resumeLiveConsumer(consumer.id);
-    },
-    [consumeLiveProducer, resumeLiveConsumer]
-  );
-
-  const setupLiveAuction = useCallback(
-    async (producerAllowed: boolean) => {
-      const capabilities = await getLiveCapabilities();
-      if (!capabilities.success || !capabilities.data) {
-        setError(capabilities.error ?? 'Could not initialize live auction');
-        return;
-      }
-
-      const device = new Device();
-      await device.load({
-        routerRtpCapabilities: capabilities.data.rtpCapabilities,
-      });
-      deviceRef.current = device;
-
-      const isHost = producerAllowed && capabilities.data.isHost;
-      const transportType = isHost ? 'send' : 'recv';
-      const liveTransportRes = await createLiveTransport(transportType);
-      if (!liveTransportRes.success || !liveTransportRes.data) return;
-
-      const transportOptions: DeviceTransportOptions = {
-        id: liveTransportRes.data.id,
-        iceParameters: liveTransportRes.data.iceParameters,
-        iceCandidates: liveTransportRes.data.iceCandidates,
-        dtlsParameters: liveTransportRes.data.dtlsParameters,
-      };
-
-      if (!isHost) {
-        const recvTransport = device.createRecvTransport(transportOptions);
-        recvTransportRef.current = recvTransport;
-
-        recvTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
-          connectLiveTransport('recv', dtlsParameters)
-            .then((res) => {
-              if (!res.success) {
-                errback(
-                  new Error(res.error ?? 'Recv transport connect failed')
-                );
-                return;
+          socket.emit(
+            AUCTION_SOCKET_EVENTS.LIVE_AUCTION_RESUME_CONSUMER,
+            {
+              auctionId,
+              consumerId: params.data.id,
+            },
+            (ack: { success: boolean }) => {
+              if (!ack?.success) {
+                console.log('resume failed from server');
               }
-              callback();
-            })
-            .catch((err) => errback(err as Error));
-        });
-
-        for (const producerId of capabilities.data.producerIds) {
-          await addRemoteConsumer(producerId);
-        }
-        return;
-      }
-
-      const sendTransport = device.createSendTransport(transportOptions);
-      sendTransportRef.current = sendTransport;
-
-      sendTransport.on('connect', ({ dtlsParameters }, callback, errback) => {
-        connectLiveTransport('send', dtlsParameters)
-          .then((res) => {
-            if (!res.success) {
-              errback(new Error(res.error ?? 'Send transport connect failed'));
-              return;
+              console.log('resume success from server');
+              resolve();
             }
-            callback();
-          })
-          .catch((err) => errback(err as Error));
-      });
-
-      sendTransport.on(
-        'produce',
-        ({ kind, rtpParameters }, callback, errback) => {
-          produceLiveTrack(kind, rtpParameters)
-            .then((res) => {
-              if (!res.success || !res.data) {
-                errback(new Error(res.error ?? 'Produce failed'));
-                return;
-              }
-              callback({ id: res.data.id });
-            })
-            .catch((err) => errback(err as Error));
+          );
         }
       );
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: true,
-      });
-      localStreamRef.current = stream;
-      setLocalStream(stream);
-
-      for (const track of stream.getTracks()) {
-        const producer = await sendTransport.produce({ track });
-        producerRef.current.push(producer);
-      }
-    },
-    [
-      addRemoteConsumer,
-      connectLiveTransport,
-      createLiveTransport,
-      getLiveCapabilities,
-      produceLiveTrack,
-    ]
-  );
+    });
 
   useEffect(() => {
     if (!auctionId) return;
@@ -532,33 +307,40 @@ export function useAuctionRoomSocket({
       setConnectionState('error');
     });
 
-    socket.on(AUCTION_SOCKET_EVENTS.JOINED, (joined: AuctionJoinedEvent) => {
-      const {
-        chatMessages: joinedChat,
-        isLiveAuction,
-        isProducer,
-        ...room
-      } = joined;
-      setIsLiveAuction(isLiveAuction);
-      setIsHostProducer(isProducer);
-
-      if (isLiveAuction) {
-        void setupLiveAuction(isProducer);
-      }
-
-      setSnapshot(room);
-      setRoomReady(true);
-      if (Array.isArray(joinedChat)) {
-        setChatMessages(joinedChat);
-      }
-    });
-
     socket.on(
-      AUCTION_SOCKET_EVENTS.LIVE_AUCTION_NEW_PRODUCER,
-      (payload: { producerId: string }) => {
-        void addRemoteConsumer(payload.producerId);
+      AUCTION_SOCKET_EVENTS.JOINED,
+      async (joined: AuctionJoinedEvent) => {
+        const {
+          chatMessages: joinedChat,
+          isLiveAuction,
+          isProducer,
+          ...room
+        } = joined;
+        setIsLiveAuction(isLiveAuction);
+        setIsHostProducer(isProducer);
+
+        if (isLiveAuction) {
+          await handleGetCapabilities(
+            socket,
+            roomId,
+            isProducer ? 'host' : 'viewer'
+          );
+        }
+
+        setSnapshot(room);
+        setRoomReady(true);
+        if (Array.isArray(joinedChat)) {
+          setChatMessages(joinedChat);
+        }
       }
     );
+
+    // socket.on(
+    //   AUCTION_SOCKET_EVENTS.LIVE_AUCTION_NEW_PRODUCER,
+    //   (payload: { producerId: string }) => {
+    //     void addRemoteConsumer(payload.producerId);
+    //   }
+    // );
 
     socket.on(
       AUCTION_SOCKET_EVENTS.LIVE_AUCTION_PRODUCER_CLOSED,
@@ -663,8 +445,8 @@ export function useAuctionRoomSocket({
     socket.emit(
       AUCTION_SOCKET_EVENTS.JOIN,
       { auctionId, mode },
-      (ack?: { success: boolean; error?: string }) => {
-        if (ack?.success === false) {
+      (ack: { success: boolean; error?: string }) => {
+        if (ack.success === false) {
           const message = ack.error ?? 'Failed to join';
           setError(message);
           setConnectionState('error');
@@ -680,14 +462,10 @@ export function useAuctionRoomSocket({
       producerRef.current = [];
       consumers.forEach((consumer) => consumer.close());
       consumers.clear();
-      sendTransportRef.current?.close();
-      recvTransportRef.current?.close();
-      sendTransportRef.current = null;
-      recvTransportRef.current = null;
-      localStreamRef.current?.getTracks().forEach((track) => track.stop());
-      localStreamRef.current = null;
-      setLocalStream(null);
       setRemoteStreams([]);
+      transportRef.current?.close();
+      transportRef.current = null;
+      setLocalStream(null);
       setIsLiveAuction(false);
       setIsHostProducer(false);
       socketRef.current = null;
@@ -695,211 +473,177 @@ export function useAuctionRoomSocket({
       setRoomReady(false);
       setChatMessages([]);
     };
-  }, [addRemoteConsumer, auctionId, mode, setupLiveAuction]);
+  }, [auctionId, mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const placeBid = useCallback(
-    (amount: number): Promise<{ success: boolean; error?: string }> => {
-      const socket = socketRef.current;
-      if (!socket) {
-        return Promise.resolve({ success: false, error: 'Not connected' });
+  async function placeBid(
+    amount: number
+  ): Promise<{ success: boolean; error?: string }> {
+    const socket = socketRef.current;
+    if (!socket) {
+      return { success: false, error: 'Not connected' };
+    }
+
+    try {
+      const ack = (await socket.emitWithAck(AUCTION_SOCKET_EVENTS.PLACE_BID, {
+        auctionId,
+        amount,
+      })) as SocketControlAck;
+      if (ack.success === false) {
+        return { success: false, error: ack.error ?? 'Bid failed' };
       }
-      return new Promise((resolve) => {
-        socket.emit(
-          AUCTION_SOCKET_EVENTS.PLACE_BID,
-          { auctionId, amount },
-          (ack?: SocketControlAck) => {
-            if (ack?.success === false) {
-              resolve({
-                success: false,
-                error: ack.error ?? 'Bid failed',
-              });
-              return;
-            }
-            resolve({ success: true });
-          }
-        );
-      });
-    },
-    [auctionId]
-  );
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Bid failed' };
+    }
+  }
 
-  const addAuctionParticipant = useCallback((): Promise<{
+  async function addAuctionParticipant(): Promise<{
     success: boolean;
     error?: string;
-  }> => {
+  }> {
+    const socket = socketRef.current;
+    if (!socket) {
+      return { success: false, error: 'Not connected' };
+    }
+
+    try {
+      const ack = (await socket.emitWithAck(
+        AUCTION_SOCKET_EVENTS.ADD_AUCTION_PARTICIPANT,
+        { auctionId }
+      )) as SocketControlAck;
+      if (ack.success === false) {
+        return { success: false, error: ack.error ?? 'Could not join auction' };
+      }
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Could not join auction' };
+    }
+  }
+
+  function sendChatMessage(message: string): void {
+    socketRef.current?.emit(AUCTION_SOCKET_EVENTS.SEND_CHAT, {
+      auctionId,
+      message,
+    });
+  }
+
+  function emitAuctionControl(
+    event: AuctionSocketControlEvent
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
     const socket = socketRef.current;
     if (!socket) {
       return Promise.resolve({ success: false, error: 'Not connected' });
     }
-    return new Promise((resolve) => {
-      socket.emit(
-        AUCTION_SOCKET_EVENTS.ADD_AUCTION_PARTICIPANT,
-        { auctionId },
-        (ack?: SocketControlAck) => {
-          if (ack?.success === false) {
-            resolve({
-              success: false,
-              error: ack.error ?? 'Could not join auction',
-            });
-            return;
-          }
-          resolve({ success: true });
+
+    return socket
+      .emitWithAck(event, { auctionId })
+      .then((ack: SocketControlAck) => {
+        if (ack.success === false) {
+          return { success: false, error: ack.error ?? 'Request failed' };
         }
-      );
-    });
-  }, [auctionId]);
+        return { success: true, data: ack.data };
+      })
+      .catch(() => ({ success: false, error: 'Request failed' }));
+  }
 
-  const sendChatMessage = useCallback(
-    (message: string) => {
-      socketRef.current?.emit(AUCTION_SOCKET_EVENTS.SEND_CHAT, {
-        auctionId,
-        message,
-      });
-    },
-    [auctionId]
-  );
+  function pauseAuction() {
+    return emitAuctionControl(AUCTION_SOCKET_EVENTS.PAUSE);
+  }
 
-  const emitAuctionControl = useCallback(
-    (
-      event: AuctionSocketControlEvent
-    ): Promise<{ success: boolean; data?: unknown; error?: string }> => {
-      const socket = socketRef.current;
-      if (!socket) {
-        return Promise.resolve({ success: false, error: 'Not connected' });
-      }
-      return new Promise((resolve) => {
-        socket.emit(event, { auctionId }, (ack?: SocketControlAck) => {
-          if (ack?.success === false) {
-            resolve({
-              success: false,
-              error: ack.error ?? 'Request failed',
-            });
-            return;
-          }
-          resolve({ success: true, data: ack?.data });
-        });
-      });
-    },
-    [auctionId]
-  );
+  function resumeAuction() {
+    return emitAuctionControl(AUCTION_SOCKET_EVENTS.RESUME);
+  }
 
-  const pauseAuction = useCallback(
-    () => emitAuctionControl(AUCTION_SOCKET_EVENTS.PAUSE),
-    [emitAuctionControl]
-  );
+  function endAuction() {
+    return emitAuctionControl(AUCTION_SOCKET_EVENTS.END);
+  }
 
-  const resumeAuction = useCallback(
-    () => emitAuctionControl(AUCTION_SOCKET_EVENTS.RESUME),
-    [emitAuctionControl]
-  );
+  function sendFallbackPublicNotification() {
+    return emitAuctionControl(
+      AUCTION_SOCKET_EVENTS.SEND_FALLBACK_PUBLIC_NOTIFICATION
+    );
+  }
 
-  const endAuction = useCallback(
-    () => emitAuctionControl(AUCTION_SOCKET_EVENTS.END),
-    [emitAuctionControl]
-  );
+  function markAuctionFailed() {
+    return emitAuctionControl(AUCTION_SOCKET_EVENTS.MARK_AUCTION_FAILED);
+  }
 
-  const sendFallbackPublicNotification = useCallback(
-    () =>
-      emitAuctionControl(
-        AUCTION_SOCKET_EVENTS.SEND_FALLBACK_PUBLIC_NOTIFICATION
-      ),
-    [emitAuctionControl]
-  );
-
-  const markAuctionFailed = useCallback(
-    () => emitAuctionControl(AUCTION_SOCKET_EVENTS.MARK_AUCTION_FAILED),
-    [emitAuctionControl]
-  );
-
-  const payFallbackPublic = useCallback((): Promise<{
+  async function payFallbackPublic(): Promise<{
     success: boolean;
     data?: IPaymentGatewayOrder;
     error?: string;
-  }> => {
+  }> {
     const socket = socketRef.current;
     if (!socket) {
-      return Promise.resolve({ success: false, error: 'Not connected' });
+      return { success: false, error: 'Not connected' };
     }
 
-    return new Promise((resolve) => {
-      socket.emit(
+    try {
+      const ack = (await socket.emitWithAck(
         AUCTION_SOCKET_EVENTS.PAY_FALLBACK_PUBLIC,
-        { auctionId },
-        (ack?: SocketControlAck) => {
-          if (ack?.success === false) {
-            resolve({
-              success: false,
-              error: ack.error ?? 'Request failed',
-            });
-            return;
-          }
-          resolve({
-            success: true,
-            data: ack?.data as IPaymentGatewayOrder | undefined,
-          });
-        }
-      );
-    });
-  }, [auctionId]);
+        { auctionId }
+      )) as SocketControlAck;
+      if (ack.success === false) {
+        return { success: false, error: ack.error ?? 'Request failed' };
+      }
+      return {
+        success: true,
+        data: ack.data as IPaymentGatewayOrder | undefined,
+      };
+    } catch {
+      return { success: false, error: 'Request failed' };
+    }
+  }
 
-  const declineFallbackPublic = useCallback((): Promise<{
+  async function declineFallbackPublic(): Promise<{
     success: boolean;
     data?: unknown;
     error?: string;
-  }> => {
+  }> {
     const socket = socketRef.current;
     if (!socket) {
-      return Promise.resolve({ success: false, error: 'Not connected' });
+      return { success: false, error: 'Not connected' };
     }
-    return new Promise((resolve) => {
-      socket.emit(
-        AUCTION_SOCKET_EVENTS.DECLINE_FALLBACK_PUBLIC,
-        { auctionId },
-        (ack?: SocketControlAck) => {
-          if (ack?.success === false) {
-            resolve({
-              success: false,
-              error: ack.error ?? 'Request failed',
-            });
-            return;
-          }
-          resolve({ success: true, data: ack?.data });
-        }
-      );
-    });
-  }, [auctionId]);
-  const verifyFallbackPublicAuctionPayment = useCallback(
-    (
-      input: IVerifyGatewayPaymentInput
-    ): Promise<{
-      success: boolean;
-      data?: unknown;
-      error?: string;
-    }> => {
-      const socket = socketRef.current;
-      if (!socket) {
-        return Promise.resolve({ success: false, error: 'Not connected' });
-      }
-      return new Promise((resolve) => {
-        socket.emit(
-          AUCTION_SOCKET_EVENTS.VERIFY_FALLBACK_PUBLIC_AUCTION_PAYMENT,
-          { auctionId, ...input },
-          (ack?: SocketControlAck) => {
-            if (ack?.success === false) {
-              resolve({
-                success: false,
-                error: ack.error ?? 'Verification failed',
-              });
-              return;
-            }
 
-            resolve({ success: true, data: ack?.data });
-          }
-        );
-      });
-    },
-    [auctionId]
-  );
+    try {
+      const ack = (await socket.emitWithAck(
+        AUCTION_SOCKET_EVENTS.DECLINE_FALLBACK_PUBLIC,
+        { auctionId }
+      )) as SocketControlAck;
+      if (ack.success === false) {
+        return { success: false, error: ack.error ?? 'Request failed' };
+      }
+      return { success: true, data: ack.data };
+    } catch {
+      return { success: false, error: 'Request failed' };
+    }
+  }
+
+  async function verifyFallbackPublicAuctionPayment(
+    input: IVerifyGatewayPaymentInput
+  ): Promise<{
+    success: boolean;
+    data?: unknown;
+    error?: string;
+  }> {
+    const socket = socketRef.current;
+    if (!socket) {
+      return { success: false, error: 'Not connected' };
+    }
+
+    try {
+      const ack = (await socket.emitWithAck(
+        AUCTION_SOCKET_EVENTS.VERIFY_FALLBACK_PUBLIC_AUCTION_PAYMENT,
+        { auctionId, ...input }
+      )) as SocketControlAck;
+      if (ack.success === false) {
+        return { success: false, error: ack.error ?? 'Verification failed' };
+      }
+      return { success: true, data: ack.data };
+    } catch {
+      return { success: false, error: 'Verification failed' };
+    }
+  }
 
   return {
     snapshot,
