@@ -1,16 +1,17 @@
 'use server';
 
 import { adminService, SellerInfo } from '@/services/admin/admin.service';
+import { IAdminDashboardStats } from '@/types/admin-dashboard.type';
 import { IgetllSellersParams, IgetllUsersParams } from '@/types/admin.type';
 import { ApiResponse } from '@/types/api.index';
-import { UserInfo } from '@/types/user.type';
+import { IUser } from '@/types/user.type';
 import { cookies } from 'next/headers';
 
 export const getAllUsersAction = async (
   input: IgetllUsersParams
 ): Promise<
   ApiResponse<{
-    users: UserInfo[];
+    users: IUser[];
     total: number;
     page: number;
     limit: number;
@@ -20,6 +21,13 @@ export const getAllUsersAction = async (
 > => {
   const cookieStore = await cookies();
   return adminService.getAllUsers(input, cookieStore.toString());
+};
+
+export const getAdminDashboardStatsAction = async (): Promise<
+  ApiResponse<IAdminDashboardStats>
+> => {
+  const cookieStore = await cookies();
+  return adminService.getDashboardStats(cookieStore.toString());
 };
 
 export const blockUserAction = async (
@@ -32,7 +40,7 @@ export const blockUserAction = async (
 
 export const getAdminUserAction = async (
   id: string
-): Promise<ApiResponse<UserInfo>> => {
+): Promise<ApiResponse<IUser>> => {
   const cookieStore = await cookies();
   return adminService.getAdminUser(cookieStore.toString(), id);
 };

@@ -1,12 +1,29 @@
 import Link from 'next/link';
 import { Users, Store } from 'lucide-react';
+import { getAdminDashboardStatsAction } from '@/actions/admin/admin.actions';
+import { AdminDashboardStats } from '@/features/admin/components/admin-dashboard-stats';
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const fallbackStats = {
+    totalUsers: 0,
+    suspendedUsers: 0,
+    activeSellers: 0,
+    pendingKyc: 0,
+    totalAuctions: 0,
+    liveAuctions: 0,
+  };
+  const statsRes = await getAdminDashboardStatsAction();
+  const stats = statsRes.success
+    ? (statsRes.data ?? fallbackStats)
+    : fallbackStats;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold mb-8 dark:text-white">
         Admin Dashboard
       </h1>
+
+      <AdminDashboardStats stats={stats} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link

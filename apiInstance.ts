@@ -64,6 +64,7 @@ export const API_ENDPOINTS = {
   },
 
   admin: {
+    getDashboardStats: '/admin/stats',
     getAllUsers: '/admin/users',
     blockUser: '/admin/users/block',
     getAdminUser: '/admin/users',

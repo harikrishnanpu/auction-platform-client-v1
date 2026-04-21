@@ -30,3 +30,5 @@ export interface IUser {
   address?: string;
   avatar_url?: string;
 }
+
+export type UserInfo = IUser;
