@@ -19,7 +19,7 @@ import { useAuctionRoomChatSheet } from '../hooks/useAuctionRoomChatSheet';
 import { useAuctionRoomHostControls } from '../hooks/useAuctionRoomHostControls';
 import { useAuctionRoomStatus } from '../hooks/useAuctionRoomStatus';
 import { useBidCooldown } from '../hooks/useBidCooldown';
-import type { AuctionRoomMode } from '../../../socket/useAuctionRoomSocket';
+import type { AuctionRoomMode } from '@/types/auctionRoom.types';
 import { useAuctionRoomSocket } from '../../../socket/useAuctionRoomSocket';
 import {
   auctionParticipationDepositAmount,
@@ -353,7 +353,7 @@ export function AuctionRoomCore({
                   isAuctionEnded={isAuctionEnded}
                   isAuctionActive={isAuctionActive}
                   canInteract={canInteract}
-                  showPlaceBid={mode === 'USER' && !isLiveRoom}
+                  showPlaceBid={mode === 'USER'}
                   cooldownRemainingSeconds={cooldownRemainingSeconds}
                   onPlaceBid={handlePlaceBid}
                 />
