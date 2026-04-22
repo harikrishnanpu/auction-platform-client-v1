@@ -86,6 +86,17 @@ export const API_ENDPOINTS = {
     getAuctionCategoryRequests: '/admin/category-requests',
     getAllAuctionCategories: '/admin/auction-categories',
   },
+  fraud: {
+    createReport: '/fraud/reports',
+    createSystemReport: '/fraud/reports/system',
+    getReports: '/fraud/reports',
+    markUnderReview: (reportId: string) =>
+      `/fraud/reports/${reportId}/under-review`,
+    reviewReport: (reportId: string) => `/fraud/reports/${reportId}/review`,
+    getSuspendedUsers: '/fraud/suspended-users',
+    getSuspensionTimeline: (userId: string) =>
+      `/fraud/suspended-users/${userId}/timeline`,
+  },
 
   seller: {
     getAllSellerAuctionCategoryRequests: '/seller/auction-category-requests',

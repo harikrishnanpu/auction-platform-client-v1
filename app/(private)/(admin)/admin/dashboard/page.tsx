@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Users, Store } from 'lucide-react';
+import { Users, Store, ShieldAlert, UserX } from 'lucide-react';
 import { getAdminDashboardStatsAction } from '@/actions/admin/admin.actions';
 import { AdminDashboardStats } from '@/features/admin/components/admin-dashboard-stats';
 
@@ -78,6 +78,44 @@ export default async function AdminDashboard() {
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Manage sellers and KYC verification
+              </p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/reports"
+          className="block p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow group"
+        >
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg group-hover:bg-red-100 dark:group-hover:bg-red-900/30 transition-colors">
+              <ShieldAlert size={24} />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Fraud Reports
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Review and verify user fraud reports
+              </p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/users/suspended"
+          className="block p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow group"
+        >
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded-lg group-hover:bg-orange-100 dark:group-hover:bg-orange-900/30 transition-colors">
+              <UserX size={24} />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Suspended Users
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                View temporary/permanent suspension timeline
               </p>
             </div>
           </div>

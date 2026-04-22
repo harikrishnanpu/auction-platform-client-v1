@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { getWalletAction } from '@/actions/user/wallet.actions';
+import { createFraudReportAction } from '@/actions/admin/report.actions';
 
 import type { IAuctionDto, AuctionType } from '@/types/auction.type';
 import {
@@ -243,6 +244,7 @@ export function AuctionRoomCore({
   }, [addAuctionParticipant]);
 
   const canControlAuction = mode === 'SELLER' || mode === 'ADMIN';
+  const canReportParticipants = mode === 'SELLER' || mode === 'USER';
 
   const categoryName = auction ? getAuctionCategoryName(auction) : '—';
   const typeLabel = auction
@@ -251,6 +253,28 @@ export function AuctionRoomCore({
   const statusLabel = auctionStatusStr
     ? auctionStatusLabel(auctionStatusStr)
     : '—';
+
+  const handleReportParticipant = useCallback(
+    async (input: {
+      targetedUserId: string;
+      reportedUserType?: 'USER' | 'SELLER';
+      reason: string;
+      category: 'AUCTION_FRAUD_CRITICAL' | 'PAYMENT_CRITICAL' | 'OTHER';
+      level: 'LOW' | 'MEDIUM' | 'CRITICAL';
+    }) => {
+      const res = await createFraudReportAction({
+        ...input,
+        reportedUserId: user?.id ?? '',
+        reportedUserType: mode === 'SELLER' ? 'SELLER' : 'USER',
+      });
+      if (!res.success) {
+        toast.error(res.error ?? 'Failed to submit report');
+        return;
+      }
+      toast.success('Report submitted');
+    },
+    [mode, user?.id]
+  );
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -418,6 +442,8 @@ export function AuctionRoomCore({
                 <AuctionRoomParticipantsPanel
                   participants={participants}
                   currentUserId={user?.id}
+                  canReport={canReportParticipants}
+                  onReportUser={handleReportParticipant}
                 />
               </aside>
             </div>
