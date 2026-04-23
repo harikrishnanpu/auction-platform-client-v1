@@ -44,6 +44,7 @@ import { AuctionRoomMetaBadges } from './AuctionRoomMetaBadges';
 import { AuctionRoomParticipantsPanel } from './AuctionRoomParticipantsPanel';
 import { AuctionRoomSellerPanel } from './AuctionRoomSellerPanel';
 import { AuctionPlaceBidTermsModal } from './AuctionPlaceBidTermsModal';
+import { AuctionFraudReportDialog } from './AuctionFraudReportDialog';
 import { AuctionResultModal } from './AuctionResultModal';
 import { AuctionSoldSummaryCard } from './AuctionSoldSummaryCard';
 import { AuctionRoomYourPosition } from './AuctionRoomYourPosition';
@@ -69,6 +70,7 @@ export function AuctionRoomCore({
   const { user } = useUserStore();
   const [placeBidTermsOpen, setPlaceBidTermsOpen] = useState(false);
   const [lockParticipantBusy, setLockParticipantBusy] = useState(false);
+  const [reportAuctionOpen, setReportAuctionOpen] = useState(false);
   const [walletMain, setWalletMain] = useState<number | null>(null);
   const [walletCurrency, setWalletCurrency] = useState('INR');
   const [isResultModalDismissed, setIsResultModalDismissed] = useState(false);
@@ -276,6 +278,35 @@ export function AuctionRoomCore({
     [mode, user?.id]
   );
 
+  const canReportAuction =
+    mode === 'USER' &&
+    Boolean(auction?.sellerId) &&
+    auction?.sellerId !== user?.id;
+
+  const handleReportAuction = useCallback(
+    async (input: {
+      reason: string;
+      category: 'AUCTION_FRAUD_CRITICAL' | 'PAYMENT_CRITICAL' | 'OTHER';
+      level: 'LOW' | 'MEDIUM' | 'CRITICAL';
+    }) => {
+      if (!auction?.sellerId) return;
+      const res = await createFraudReportAction({
+        reportedUserId: user?.id ?? '',
+        reportedUserType: 'USER',
+        targetedUserId: auction.sellerId,
+        reason: input.reason,
+        category: input.category,
+        level: input.level,
+      });
+      if (!res.success) {
+        toast.error(res.error ?? 'Failed to submit report');
+        return;
+      }
+      toast.success('Auction report submitted');
+    },
+    [user?.id, auction]
+  );
+
   return (
     <div className="relative min-h-screen bg-background">
       <AuctionPlaceBidTermsModal
@@ -298,6 +329,15 @@ export function AuctionRoomCore({
             setIsResultModalDismissed(true);
           }
         }}
+      />
+
+      <AuctionFraudReportDialog
+        open={reportAuctionOpen}
+        onOpenChange={setReportAuctionOpen}
+        title="Report this auction"
+        description="This will send a fraud report against the auction seller."
+        submitLabel="Submit auction report"
+        onSubmit={handleReportAuction}
       />
 
       <div className="relative mx-auto max-w-6xl px-3 pb-10 pt-4 sm:px-4 lg:px-6">
@@ -326,16 +366,29 @@ export function AuctionRoomCore({
                   }
                 />
               </div>
-              <SheetTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-7 shrink-0 rounded-full border-border/60 px-3 text-[11px] font-medium"
-                >
-                  Chat
-                </Button>
-              </SheetTrigger>
+              <div className="flex items-center gap-2">
+                {canReportAuction ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 shrink-0 rounded-full border-border/60 px-3 text-[11px] font-medium"
+                    onClick={() => setReportAuctionOpen(true)}
+                  >
+                    Report Auction
+                  </Button>
+                ) : null}
+                <SheetTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 shrink-0 rounded-full border-border/60 px-3 text-[11px] font-medium"
+                  >
+                    Chat
+                  </Button>
+                </SheetTrigger>
+              </div>
             </header>
 
             <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-12 xl:gap-5">

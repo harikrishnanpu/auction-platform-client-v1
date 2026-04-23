@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/card';
 import { formatAuctionDateTime } from '@/utils/auction-utils';
 import { cn } from '@/lib/utils';
+import { AuctionFraudReportDialog } from './AuctionFraudReportDialog';
 
 import type { IAuctionRoomParticipant } from '@/types/auctionRoom.types';
 
@@ -40,11 +41,6 @@ export function AuctionRoomParticipantsPanel({
   const [reportTargetUserId, setReportTargetUserId] = useState<string | null>(
     null
   );
-  const [reason, setReason] = useState('');
-  const [category, setCategory] = useState<
-    'AUCTION_FRAUD_CRITICAL' | 'PAYMENT_CRITICAL' | 'OTHER'
-  >('OTHER');
-  const [level, setLevel] = useState<'LOW' | 'MEDIUM' | 'CRITICAL'>('MEDIUM');
 
   return (
     <Card
@@ -125,80 +121,27 @@ export function AuctionRoomParticipantsPanel({
           </ul>
         )}
       </CardContent>
-      {reportTargetUserId ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
-          <div className="w-full max-w-md rounded-xl border bg-card p-4">
-            <h3 className="text-sm font-semibold">Report participant</h3>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Reporting user ID: {reportTargetUserId}
-            </p>
-            <div className="mt-3 space-y-2">
-              <select
-                value={category}
-                onChange={(e) =>
-                  setCategory(
-                    e.target.value as
-                      | 'AUCTION_FRAUD_CRITICAL'
-                      | 'PAYMENT_CRITICAL'
-                      | 'OTHER'
-                  )
-                }
-                className="h-9 w-full rounded border border-input bg-background px-2 text-xs"
-              >
-                <option value="OTHER">Other</option>
-                <option value="AUCTION_FRAUD_CRITICAL">
-                  Auction fraud critical
-                </option>
-                <option value="PAYMENT_CRITICAL">Payment critical</option>
-              </select>
-              <select
-                value={level}
-                onChange={(e) =>
-                  setLevel(e.target.value as 'LOW' | 'MEDIUM' | 'CRITICAL')
-                }
-                className="h-9 w-full rounded border border-input bg-background px-2 text-xs"
-              >
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="CRITICAL">Critical</option>
-              </select>
-              <textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                className="min-h-[90px] w-full rounded border border-input bg-background px-2 py-2 text-xs"
-                placeholder="Reason"
-              />
-            </div>
-            <div className="mt-3 flex justify-end gap-2">
-              <button
-                className="rounded border px-3 py-1 text-xs"
-                onClick={() => {
-                  setReportTargetUserId(null);
-                  setReason('');
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                className="rounded bg-primary px-3 py-1 text-xs text-primary-foreground"
-                onClick={async () => {
-                  if (!onReportUser || !reason.trim()) return;
-                  await onReportUser({
-                    targetedUserId: reportTargetUserId,
-                    reason,
-                    category,
-                    level,
-                  });
-                  setReportTargetUserId(null);
-                  setReason('');
-                }}
-              >
-                Submit report
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <AuctionFraudReportDialog
+        open={Boolean(reportTargetUserId)}
+        onOpenChange={(open) => {
+          if (!open) setReportTargetUserId(null);
+        }}
+        title="Report participant"
+        description={
+          reportTargetUserId
+            ? `You are reporting user ID: ${reportTargetUserId}`
+            : 'Report participant'
+        }
+        onSubmit={async ({ reason, category, level }) => {
+          if (!onReportUser || !reportTargetUserId) return;
+          await onReportUser({
+            targetedUserId: reportTargetUserId,
+            reason,
+            category,
+            level,
+          });
+        }}
+      />
     </Card>
   );
 }
