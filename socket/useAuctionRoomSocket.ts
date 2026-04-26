@@ -92,7 +92,7 @@ export function useAuctionRoomSocket({
 
         if (!success) {
           console.log(raw);
-          setError('Failed to get capabilities');
+          // setError('Failed to get capabilities');
           return;
         }
 
@@ -583,9 +583,12 @@ export function useAuctionRoomSocket({
         AUCTION_SOCKET_EVENTS.PAY_FALLBACK_PUBLIC,
         { auctionId }
       )) as SocketControlAck;
+
       if (ack.success === false) {
         return { success: false, error: ack.error ?? 'Request failed' };
       }
+
+      console.log('ack', ack.data);
       return {
         success: true,
         data: ack.data as IPaymentGatewayOrder | undefined,
