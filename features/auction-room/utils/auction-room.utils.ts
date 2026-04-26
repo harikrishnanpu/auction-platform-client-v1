@@ -126,7 +126,7 @@ export function getBidPanelHeadline(
   if (isLiveRoom) {
     return {
       title: 'Live auction',
-      description: 'Coming soon — real-time bidding will open here.',
+      description: 'Current bid and next bid update in real time.',
     };
   }
   if (isSealedRoom) {
@@ -148,7 +148,11 @@ export function getAuctionRoomPrimaryBidDisplay(
   bidCount: number,
   currentBidAmount: number | null
 ): string {
-  if (isLiveRoom) return 'Coming soon';
+  if (isLiveRoom) {
+    return currentBidAmount != null
+      ? formatAuctionPrice(currentBidAmount)
+      : '—';
+  }
   if (isSealedRoom) {
     if (shouldRevealSealedWinningAmount(isAuctionEnded, currentBidAmount)) {
       return formatAuctionPrice(currentBidAmount as number);
@@ -159,7 +163,7 @@ export function getAuctionRoomPrimaryBidDisplay(
 }
 
 export function getBidFeedEmptyMessage(isLiveRoom: boolean): string {
-  if (isLiveRoom) return 'Live bidding coming soon.';
+  if (isLiveRoom) return 'No live bids yet.';
   return 'No bids yet. Be the first when the room opens.';
 }
 

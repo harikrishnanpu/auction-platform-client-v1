@@ -3,6 +3,7 @@ import { IgetllSellersParams, IgetllUsersParams } from '@/types/admin.type';
 import { ApiResponse } from '@/types/api.index';
 import { IUser } from '@/types/user.type';
 import { KycProfile } from '@/types/kyc.type';
+import { IAdminDashboardStats } from '@/types/admin-dashboard.type';
 import { getErrorMessage } from '@/utils/get-app-error';
 
 export interface SellerInfo extends IUser {
@@ -11,6 +12,33 @@ export interface SellerInfo extends IUser {
 }
 
 export const adminService = {
+  getDashboardStats: async (
+    cookieString: string
+  ): Promise<ApiResponse<IAdminDashboardStats>> => {
+    try {
+      const res = await fetch(
+        buildApiUrl(API_ENDPOINTS.admin.getDashboardStats),
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: cookieString,
+          },
+          credentials: 'include',
+        }
+      );
+
+      const response = await res.json();
+      if (!res.ok) throw new Error(response.error ?? response.message);
+      if (!response.success)
+        throw new Error(response.error ?? response.message);
+
+      return { success: true, data: response.data };
+    } catch (err: unknown) {
+      return { success: false, data: null, error: getErrorMessage(err) };
+    }
+  },
+
   getAllUsers: async (
     input: IgetllUsersParams,
     cookieString: string

@@ -180,7 +180,7 @@ export function AuctionRoomFallbackPublicNotificationPanel({
             size="sm"
             className="h-7 flex-1 justify-center gap-1 rounded-md text-[11px]"
             disabled={disabled}
-            onClick={() => void runPay()}
+            onClick={() => runPay()}
           >
             <CreditCard className="size-3.5" />
             {busy === 'pay' ? 'Opening checkout…' : 'Pay start price'}
@@ -190,7 +190,7 @@ export function AuctionRoomFallbackPublicNotificationPanel({
             size="sm"
             className="h-7 flex-1 justify-center gap-1 rounded-md text-[11px]"
             disabled={disabled}
-            onClick={() => void runDecline()}
+            onClick={() => runDecline()}
           >
             <X className="size-3.5" />
             {busy === 'decline' ? 'Sending…' : 'Decline'}

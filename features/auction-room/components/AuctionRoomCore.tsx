@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { getWalletAction } from '@/actions/user/wallet.actions';
+import { createFraudReportAction } from '@/actions/admin/report.actions';
 
 import type { IAuctionDto, AuctionType } from '@/types/auction.type';
 import {
@@ -19,7 +20,7 @@ import { useAuctionRoomChatSheet } from '../hooks/useAuctionRoomChatSheet';
 import { useAuctionRoomHostControls } from '../hooks/useAuctionRoomHostControls';
 import { useAuctionRoomStatus } from '../hooks/useAuctionRoomStatus';
 import { useBidCooldown } from '../hooks/useBidCooldown';
-import type { AuctionRoomMode } from '../../../socket/useAuctionRoomSocket';
+import type { AuctionRoomMode } from '@/types/auctionRoom.types';
 import { useAuctionRoomSocket } from '../../../socket/useAuctionRoomSocket';
 import {
   auctionParticipationDepositAmount,
@@ -43,11 +44,13 @@ import { AuctionRoomMetaBadges } from './AuctionRoomMetaBadges';
 import { AuctionRoomParticipantsPanel } from './AuctionRoomParticipantsPanel';
 import { AuctionRoomSellerPanel } from './AuctionRoomSellerPanel';
 import { AuctionPlaceBidTermsModal } from './AuctionPlaceBidTermsModal';
+import { AuctionFraudReportDialog } from './AuctionFraudReportDialog';
 import { AuctionResultModal } from './AuctionResultModal';
 import { AuctionSoldSummaryCard } from './AuctionSoldSummaryCard';
 import { AuctionRoomYourPosition } from './AuctionRoomYourPosition';
 import { FallbackPublicParticipantStatsCard } from './FallbackPublicParticipantStatsCard';
 import useUserStore from '@/store/user.store';
+import { AuctionRoomLiveStreamPanel } from './AuctionRoomLiveStreamPanel';
 
 export type AuctionRoomCoreProps = {
   auctionId: string;
@@ -67,6 +70,7 @@ export function AuctionRoomCore({
   const { user } = useUserStore();
   const [placeBidTermsOpen, setPlaceBidTermsOpen] = useState(false);
   const [lockParticipantBusy, setLockParticipantBusy] = useState(false);
+  const [reportAuctionOpen, setReportAuctionOpen] = useState(false);
   const [walletMain, setWalletMain] = useState<number | null>(null);
   const [walletCurrency, setWalletCurrency] = useState('INR');
   const [isResultModalDismissed, setIsResultModalDismissed] = useState(false);
@@ -96,6 +100,9 @@ export function AuctionRoomCore({
     verifyFallbackPublicAuctionPayment,
     fallbackPublicParticipantStats,
     soldSummary,
+    isHostProducer,
+    localStream,
+    remoteStreams,
   } = useAuctionRoomSocket({
     auctionId,
     mode,
@@ -239,6 +246,7 @@ export function AuctionRoomCore({
   }, [addAuctionParticipant]);
 
   const canControlAuction = mode === 'SELLER' || mode === 'ADMIN';
+  const canReportParticipants = mode === 'SELLER' || mode === 'USER';
 
   const categoryName = auction ? getAuctionCategoryName(auction) : '—';
   const typeLabel = auction
@@ -247,6 +255,57 @@ export function AuctionRoomCore({
   const statusLabel = auctionStatusStr
     ? auctionStatusLabel(auctionStatusStr)
     : '—';
+
+  const handleReportParticipant = useCallback(
+    async (input: {
+      targetedUserId: string;
+      reportedUserType?: 'USER' | 'SELLER';
+      reason: string;
+      category: 'AUCTION_FRAUD_CRITICAL' | 'PAYMENT_CRITICAL' | 'OTHER';
+      level: 'LOW' | 'MEDIUM' | 'CRITICAL';
+    }) => {
+      const res = await createFraudReportAction({
+        ...input,
+        reportedUserId: user?.id ?? '',
+        reportedUserType: mode === 'SELLER' ? 'SELLER' : 'USER',
+      });
+      if (!res.success) {
+        toast.error(res.error ?? 'Failed to submit report');
+        return;
+      }
+      toast.success('Report submitted');
+    },
+    [mode, user?.id]
+  );
+
+  const canReportAuction =
+    mode === 'USER' &&
+    Boolean(auction?.sellerId) &&
+    auction?.sellerId !== user?.id;
+
+  const handleReportAuction = useCallback(
+    async (input: {
+      reason: string;
+      category: 'AUCTION_FRAUD_CRITICAL' | 'PAYMENT_CRITICAL' | 'OTHER';
+      level: 'LOW' | 'MEDIUM' | 'CRITICAL';
+    }) => {
+      if (!auction?.sellerId) return;
+      const res = await createFraudReportAction({
+        reportedUserId: user?.id ?? '',
+        reportedUserType: 'USER',
+        targetedUserId: auction.sellerId,
+        reason: input.reason,
+        category: input.category,
+        level: input.level,
+      });
+      if (!res.success) {
+        toast.error(res.error ?? 'Failed to submit report');
+        return;
+      }
+      toast.success('Auction report submitted');
+    },
+    [user?.id, auction]
+  );
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -270,6 +329,15 @@ export function AuctionRoomCore({
             setIsResultModalDismissed(true);
           }
         }}
+      />
+
+      <AuctionFraudReportDialog
+        open={reportAuctionOpen}
+        onOpenChange={setReportAuctionOpen}
+        title="Report this auction"
+        description="This will send a fraud report against the auction seller."
+        submitLabel="Submit auction report"
+        onSubmit={handleReportAuction}
       />
 
       <div className="relative mx-auto max-w-6xl px-3 pb-10 pt-4 sm:px-4 lg:px-6">
@@ -298,20 +366,39 @@ export function AuctionRoomCore({
                   }
                 />
               </div>
-              <SheetTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-7 shrink-0 rounded-full border-border/60 px-3 text-[11px] font-medium"
-                >
-                  Chat
-                </Button>
-              </SheetTrigger>
+              <div className="flex items-center gap-2">
+                {canReportAuction ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 shrink-0 rounded-full border-border/60 px-3 text-[11px] font-medium"
+                    onClick={() => setReportAuctionOpen(true)}
+                  >
+                    Report Auction
+                  </Button>
+                ) : null}
+                <SheetTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 shrink-0 rounded-full border-border/60 px-3 text-[11px] font-medium"
+                  >
+                    Chat
+                  </Button>
+                </SheetTrigger>
+              </div>
             </header>
 
             <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-12 xl:gap-5">
               <div className="min-w-0 space-y-3 xl:col-span-7">
+                <AuctionRoomLiveStreamPanel
+                  isLiveRoom={isLiveRoom}
+                  isHostProducer={isHostProducer}
+                  localStream={localStream}
+                  remoteStreams={remoteStreams}
+                />
                 <AuctionRoomMediaGallery
                   key={auction?.id ?? auctionId}
                   auction={auction}
@@ -343,7 +430,7 @@ export function AuctionRoomCore({
                   isAuctionEnded={isAuctionEnded}
                   isAuctionActive={isAuctionActive}
                   canInteract={canInteract}
-                  showPlaceBid={mode === 'USER' && !isLiveRoom}
+                  showPlaceBid={mode === 'USER'}
                   cooldownRemainingSeconds={cooldownRemainingSeconds}
                   onPlaceBid={handlePlaceBid}
                 />
@@ -408,6 +495,8 @@ export function AuctionRoomCore({
                 <AuctionRoomParticipantsPanel
                   participants={participants}
                   currentUserId={user?.id}
+                  canReport={canReportParticipants}
+                  onReportUser={handleReportParticipant}
                 />
               </aside>
             </div>
