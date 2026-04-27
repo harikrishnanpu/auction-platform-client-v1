@@ -86,8 +86,13 @@ export const API_ENDPOINTS = {
     getAuctionCategoryRequests: '/admin/category-requests',
     getAllAuctionCategories: '/admin/auction-categories',
     getSystemConfigs: '/admin/system-configs',
+    getSystemConfigKeys: '/admin/system-configs/keys',
     createSystemConfig: '/admin/system-configs',
     editSystemConfig: '/admin/system-configs',
+    createSubscriptionPlan: '/admin/subscriptions/plans',
+    getSubscriptionPlans: '/admin/subscriptions/plans',
+    getSubscriptionFeatureMetadata: '/admin/subscriptions/features',
+    getSubscribedUsers: '/admin/subscriptions/users',
   },
   fraud: {
     createReport: '/fraud/reports',

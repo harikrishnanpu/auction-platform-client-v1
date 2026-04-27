@@ -5,7 +5,7 @@ import { IUser } from '@/types/user.type';
 import { KycProfile } from '@/types/kyc.type';
 import { IAdminDashboardStats } from '@/types/admin-dashboard.type';
 import { ISystemConfig } from '@/types/system-config.type';
-import { SystemConfigKey } from '@/constants/system-config.constants';
+import { ISubscribedUser, ISubscriptionPlan } from '@/types/subscription.type';
 import { getErrorMessage } from '@/utils/get-app-error';
 
 export interface SellerInfo extends IUser {
@@ -303,8 +303,31 @@ export const adminService = {
       return { success: false, data: null, error: getErrorMessage(err) };
     }
   },
+  getSystemConfigKeys: async (
+    cookieString: string
+  ): Promise<ApiResponse<{ keys: string[] }>> => {
+    try {
+      const res = await fetch(
+        buildApiUrl(API_ENDPOINTS.admin.getSystemConfigKeys),
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', Cookie: cookieString },
+          credentials: 'include',
+        }
+      );
+
+      const response = await res.json();
+      if (!res.ok) throw new Error(response.error ?? response.message);
+      if (!response.success)
+        throw new Error(response.error ?? response.message);
+
+      return { success: true, data: response.data };
+    } catch (err: unknown) {
+      return { success: false, data: null, error: getErrorMessage(err) };
+    }
+  },
   createSystemConfig: async (
-    input: { key: SystemConfigKey; value: string; description?: string | null },
+    input: { key: string; value: string; description?: string | null },
     cookieString: string
   ): Promise<ApiResponse<ISystemConfig>> => {
     try {
@@ -329,7 +352,7 @@ export const adminService = {
     }
   },
   editSystemConfig: async (
-    input: { key: SystemConfigKey; value: string; description?: string | null },
+    input: { key: string; value: string; description?: string | null },
     cookieString: string
   ): Promise<ApiResponse<ISystemConfig>> => {
     try {
@@ -340,6 +363,110 @@ export const adminService = {
           headers: { 'Content-Type': 'application/json', Cookie: cookieString },
           credentials: 'include',
           body: JSON.stringify(input),
+        }
+      );
+
+      const response = await res.json();
+      if (!res.ok) throw new Error(response.error ?? response.message);
+      if (!response.success)
+        throw new Error(response.error ?? response.message);
+
+      return { success: true, data: response.data };
+    } catch (err: unknown) {
+      return { success: false, data: null, error: getErrorMessage(err) };
+    }
+  },
+  createSubscriptionPlan: async (
+    input: {
+      name: string;
+      description: string;
+      price: number;
+      durationDays: number;
+      features: {
+        featureKey: string;
+        value: string;
+        type: 'BOOLEAN' | 'NUMBER' | 'STRING';
+      }[];
+    },
+    cookieString: string
+  ): Promise<ApiResponse<ISubscriptionPlan>> => {
+    try {
+      const res = await fetch(
+        buildApiUrl(API_ENDPOINTS.admin.createSubscriptionPlan),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Cookie: cookieString },
+          credentials: 'include',
+          body: JSON.stringify(input),
+        }
+      );
+
+      const response = await res.json();
+      if (!res.ok) throw new Error(response.error ?? response.message);
+      if (!response.success)
+        throw new Error(response.error ?? response.message);
+
+      return { success: true, data: response.data };
+    } catch (err: unknown) {
+      return { success: false, data: null, error: getErrorMessage(err) };
+    }
+  },
+  getSubscriptionPlans: async (
+    cookieString: string
+  ): Promise<ApiResponse<{ plans: ISubscriptionPlan[] }>> => {
+    try {
+      const res = await fetch(
+        buildApiUrl(API_ENDPOINTS.admin.getSubscriptionPlans),
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', Cookie: cookieString },
+          credentials: 'include',
+        }
+      );
+
+      const response = await res.json();
+      if (!res.ok) throw new Error(response.error ?? response.message);
+      if (!response.success)
+        throw new Error(response.error ?? response.message);
+
+      return { success: true, data: response.data };
+    } catch (err: unknown) {
+      return { success: false, data: null, error: getErrorMessage(err) };
+    }
+  },
+  getSubscribedUsers: async (
+    cookieString: string
+  ): Promise<ApiResponse<{ subscriptions: ISubscribedUser[] }>> => {
+    try {
+      const res = await fetch(
+        buildApiUrl(API_ENDPOINTS.admin.getSubscribedUsers),
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', Cookie: cookieString },
+          credentials: 'include',
+        }
+      );
+
+      const response = await res.json();
+      if (!res.ok) throw new Error(response.error ?? response.message);
+      if (!response.success)
+        throw new Error(response.error ?? response.message);
+
+      return { success: true, data: response.data };
+    } catch (err: unknown) {
+      return { success: false, data: null, error: getErrorMessage(err) };
+    }
+  },
+  getSubscriptionFeatureMetadata: async (
+    cookieString: string
+  ): Promise<ApiResponse<{ featureKeys: string[]; valueTypes: string[] }>> => {
+    try {
+      const res = await fetch(
+        buildApiUrl(API_ENDPOINTS.admin.getSubscriptionFeatureMetadata),
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', Cookie: cookieString },
+          credentials: 'include',
         }
       );
 

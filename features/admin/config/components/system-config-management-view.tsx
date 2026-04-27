@@ -4,10 +4,6 @@ import {
   createSystemConfigAction,
   editSystemConfigAction,
 } from '@/actions/admin/admin.actions';
-import {
-  isSystemConfigKey,
-  SYSTEM_CONFIG_ALLOWED_KEYS,
-} from '@/constants/system-config.constants';
 import { SystemConfigField } from '@/features/admin/config/components/system-config-field';
 import { ISystemConfig } from '@/types/system-config.type';
 import { useMemo, useState, useTransition } from 'react';
@@ -15,12 +11,14 @@ import { toast } from 'sonner';
 
 export function SystemConfigManagementView({
   initialConfigs,
+  allowedKeys,
 }: {
   initialConfigs: ISystemConfig[];
+  allowedKeys: string[];
 }) {
   const [configs, setConfigs] = useState(initialConfigs);
   const [selectedKey, setSelectedKey] = useState(
-    initialConfigs[0]?.key ?? SYSTEM_CONFIG_ALLOWED_KEYS[0]
+    initialConfigs[0]?.key ?? allowedKeys[0] ?? ''
   );
   const [description, setDescription] = useState(
     initialConfigs[0]?.description ?? ''
@@ -50,7 +48,7 @@ export function SystemConfigManagementView({
       toast.error('Key is required');
       return;
     }
-    if (!isSystemConfigKey(trimmedKey)) {
+    if (!allowedKeys.includes(trimmedKey)) {
       toast.error('Invalid system config key');
       return;
     }
@@ -130,7 +128,7 @@ export function SystemConfigManagementView({
               label="Key"
               value={selectedKey}
               onChange={setSelectedKey}
-              placeholder={SYSTEM_CONFIG_ALLOWED_KEYS[0]}
+              placeholder={allowedKeys[0] ?? 'key'}
             />
 
             <SystemConfigField
