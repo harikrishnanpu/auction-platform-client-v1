@@ -5,6 +5,8 @@ import { IAdminDashboardStats } from '@/types/admin-dashboard.type';
 import { IgetllSellersParams, IgetllUsersParams } from '@/types/admin.type';
 import { ApiResponse } from '@/types/api.index';
 import { IUser } from '@/types/user.type';
+import { ISystemConfig } from '@/types/system-config.type';
+import { SystemConfigKey } from '@/constants/system-config.constants';
 import { cookies } from 'next/headers';
 
 export const getAllUsersAction = async (
@@ -80,4 +82,29 @@ export const rejectSellerKycAction = async (
 ): Promise<ApiResponse<null>> => {
   const cookieStore = await cookies();
   return adminService.rejectSellerKyc(sellerId, reason, cookieStore.toString());
+};
+
+export const getSystemConfigsAction = async (): Promise<
+  ApiResponse<{ configs: ISystemConfig[] }>
+> => {
+  const cookieStore = await cookies();
+  return adminService.getSystemConfigs(cookieStore.toString());
+};
+
+export const createSystemConfigAction = async (input: {
+  key: SystemConfigKey;
+  value: string;
+  description?: string | null;
+}): Promise<ApiResponse<ISystemConfig>> => {
+  const cookieStore = await cookies();
+  return adminService.createSystemConfig(input, cookieStore.toString());
+};
+
+export const editSystemConfigAction = async (input: {
+  key: SystemConfigKey;
+  value: string;
+  description?: string | null;
+}): Promise<ApiResponse<ISystemConfig>> => {
+  const cookieStore = await cookies();
+  return adminService.editSystemConfig(input, cookieStore.toString());
 };

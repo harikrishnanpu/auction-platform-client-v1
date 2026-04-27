@@ -85,6 +85,9 @@ export const API_ENDPOINTS = {
       `/admin/auction-categories/${categoryId}/status`,
     getAuctionCategoryRequests: '/admin/category-requests',
     getAllAuctionCategories: '/admin/auction-categories',
+    getSystemConfigs: '/admin/system-configs',
+    createSystemConfig: '/admin/system-configs',
+    editSystemConfig: '/admin/system-configs',
   },
   fraud: {
     createReport: '/fraud/reports',

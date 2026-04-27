@@ -4,6 +4,8 @@ import { ApiResponse } from '@/types/api.index';
 import { IUser } from '@/types/user.type';
 import { KycProfile } from '@/types/kyc.type';
 import { IAdminDashboardStats } from '@/types/admin-dashboard.type';
+import { ISystemConfig } from '@/types/system-config.type';
+import { SystemConfigKey } from '@/constants/system-config.constants';
 import { getErrorMessage } from '@/utils/get-app-error';
 
 export interface SellerInfo extends IUser {
@@ -274,6 +276,79 @@ export const adminService = {
         throw new Error(response.error ?? response.message);
 
       return { success: true, data: null };
+    } catch (err: unknown) {
+      return { success: false, data: null, error: getErrorMessage(err) };
+    }
+  },
+  getSystemConfigs: async (
+    cookieString: string
+  ): Promise<ApiResponse<{ configs: ISystemConfig[] }>> => {
+    try {
+      const res = await fetch(
+        buildApiUrl(API_ENDPOINTS.admin.getSystemConfigs),
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', Cookie: cookieString },
+          credentials: 'include',
+        }
+      );
+
+      const response = await res.json();
+      if (!res.ok) throw new Error(response.error ?? response.message);
+      if (!response.success)
+        throw new Error(response.error ?? response.message);
+
+      return { success: true, data: response.data };
+    } catch (err: unknown) {
+      return { success: false, data: null, error: getErrorMessage(err) };
+    }
+  },
+  createSystemConfig: async (
+    input: { key: SystemConfigKey; value: string; description?: string | null },
+    cookieString: string
+  ): Promise<ApiResponse<ISystemConfig>> => {
+    try {
+      const res = await fetch(
+        buildApiUrl(API_ENDPOINTS.admin.createSystemConfig),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Cookie: cookieString },
+          credentials: 'include',
+          body: JSON.stringify(input),
+        }
+      );
+
+      const response = await res.json();
+      if (!res.ok) throw new Error(response.error ?? response.message);
+      if (!response.success)
+        throw new Error(response.error ?? response.message);
+
+      return { success: true, data: response.data };
+    } catch (err: unknown) {
+      return { success: false, data: null, error: getErrorMessage(err) };
+    }
+  },
+  editSystemConfig: async (
+    input: { key: SystemConfigKey; value: string; description?: string | null },
+    cookieString: string
+  ): Promise<ApiResponse<ISystemConfig>> => {
+    try {
+      const res = await fetch(
+        buildApiUrl(API_ENDPOINTS.admin.editSystemConfig),
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Cookie: cookieString },
+          credentials: 'include',
+          body: JSON.stringify(input),
+        }
+      );
+
+      const response = await res.json();
+      if (!res.ok) throw new Error(response.error ?? response.message);
+      if (!response.success)
+        throw new Error(response.error ?? response.message);
+
+      return { success: true, data: response.data };
     } catch (err: unknown) {
       return { success: false, data: null, error: getErrorMessage(err) };
     }
