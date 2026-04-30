@@ -3,8 +3,6 @@ import { SubscriptionFeaturesView } from '@/features/admin/subscriptions/compone
 
 export default async function AdminSubscriptionFeaturesPage() {
   const response = await getSubscriptionFeatureMetadataAction();
-  const featureKeys = response.success
-    ? (response.data?.featureKeys ?? [])
-    : [];
-  return <SubscriptionFeaturesView featureKeys={featureKeys} />;
+  const features = response.success ? (response.data?.features ?? []) : [];
+  return <SubscriptionFeaturesView features={features} />;
 }

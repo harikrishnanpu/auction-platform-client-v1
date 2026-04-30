@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BadgeCheck, Layers, Users } from 'lucide-react';
+import { BadgeCheck, CirclePlus, Layers, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV = [
@@ -10,6 +10,12 @@ const NAV = [
     href: '/admin/subscriptions',
     label: 'All subscriptions',
     icon: Layers,
+    exact: true,
+  },
+  {
+    href: '/admin/subscriptions/create',
+    label: 'Create plan',
+    icon: CirclePlus,
     exact: true,
   },
   {

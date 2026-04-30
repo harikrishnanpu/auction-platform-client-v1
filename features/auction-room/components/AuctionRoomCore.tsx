@@ -103,6 +103,10 @@ export function AuctionRoomCore({
     isHostProducer,
     localStream,
     remoteStreams,
+    isLocalAudioEnabled,
+    isLocalVideoEnabled,
+    toggleLocalAudio,
+    toggleLocalVideo,
   } = useAuctionRoomSocket({
     auctionId,
     mode,
@@ -398,6 +402,10 @@ export function AuctionRoomCore({
                   isHostProducer={isHostProducer}
                   localStream={localStream}
                   remoteStreams={remoteStreams}
+                  isLocalAudioEnabled={isLocalAudioEnabled}
+                  isLocalVideoEnabled={isLocalVideoEnabled}
+                  onToggleLocalAudio={toggleLocalAudio}
+                  onToggleLocalVideo={toggleLocalVideo}
                 />
                 <AuctionRoomMediaGallery
                   key={auction?.id ?? auctionId}

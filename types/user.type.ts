@@ -1,3 +1,5 @@
+import type { IUserSubscriptionSummary } from '@/types/user-subscription.type';
+
 export enum UserRole {
   ADMIN = 'ADMIN',
   USER = 'USER',
@@ -29,6 +31,7 @@ export interface IUser {
   phone?: string;
   address?: string;
   avatar_url?: string;
+  subscription?: IUserSubscriptionSummary | null;
 }
 
 export type UserInfo = IUser;

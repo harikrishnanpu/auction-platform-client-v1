@@ -74,6 +74,8 @@ export function useAuctionRoomSocket({
   const [isHostProducer, setIsHostProducer] = useState(false);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<RemoteStreamItem[]>([]);
+  const [isLocalAudioEnabled, setIsLocalAudioEnabled] = useState(true);
+  const [isLocalVideoEnabled, setIsLocalVideoEnabled] = useState(true);
 
   const roomId = useMemo(() => `auction:${auctionId}`, [auctionId]);
 
@@ -181,6 +183,12 @@ export function useAuctionRoomSocket({
     });
 
     setLocalStream(stream);
+    setIsLocalAudioEnabled(
+      stream.getAudioTracks().some((track) => track.enabled)
+    );
+    setIsLocalVideoEnabled(
+      stream.getVideoTracks().some((track) => track.enabled)
+    );
 
     for (const track of stream.getTracks()) {
       await transport.produce({ track });
@@ -466,6 +474,8 @@ export function useAuctionRoomSocket({
       transportRef.current?.close();
       transportRef.current = null;
       setLocalStream(null);
+      setIsLocalAudioEnabled(true);
+      setIsLocalVideoEnabled(true);
       setIsLiveAuction(false);
       setIsHostProducer(false);
       socketRef.current = null;
@@ -648,6 +658,30 @@ export function useAuctionRoomSocket({
     }
   }
 
+  function toggleLocalAudio(): boolean {
+    if (!localStream) return false;
+    const audioTracks = localStream.getAudioTracks();
+    if (audioTracks.length === 0) return false;
+    const nextEnabled = !audioTracks.some((track) => track.enabled);
+    audioTracks.forEach((track) => {
+      track.enabled = nextEnabled;
+    });
+    setIsLocalAudioEnabled(nextEnabled);
+    return nextEnabled;
+  }
+
+  function toggleLocalVideo(): boolean {
+    if (!localStream) return false;
+    const videoTracks = localStream.getVideoTracks();
+    if (videoTracks.length === 0) return false;
+    const nextEnabled = !videoTracks.some((track) => track.enabled);
+    videoTracks.forEach((track) => {
+      track.enabled = nextEnabled;
+    });
+    setIsLocalVideoEnabled(nextEnabled);
+    return nextEnabled;
+  }
+
   return {
     snapshot,
     roomReady,
@@ -666,6 +700,10 @@ export function useAuctionRoomSocket({
     isHostProducer,
     localStream,
     remoteStreams,
+    isLocalAudioEnabled,
+    isLocalVideoEnabled,
+    toggleLocalAudio,
+    toggleLocalVideo,
     placeBid,
     addAuctionParticipant,
     sendChatMessage,

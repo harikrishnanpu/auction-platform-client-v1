@@ -2,26 +2,22 @@ import {
   getSubscriptionFeatureMetadataAction,
   getSubscriptionPlansAction,
 } from '@/actions/admin/admin.actions';
-import { SubscriptionPlansView } from '@/features/admin/subscriptions/components/subscription-plans-view';
+import { SubscriptionPlansListView } from '@/features/admin/subscriptions/components/subscription-plans-list-view';
 
 export default async function AdminSubscriptionsPage() {
-  const [response, metadataResponse] = await Promise.all([
+  const [plansResponse, featuresResponse] = await Promise.all([
     getSubscriptionPlansAction(),
     getSubscriptionFeatureMetadataAction(),
   ]);
-  const plans = response.success ? (response.data?.plans ?? []) : [];
-  const featureKeys = metadataResponse.success
-    ? (metadataResponse.data?.featureKeys ?? [])
-    : [];
-  const valueTypes = metadataResponse.success
-    ? (metadataResponse.data?.valueTypes ?? [])
+  const plans = plansResponse.success ? (plansResponse.data?.plans ?? []) : [];
+  const allowedFeatures = featuresResponse.success
+    ? (featuresResponse.data?.features ?? [])
     : [];
 
   return (
-    <SubscriptionPlansView
+    <SubscriptionPlansListView
       initialPlans={plans}
-      allowedFeatureKeys={featureKeys}
-      allowedValueTypes={valueTypes}
+      allowedFeatures={allowedFeatures}
     />
   );
 }

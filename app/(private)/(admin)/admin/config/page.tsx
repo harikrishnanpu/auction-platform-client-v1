@@ -1,18 +1,10 @@
-import {
-  getSystemConfigKeysAction,
-  getSystemConfigsAction,
-} from '@/actions/admin/admin.actions';
+import { getSystemConfigsAction } from '@/actions/admin/admin.actions';
 import { SystemConfigManagementView } from '@/features/admin/config/components/system-config-management-view';
 
 export default async function AdminSystemConfigPage() {
-  const [response, keysResponse] = await Promise.all([
-    getSystemConfigsAction(),
-    getSystemConfigKeysAction(),
-  ]);
+  const response = await getSystemConfigsAction();
   const configs = response.success ? (response.data?.configs ?? []) : [];
-  const allowedKeys = keysResponse.success
-    ? (keysResponse.data?.keys ?? [])
-    : [];
+  const allowedKeys = configs.map((config) => config.key);
 
   return (
     <SystemConfigManagementView

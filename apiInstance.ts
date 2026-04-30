@@ -28,6 +28,8 @@ export const API_ENDPOINTS = {
     notificationsStream: '/user/notifications/stream',
     myAuctions: '/user/my-auctions',
     wallet: '/user/wallet',
+    subscriptionPlans: '/user/subscription-plans',
+    subscriptionsStart: '/user/subscriptions/start',
   },
   wallet: {
     get: '/wallet',
@@ -86,11 +88,11 @@ export const API_ENDPOINTS = {
     getAuctionCategoryRequests: '/admin/category-requests',
     getAllAuctionCategories: '/admin/auction-categories',
     getSystemConfigs: '/admin/system-configs',
-    getSystemConfigKeys: '/admin/system-configs/keys',
-    createSystemConfig: '/admin/system-configs',
-    editSystemConfig: '/admin/system-configs',
+    updateSystemConfig: '/admin/system-configs',
     createSubscriptionPlan: '/admin/subscriptions/plans',
     getSubscriptionPlans: '/admin/subscriptions/plans',
+    updateSubscriptionPlan: (planId: string) =>
+      `/admin/subscriptions/plans/${planId}`,
     getSubscriptionFeatureMetadata: '/admin/subscriptions/features',
     getSubscribedUsers: '/admin/subscriptions/users',
   },

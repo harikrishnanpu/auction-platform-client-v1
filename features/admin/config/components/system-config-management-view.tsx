@@ -1,9 +1,6 @@
 'use client';
 
-import {
-  createSystemConfigAction,
-  editSystemConfigAction,
-} from '@/actions/admin/admin.actions';
+import { updateSystemConfigAction } from '@/actions/admin/admin.actions';
 import { SystemConfigField } from '@/features/admin/config/components/system-config-field';
 import { ISystemConfig } from '@/types/system-config.type';
 import { useMemo, useState, useTransition } from 'react';
@@ -48,6 +45,7 @@ export function SystemConfigManagementView({
       toast.error('Key is required');
       return;
     }
+
     if (!allowedKeys.includes(trimmedKey)) {
       toast.error('Invalid system config key');
       return;
@@ -58,19 +56,37 @@ export function SystemConfigManagementView({
       return;
     }
 
+    // const valueType = selectedConfig?.valueType;
+
+    // switch (valueType) {
+    //   case 'STRING':
+    //     if(trimmedValue)
+    //     break;
+    //   case 'NUMBER':
+    //     if(isNaN(Number(trimmedValue))) {
+    //       toast.error('Invalid number');
+    //       return;
+    //     }
+    //     break;
+    //   case 'BOOLEAN':
+    //     if(!['true', 'false'].includes(trimmedValue)) {
+    //       toast.error('Invalid boolean');
+    //       return;
+    //     }
+    //     break;
+    // }
+
     startTransition(async () => {
       const payload = {
         key: trimmedKey,
         value: trimmedValue,
         description: description.trim() || null,
       };
-      const isExisting = configs.some((item) => item.key === trimmedKey);
-      const response = isExisting
-        ? await editSystemConfigAction(payload)
-        : await createSystemConfigAction(payload);
+
+      const response = await updateSystemConfigAction(payload);
 
       if (!response.success || !response.data) {
-        toast.error(response.error ?? 'Failed to save config');
+        toast.error(response.error);
         return;
       }
 
@@ -81,12 +97,11 @@ export function SystemConfigManagementView({
           return [...prev, next].sort((a, b) => a.key.localeCompare(b.key));
         return prev.map((item) => (item.key === next.key ? next : item));
       });
+
       setSelectedKey(next.key);
       setDescription(next.description ?? '');
       setConfigValue(next.value ?? '');
-      toast.success(
-        isExisting ? 'System config updated' : 'System config created'
-      );
+      toast.success('System config updated');
     });
   };
 
@@ -142,16 +157,21 @@ export function SystemConfigManagementView({
               label="Value"
               value={configValue}
               onChange={setConfigValue}
-              placeholder="3"
+              placeholder={
+                selectedConfig?.valueType === 'STRING'
+                  ? 'Value'
+                  : selectedConfig?.valueType === 'NUMBER'
+                    ? 'Number'
+                    : 'true or false'
+              }
               multiline
               rows={6}
             />
 
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
-                {selectedConfig
-                  ? `Last updated: ${new Date(selectedConfig.updatedAt).toLocaleString()}`
-                  : 'Create a new key by entering a unique name'}
+                {selectedConfig &&
+                  `Last updated: ${new Date(selectedConfig.updatedAt).toLocaleString('en-IN')}`}
               </p>
               <button
                 type="button"

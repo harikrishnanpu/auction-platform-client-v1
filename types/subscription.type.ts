@@ -1,8 +1,18 @@
+export type SubscriptionFeatureValueType = 'BOOLEAN' | 'NUMBER' | 'STRING';
+
+export interface IAllowedSubscriptionFeatureMetadata {
+  id: string;
+  key: string;
+  valueType: SubscriptionFeatureValueType;
+  description: string;
+}
+
 export interface ISubscriptionPlanFeature {
   id: string;
   featureKey: string;
+  description: string;
   value: string;
-  type: 'BOOLEAN' | 'NUMBER' | 'STRING';
+  type: SubscriptionFeatureValueType;
 }
 
 export interface ISubscriptionPlan {
@@ -11,7 +21,9 @@ export interface ISubscriptionPlan {
   description: string;
   price: number;
   durationDays: number;
+  isDefault: boolean;
   isActive: boolean;
+  razorpayPlanId?: string | null;
   createdAt: string;
   updatedAt: string;
   features: ISubscriptionPlanFeature[];

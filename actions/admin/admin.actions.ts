@@ -6,7 +6,11 @@ import { IgetllSellersParams, IgetllUsersParams } from '@/types/admin.type';
 import { ApiResponse } from '@/types/api.index';
 import { IUser } from '@/types/user.type';
 import { ISystemConfig } from '@/types/system-config.type';
-import { ISubscribedUser, ISubscriptionPlan } from '@/types/subscription.type';
+import {
+  IAllowedSubscriptionFeatureMetadata,
+  ISubscribedUser,
+  ISubscriptionPlan,
+} from '@/types/subscription.type';
 import { cookies } from 'next/headers';
 
 export const getAllUsersAction = async (
@@ -91,29 +95,13 @@ export const getSystemConfigsAction = async (): Promise<
   return adminService.getSystemConfigs(cookieStore.toString());
 };
 
-export const getSystemConfigKeysAction = async (): Promise<
-  ApiResponse<{ keys: string[] }>
-> => {
-  const cookieStore = await cookies();
-  return adminService.getSystemConfigKeys(cookieStore.toString());
-};
-
-export const createSystemConfigAction = async (input: {
+export const updateSystemConfigAction = async (input: {
   key: string;
   value: string;
   description?: string | null;
 }): Promise<ApiResponse<ISystemConfig>> => {
   const cookieStore = await cookies();
-  return adminService.createSystemConfig(input, cookieStore.toString());
-};
-
-export const editSystemConfigAction = async (input: {
-  key: string;
-  value: string;
-  description?: string | null;
-}): Promise<ApiResponse<ISystemConfig>> => {
-  const cookieStore = await cookies();
-  return adminService.editSystemConfig(input, cookieStore.toString());
+  return adminService.updateSystemConfig(input, cookieStore.toString());
 };
 
 export const createSubscriptionPlanAction = async (input: {
@@ -121,21 +109,31 @@ export const createSubscriptionPlanAction = async (input: {
   description: string;
   price: number;
   durationDays: number;
+  isDefault: boolean;
   features: {
-    featureKey: string;
+    featureId: string;
     value: string;
-    type: 'BOOLEAN' | 'NUMBER' | 'STRING';
   }[];
 }): Promise<ApiResponse<ISubscriptionPlan>> => {
   const cookieStore = await cookies();
   return adminService.createSubscriptionPlan(input, cookieStore.toString());
 };
 
-export const getSubscriptionPlansAction = async (): Promise<
-  ApiResponse<{ plans: ISubscriptionPlan[] }>
-> => {
+export const updateSubscriptionPlanAction = async (input: {
+  planId: string;
+  name: string;
+  description: string;
+  price: number;
+  durationDays: number;
+  isDefault: boolean;
+  isActive: boolean;
+  features: {
+    featureId: string;
+    value: string;
+  }[];
+}): Promise<ApiResponse<ISubscriptionPlan>> => {
   const cookieStore = await cookies();
-  return adminService.getSubscriptionPlans(cookieStore.toString());
+  return adminService.updateSubscriptionPlan(input, cookieStore.toString());
 };
 
 export const getSubscribedUsersAction = async (): Promise<
@@ -146,8 +144,15 @@ export const getSubscribedUsersAction = async (): Promise<
 };
 
 export const getSubscriptionFeatureMetadataAction = async (): Promise<
-  ApiResponse<{ featureKeys: string[]; valueTypes: string[] }>
+  ApiResponse<{ features: IAllowedSubscriptionFeatureMetadata[] }>
 > => {
   const cookieStore = await cookies();
   return adminService.getSubscriptionFeatureMetadata(cookieStore.toString());
+};
+
+export const getSubscriptionPlansAction = async (): Promise<
+  ApiResponse<{ plans: ISubscriptionPlan[] }>
+> => {
+  const cookieStore = await cookies();
+  return adminService.getSubscriptionPlans(cookieStore.toString());
 };
