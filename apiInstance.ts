@@ -29,7 +29,7 @@ export const API_ENDPOINTS = {
     myAuctions: '/user/my-auctions',
     wallet: '/user/wallet',
     subscriptionPlans: '/user/subscription-plans',
-    subscriptionsStart: '/user/subscriptions/start',
+    subscriptionsStart: '/user/subscriptions/checkout',
   },
   wallet: {
     get: '/wallet',

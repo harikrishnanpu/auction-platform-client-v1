@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, CreditCard, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
+import { RazorpayOptions } from '@/lib/razorpay';
 
 const getApiBase = () => process.env.NEXT_PUBLIC_API_BASE_URL || '';
 const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '';
@@ -22,21 +23,6 @@ interface RazorpayResponse {
   razorpay_order_id: string;
   razorpay_payment_id: string;
   razorpay_signature: string;
-}
-
-declare global {
-  interface Window {
-    Razorpay: new (options: {
-      key: string;
-      amount: number;
-      currency: string;
-      order_id: string;
-      name: string;
-      description: string;
-      handler: (response: RazorpayResponse) => void;
-      modal?: { ondismiss?: () => void };
-    }) => { open: () => void };
-  }
 }
 
 function loadRazorpayScript(): Promise<void> {
@@ -152,7 +138,7 @@ export function PaymentModal({
         },
       };
 
-      const rzp = new window.Razorpay(options);
+      const rzp = new window.Razorpay(options as RazorpayOptions);
       rzp.open();
     } catch (err: unknown) {
       setError(
