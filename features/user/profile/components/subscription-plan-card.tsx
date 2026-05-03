@@ -13,27 +13,39 @@ import type { IPublicSubscriptionPlan } from '@/types/user-subscription.type';
 
 interface SubscriptionPlanCardProps {
   plan: IPublicSubscriptionPlan;
-  isCheckoutPending: boolean;
+  isCheckoutDisabled: boolean;
+  actionLabel: string;
   onCheckout: (planId: string) => void;
 }
 
 export function SubscriptionPlanCard({
   plan,
-  isCheckoutPending,
+  isCheckoutDisabled,
+  actionLabel,
   onCheckout,
 }: SubscriptionPlanCardProps) {
-  const isCheckoutDisabled = isCheckoutPending || plan.isCurrentPlan;
-
   return (
     <Card className="border-border/60">
       <CardHeader className="space-y-3">
         <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-lg">{plan.name}</CardTitle>
-          {plan.isDefault ? (
-            <Badge variant="secondary" className="shrink-0">
-              Default
-            </Badge>
-          ) : null}
+          <CardTitle className="text-lg">
+            {plan.name}
+            <span className="ml-2 text-xs font-medium text-muted-foreground">
+              Rank {plan.rank}
+            </span>
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            {plan.isCurrentPlan ? (
+              <Badge variant="default" className="shrink-0">
+                Current
+              </Badge>
+            ) : null}
+            {plan.isDefault ? (
+              <Badge variant="secondary" className="shrink-0">
+                Default
+              </Badge>
+            ) : null}
+          </div>
         </div>
         <CardDescription className="line-clamp-1">
           {plan.description}
@@ -67,11 +79,7 @@ export function SubscriptionPlanCard({
           disabled={isCheckoutDisabled}
           onClick={() => onCheckout(plan.id)}
         >
-          {plan.isCurrentPlan
-            ? 'Current plan'
-            : isCheckoutPending
-              ? 'Redirecting...'
-              : 'Subscribe'}
+          {actionLabel}
         </Button>
       </CardContent>
     </Card>

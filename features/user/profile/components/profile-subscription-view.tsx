@@ -1,7 +1,7 @@
 'use client';
 
 import { Crown } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import {
   Card,
@@ -23,6 +23,14 @@ export function ProfileSubscriptionView({
   initialError,
 }: ProfileSubscriptionViewProps) {
   const { activePlanId, isPending, startCheckout } = useSubscriptionCheckout();
+  const plans = useMemo(
+    () => [...initialPlans].sort((a, b) => a.rank - b.rank),
+    [initialPlans]
+  );
+  const currentPlan = useMemo(
+    () => plans.find((plan) => plan.isCurrentPlan) ?? null,
+    [plans]
+  );
 
   useEffect(() => {
     if (!initialError) return;
@@ -41,7 +49,7 @@ export function ProfileSubscriptionView({
         </p>
       </header>
 
-      {initialPlans.length === 0 ? (
+      {plans.length === 0 ? (
         <Card className="border-border/60">
           <CardHeader>
             <CardTitle>Subscription plans</CardTitle>
@@ -52,14 +60,33 @@ export function ProfileSubscriptionView({
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
-          {initialPlans.map((plan) => (
-            <SubscriptionPlanCard
-              key={plan.id}
-              plan={plan}
-              isCheckoutPending={isPending && activePlanId === plan.id}
-              onCheckout={startCheckout}
-            />
-          ))}
+          {plans.map((plan) => {
+            const isCurrentPlan = plan.isCurrentPlan;
+            const isLowerOrEqualRankThanCurrent =
+              !!currentPlan && plan.rank <= currentPlan.rank;
+            const isCheckoutDisabled =
+              isCurrentPlan ||
+              isPending ||
+              (!isCurrentPlan && isLowerOrEqualRankThanCurrent);
+
+            let actionLabel = 'Subscribe';
+            if (isCurrentPlan) actionLabel = 'Current plan';
+            else if (isPending && activePlanId === plan.id)
+              actionLabel = 'Opening...';
+            else if (!currentPlan) actionLabel = 'Subscribe';
+            else if (plan.rank > currentPlan.rank) actionLabel = 'Upgrade';
+            else actionLabel = 'Subscribe';
+
+            return (
+              <SubscriptionPlanCard
+                key={plan.id}
+                plan={plan}
+                isCheckoutDisabled={isCheckoutDisabled}
+                actionLabel={actionLabel}
+                onCheckout={startCheckout}
+              />
+            );
+          })}
         </div>
       )}
     </section>

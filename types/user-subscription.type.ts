@@ -22,6 +22,7 @@ export interface IPublicSubscriptionPlan {
   price: number;
   durationDays: number;
   isDefault: boolean;
+  rank: number;
   features: ISubscriptionPlanFeature[];
   isCurrentPlan: boolean;
 }

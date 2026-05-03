@@ -1,8 +1,23 @@
 'use client';
 
-import { updateSubscriptionPlanAction } from '@/actions/admin/admin.actions';
+import {
+  createSubscriptionPlanAction,
+  updateSubscriptionPlanAction,
+} from '@/actions/admin/admin.actions';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { SubscriptionPlanEditModal } from '@/features/admin/subscriptions/components/subscription-plan-edit-modal';
-import { SubscriptionPlanFormValue } from '@/features/admin/subscriptions/components/subscription-plan-form';
+import {
+  SubscriptionPlanForm,
+  SubscriptionPlanFormValue,
+} from '@/features/admin/subscriptions/components/subscription-plan-form';
 import {
   IAllowedSubscriptionFeatureMetadata,
   ISubscriptionPlan,
@@ -26,6 +41,10 @@ export function SubscriptionPlansListView({
   const [editingPlan, setEditingPlan] = useState<ISubscriptionPlan | null>(
     null
   );
+  const [versioningPlan, setVersioningPlan] =
+    useState<ISubscriptionPlan | null>(null);
+  const [versionFormValue, setVersionFormValue] =
+    useState<SubscriptionPlanFormValue | null>(null);
 
   const totalPages = Math.max(1, Math.ceil(plans.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -122,6 +141,90 @@ export function SubscriptionPlansListView({
     return { success: true };
   };
 
+  const getPrefilledVersionFormValue = (
+    plan: ISubscriptionPlan
+  ): SubscriptionPlanFormValue => ({
+    name: `${plan.name} v2`,
+    description: plan.description,
+    price: String(plan.price),
+    durationDays: String(plan.durationDays),
+    isDefault: plan.isDefault,
+    isActive: plan.isActive,
+    features: plan.features
+      .map((feature) => {
+        const metadata = allowedFeatures.find(
+          (item) => item.key === feature.featureKey
+        );
+        if (!metadata) return null;
+        return {
+          featureId: metadata.id,
+          value: feature.value,
+        };
+      })
+      .filter((item): item is { featureId: string; value: string } =>
+        Boolean(item)
+      ),
+  });
+
+  const openCreateVersionModal = (plan: ISubscriptionPlan) => {
+    setVersioningPlan(plan);
+    setVersionFormValue(getPrefilledVersionFormValue(plan));
+  };
+
+  const closeCreateVersionModal = () => {
+    setVersioningPlan(null);
+    setVersionFormValue(null);
+  };
+
+  const handleCreateVersion = () => {
+    if (!versionFormValue) return;
+
+    const payloadFeatures = versionFormValue.features
+      .filter((feature) => feature.featureId && feature.value.trim())
+      .map((feature) => ({
+        featureId: feature.featureId,
+        value: feature.value.trim(),
+      }));
+
+    if (payloadFeatures.length === 0) {
+      toast.error('Add at least one feature with a value');
+      return;
+    }
+
+    const priceNum = Number(versionFormValue.price);
+    const durationDaysNum = Number(versionFormValue.durationDays);
+
+    if (!versionFormValue.name.trim() || !versionFormValue.description.trim()) {
+      toast.error('Plan name and description are required');
+      return;
+    }
+    if (Number.isNaN(priceNum) || Number.isNaN(durationDaysNum)) {
+      toast.error('Plan amount and duration must be valid numbers');
+      return;
+    }
+
+    startTransition(async () => {
+      const response = await createSubscriptionPlanAction({
+        name: versionFormValue.name.trim(),
+        description: versionFormValue.description.trim(),
+        price: priceNum,
+        durationDays: durationDaysNum,
+        isDefault: versionFormValue.isDefault,
+        features: payloadFeatures,
+      });
+
+      if (!response.success || !response.data) {
+        toast.error(response.error ?? 'Failed to create plan version');
+        return;
+      }
+
+      setPlans((prev) => [response.data!, ...prev]);
+      setPage(1);
+      closeCreateVersionModal();
+      toast.success('New subscription plan version created');
+    });
+  };
+
   return (
     <div className="rounded-lg border bg-card p-4">
       <h2 className="text-lg font-semibold mb-3">All subscription plans</h2>
@@ -187,6 +290,15 @@ export function SubscriptionPlansListView({
                   Edit
                 </button>
               </div>
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={() => openCreateVersionModal(plan)}
+                  className="text-sm font-medium text-blue-600 hover:underline"
+                >
+                  Create a new version
+                </button>
+              </div>
 
               <div className="mt-2 flex flex-wrap gap-2">
                 {plan.features.map((feature) => (
@@ -238,6 +350,44 @@ export function SubscriptionPlansListView({
         onClose={() => setEditingPlan(null)}
         onSave={handleSaveEditedPlan}
       />
+
+      <Dialog
+        open={Boolean(versioningPlan && versionFormValue)}
+        onOpenChange={(open) => {
+          if (!open) closeCreateVersionModal();
+        }}
+      >
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create new plan version</DialogTitle>
+            <DialogDescription>
+              A new plan will be created with these prefilled values. Update any
+              fields before creating.
+            </DialogDescription>
+          </DialogHeader>
+
+          {versionFormValue && (
+            <SubscriptionPlanForm
+              value={versionFormValue}
+              allowedFeatures={allowedFeatures}
+              onChange={setVersionFormValue}
+            />
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={closeCreateVersionModal}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleCreateVersion} disabled={isPending}>
+              {isPending ? 'Creating...' : 'Create plan'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
