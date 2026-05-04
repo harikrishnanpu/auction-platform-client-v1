@@ -16,7 +16,7 @@ import {
 
 export async function createAuctionAction(
   input: CreateAuctionInput
-): Promise<ApiResponse<IGetAllSellerAuctionsResponse>> {
+): Promise<ApiResponse<IAuctionDto>> {
   const cookieStore = await cookies();
   return auctionService.create(input, cookieStore);
 }

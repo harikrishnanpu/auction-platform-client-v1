@@ -23,7 +23,7 @@ import {
 } from '@/actions/user/profile.actions';
 import { useState } from 'react';
 import {
-  EditProfileFormValues,
+  ZodEditProfileFormValues,
   editProfileSchema,
 } from '@/features/user/profile/schemes/editProfile.schema';
 
@@ -50,7 +50,7 @@ export function EditProfileModal({
     handleSubmit,
     formState: { errors, isSubmitting },
     setError,
-  } = useForm<EditProfileFormValues>({
+  } = useForm<ZodEditProfileFormValues>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: {
       otp: '',
@@ -60,7 +60,7 @@ export function EditProfileModal({
     },
   });
 
-  const onSubmit = async (data: EditProfileFormValues) => {
+  const onSubmit = async (data: ZodEditProfileFormValues) => {
     try {
       const response = await editProfileAction(data);
 

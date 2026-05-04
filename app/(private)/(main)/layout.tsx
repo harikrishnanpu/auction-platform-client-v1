@@ -1,5 +1,6 @@
 import { LandingFooter } from '@/components/layout/footers/landingFooter';
 import { DashboardHeader } from '@/components/layout/navbars/navbar';
+import { UserAssistantChat } from '@/components/assistant/user-assistant-chat';
 
 export default function MainLayout({
   children,
@@ -11,6 +12,7 @@ export default function MainLayout({
       <DashboardHeader />
       <main className="flex-1">{children}</main>
       <LandingFooter />
+      <UserAssistantChat />
     </div>
   );
 }

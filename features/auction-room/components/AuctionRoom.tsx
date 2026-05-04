@@ -2,7 +2,7 @@
 
 import type { IAuctionDto } from '@/types/auction.type';
 
-import type { AuctionRoomMode } from '../../../socket/useAuctionRoomSocket';
+import type { AuctionRoomMode } from '@/types/auctionRoom.types';
 
 import { AuctionRoomCore } from './AuctionRoomCore';
 export function AuctionRoom({

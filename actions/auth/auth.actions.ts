@@ -61,7 +61,7 @@ export const forgotPasswordAction = async (
 };
 
 export const changePasswordAction = async (
-  data: ZodChangePasswordValues
+  data: ZodChangePasswordValues & { token: string }
 ): Promise<ApiResponse<null>> => {
   return await authService.changePassword(data);
 };

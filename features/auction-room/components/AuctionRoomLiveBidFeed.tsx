@@ -20,7 +20,7 @@ import {
 import type {
   AuctionRoomMode,
   IAuctionRoomBid,
-} from '../../../socket/useAuctionRoomSocket';
+} from '@/types/auctionRoom.types';
 
 type AuctionRoomLiveBidFeedProps = {
   bids: IAuctionRoomBid[];

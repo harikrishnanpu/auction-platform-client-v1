@@ -10,7 +10,6 @@ import {
   IAuctionDto,
   UpdateAuctionDraftInput,
 } from '@/types/auction.type';
-import { getErrorMessage } from '@/utils/get-app-error';
 import { cookies } from 'next/headers';
 import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
 import { buildQuery } from '@/apiInstance';
@@ -19,8 +18,8 @@ export const auctionService = {
   create: async (
     input: CreateAuctionInput,
     cookieStore: ReadonlyRequestCookies
-  ): Promise<ApiResponse<IGetAllSellerAuctionsResponse>> => {
-    return apiFetch<IGetAllSellerAuctionsResponse>(
+  ): Promise<ApiResponse<IAuctionDto>> => {
+    return apiFetch<IAuctionDto>(
       buildApiUrl(API_ENDPOINTS.auction.create),
       {
         method: 'POST',

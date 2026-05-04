@@ -13,7 +13,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { formatAuctionDateTime } from '@/utils/auction-utils';
 
-import type { IAuctionRoomChatMessage } from '../../../socket/useAuctionRoomSocket';
+import type { IAuctionRoomChatMessage } from '@/types/auctionRoom.types';
 
 type AuctionRoomChatPanelProps = {
   messages: IAuctionRoomChatMessage[];

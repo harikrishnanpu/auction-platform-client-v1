@@ -152,7 +152,7 @@ const forgotPassword = async (
 };
 
 const changePassword = async (
-  data: ZodChangePasswordValues
+  data: ZodChangePasswordValues & { token: string }
 ): Promise<ApiResponse<null>> => {
   const cookieStorage = await cookies();
   return await apiFetch<null>(
