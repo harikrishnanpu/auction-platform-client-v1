@@ -63,6 +63,10 @@ export function useAuctionRoomSocket({
     []
   );
 
+  const [agentResponses, setAgentResponses] = useState<
+    { id: string; message: string; createdAt: string }[]
+  >([]);
+
   const [connectionState, setConnectionState] = useState<
     'connecting' | 'connected' | 'disconnected' | 'error'
   >('connecting');
@@ -472,6 +476,7 @@ export function useAuctionRoomSocket({
       setConnectionState('disconnected');
       setRoomReady(false);
       setChatMessages([]);
+      setAgentResponses([]);
     };
   }, [auctionId, mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -525,6 +530,45 @@ export function useAuctionRoomSocket({
       auctionId,
       message,
     });
+  }
+
+  async function askAgent(message: string): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    const socket = socketRef.current;
+    if (!socket?.connected) {
+      return { success: false, error: 'Not connected' };
+    }
+    try {
+      const ack = (await socket
+        .timeout(120_000)
+        .emitWithAck(AUCTION_SOCKET_EVENTS.ASK_AGENT, {
+          auctionId,
+          message,
+        })) as {
+        success: boolean;
+        data?: { response: string };
+        error?: string;
+      };
+      if (!ack.success) {
+        return { success: false, error: ack.error ?? 'Assistant failed' };
+      }
+      const text = ack.data?.response ?? '';
+      setAgentResponses((prev) =>
+        [
+          ...prev,
+          {
+            id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+            message: text,
+            createdAt: new Date().toISOString(),
+          },
+        ].slice(-50)
+      );
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Request failed or timed out' };
+    }
   }
 
   function emitAuctionControl(
@@ -659,6 +703,7 @@ export function useAuctionRoomSocket({
       snapshot?.fallbackPublicParticipantStats ?? null,
     soldSummary: snapshot?.soldSummary ?? null,
     chatMessages,
+    agentResponses,
     connectionState,
     error,
     roomId,
@@ -669,6 +714,7 @@ export function useAuctionRoomSocket({
     placeBid,
     addAuctionParticipant,
     sendChatMessage,
+    askAgent,
     pauseAuction,
     resumeAuction,
     endAuction,

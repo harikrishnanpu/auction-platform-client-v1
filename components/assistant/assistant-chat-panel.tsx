@@ -5,7 +5,6 @@ import { ArrowUp, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 import { AssistantAvatar } from './assistant-avatar';
@@ -22,6 +21,24 @@ type AssistantChatPanelProps = {
   isThinking: boolean;
   disabled?: boolean;
 };
+
+function renderHighlightedText(content: string) {
+  const parts = content.split(/(\*\*.*?\*\*)/g);
+
+  return parts.map((part, index) => {
+    const isHighlighted = part.startsWith('**') && part.endsWith('**');
+    if (!isHighlighted) {
+      return <span key={`text-${index}`}>{part}</span>;
+    }
+
+    const text = part.slice(2, -2);
+    return (
+      <strong key={`hl-${index}`} className="font-semibold">
+        {text}
+      </strong>
+    );
+  });
+}
 
 export function AssistantChatPanel({
   open,
@@ -46,10 +63,9 @@ export function AssistantChatPanel({
   return (
     <div
       className={cn(
-        'fixed bottom-4 right-4 z-60 flex max-h-[calc(100vh-1rem)] w-max max-w-[calc(100vw-0.75rem)] items-end gap-1.5 sm:bottom-6 sm:right-6 sm:gap-4'
+        'fixed bottom-4 right-4 z-60 flex max-h-[calc(100vh-1rem)] w-[min(calc(100vw-0.75rem),32rem)] max-w-full min-w-0 items-end justify-end gap-1.5 sm:bottom-6 sm:right-6 sm:gap-4'
       )}
     >
-      {/* Mascot on the left (assistant-4); slightly smaller than the idle FAB */}
       <div className="flex shrink-0 flex-col justify-end">
         <AssistantAvatar
           mood="chatOpen"
@@ -62,7 +78,7 @@ export function AssistantChatPanel({
       <div
         id="assistant-dialog"
         className={cn(
-          'flex max-h-[min(560px,calc(100vh-7rem))] min-h-0 w-[min(calc(100vw-9rem),400px)] min-w-0 shrink flex-col overflow-hidden rounded-2xl border border-border/60 bg-background/85 text-foreground shadow-2xl backdrop-blur-xl dark:bg-slate-950/90 sm:w-[min(400px,calc(100vw-14rem))]'
+          'flex h-[min(560px,calc(100vh-7rem))] max-h-[min(560px,calc(100vh-7rem))] min-h-0 w-full min-w-0 max-w-[min(calc(100vw-9rem),400px)] shrink flex-col overflow-hidden rounded-2xl border border-border/60 bg-background/85 text-foreground shadow-2xl backdrop-blur-xl dark:bg-slate-950/90 sm:max-w-[min(400px,calc(100vw-14rem))]'
         )}
         role="dialog"
         aria-modal="true"
@@ -111,12 +127,12 @@ export function AssistantChatPanel({
             </div>
           )}
 
-          <ScrollArea className="min-h-0 flex-1 px-3 py-3">
-            <div className="flex flex-col gap-3 pr-1">
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-3">
+            <div className="flex min-w-0 flex-col gap-3 pr-1">
               {messages.map((m) => (
                 <ChatMessageBubble key={m.id} role={m.role}>
-                  <span className="whitespace-pre-wrap wrap-break-word">
-                    {m.content}
+                  <span className="wrap-break-word whitespace-pre-wrap">
+                    {renderHighlightedText(m.content)}
                   </span>
                 </ChatMessageBubble>
               ))}
@@ -134,7 +150,7 @@ export function AssistantChatPanel({
               ) : null}
               <div ref={endRef} />
             </div>
-          </ScrollArea>
+          </div>
 
           <footer className="shrink-0 border-t border-border/50 bg-background/80 p-3">
             <form

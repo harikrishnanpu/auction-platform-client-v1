@@ -12,7 +12,7 @@ import {
   type AssistantMood,
 } from './assistant-constants';
 import { AssistantAvatar } from './assistant-avatar';
-import { getMockAssistantReply } from './mock-assistant-reply';
+import { useAssistantChatSocket } from '@/socket/useAssistantChatSocket';
 
 const IDLE_POSE_MS = 2800;
 
@@ -29,11 +29,12 @@ export function UserAssistantChat() {
   const [draft, setDraft] = useState('');
   const [messages, setMessages] = useState<AssistantChatMessage[]>([]);
   const [isThinking, setIsThinking] = useState(false);
-  /** Cycles greeting → ready → thinking when the chat is closed */
   const [idlePoseIndex, setIdlePoseIndex] = useState(0);
 
   const fabMood: AssistantMood =
     ASSISTANT_MOOD_CYCLE[idlePoseIndex % ASSISTANT_MOOD_CYCLE.length];
+
+  const { askAgent, connected } = useAssistantChatSocket();
 
   useEffect(() => {
     if (open) return;
@@ -43,9 +44,14 @@ export function UserAssistantChat() {
     return () => window.clearInterval(id);
   }, [open]);
 
-  const send = useCallback(() => {
+  const send = useCallback(async () => {
     const text = draft.trim();
     if (!text || isThinking) return;
+
+    const lastMessages = messages.slice(-5).map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
 
     const userMsg: AssistantChatMessage = {
       id: nextId(),
@@ -56,17 +62,34 @@ export function UserAssistantChat() {
     setMessages((prev) => [...prev, userMsg]);
     setIsThinking(true);
 
-    const delay = 650 + Math.floor(Math.random() * 400);
-    window.setTimeout(() => {
-      const reply: AssistantChatMessage = {
+    const ack = await askAgent(text, lastMessages);
+
+    setIsThinking(false);
+
+    const response = ack.data?.response;
+    if (!ack.success || response == null) {
+      const err =
+        ack.error ?? 'Could not reach the assistant. Please try again.';
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: nextId(),
+          role: 'assistant',
+          content: err,
+        },
+      ]);
+      return;
+    }
+
+    setMessages((prev) => [
+      ...prev,
+      {
         id: nextId(),
         role: 'assistant',
-        content: getMockAssistantReply(text),
-      };
-      setMessages((prev) => [...prev, reply]);
-      setIsThinking(false);
-    }, delay);
-  }, [draft, isThinking]);
+        content: response,
+      },
+    ]);
+  }, [draft, isThinking, askAgent, messages]);
 
   useEffect(() => {
     if (!open) return;
@@ -87,8 +110,9 @@ export function UserAssistantChat() {
         messages={messages}
         draft={draft}
         onDraftChange={setDraft}
-        onSend={send}
+        onSend={() => void send()}
         isThinking={isThinking}
+        disabled={!connected}
       />
 
       {!open ? (

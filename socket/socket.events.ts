@@ -12,6 +12,7 @@ export const AUCTION_SOCKET_EVENTS = {
   VERIFY_FALLBACK_PUBLIC_AUCTION_PAYMENT:
     'auction:verifyPaymentForPublicFallbackAuction',
   MARK_AUCTION_FAILED: 'auction:failAuction',
+  ASK_AGENT: 'auction:askAgent',
 
   JOINED: 'auction:joined',
   BID_PLACED: 'auction:bidPlaced',
@@ -20,6 +21,7 @@ export const AUCTION_SOCKET_EVENTS = {
   FALLBACK_STATS_UPDATED: 'auction:fallbackStatsUpdated',
   PARTICIPANTS_UPDATED: 'auction:participantsUpdated',
   ERROR: 'auction:error',
+  AGENT_RESPONSE: 'auction:agentResponse',
 
   LIVE_AUCTION_GET_CAPABILITIES: 'auction:liveAuctionGetCapabilities',
   LIVE_AUCTION_CREATE_TRANSPORT: 'auction:liveAuctionCreateTransport',
