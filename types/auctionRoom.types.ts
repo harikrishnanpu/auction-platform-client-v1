@@ -30,13 +30,22 @@ export interface IAuctionSoldSummary {
   soldAmount: number;
 }
 
+export interface IAuctionRoomAutoBidConfig {
+  id: string;
+  strategy: 'SLOW' | 'FASTER' | 'SNIPER';
+  maxBidAmount: number;
+  isActive: boolean;
+}
+
 export interface IAuctionRoomSnapshot {
   auction: IAuctionDto;
   currentBid: IAuctionRoomBid | null;
+  nextBidMin: number | null;
   liveFeed: IAuctionRoomBid[];
   participants?: IAuctionRoomParticipant[];
   fallbackPublicParticipantStats?: IFallbackPublicParticipantStats;
   soldSummary?: IAuctionSoldSummary;
+  autoBidConfig?: IAuctionRoomAutoBidConfig | null;
 }
 
 export interface IAuctionRoomParticipant {
@@ -52,6 +61,7 @@ export interface IAuctionUpdatedPayload {
   endAt?: string;
   status?: string;
   extensionCount?: number;
+  nextBidMin?: number | null;
 }
 
 export interface IAuctionRoomChatMessage {

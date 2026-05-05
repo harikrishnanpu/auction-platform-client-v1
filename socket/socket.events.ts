@@ -2,6 +2,10 @@ export const AUCTION_SOCKET_EVENTS = {
   JOIN: 'auction:join',
   PLACE_BID: 'auction:placeBid',
   ADD_AUCTION_PARTICIPANT: 'auction:addAuctionParticipant',
+  SET_AUTO_BID: 'auction:setAutoBid',
+  DISABLE_AUTO_BID: 'auction:disableAutoBid',
+  AUTO_BID_CONFIG_CREATED: 'auction:autoBidConfigCreated',
+  AUTO_BID_CONFIG_EDITED: 'auction:autoBidConfigEdited',
   SEND_CHAT: 'auction:sendChatMessage',
   PAUSE: 'auction:pause',
   RESUME: 'auction:resume',
@@ -20,6 +24,7 @@ export const AUCTION_SOCKET_EVENTS = {
   UPDATED: 'auction:updated',
   FALLBACK_STATS_UPDATED: 'auction:fallbackStatsUpdated',
   PARTICIPANTS_UPDATED: 'auction:participantsUpdated',
+  AUTO_BID_CONFIG_UPDATED: 'auction:autoBidConfigUpdated',
   ERROR: 'auction:error',
   AGENT_RESPONSE: 'auction:agentResponse',
 

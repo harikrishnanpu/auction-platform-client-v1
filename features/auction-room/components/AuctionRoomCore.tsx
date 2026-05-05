@@ -25,7 +25,6 @@ import { useAuctionRoomSocket } from '../../../socket/useAuctionRoomSocket';
 import {
   auctionParticipationDepositAmount,
   checkIsPlaceBidEligible,
-  computeNextBidMin,
   computeUserBidStanding,
   isLiveAuctionType,
   isSealedAuctionType,
@@ -51,6 +50,7 @@ import { AuctionRoomYourPosition } from './AuctionRoomYourPosition';
 import { FallbackPublicParticipantStatsCard } from './FallbackPublicParticipantStatsCard';
 import useUserStore from '@/store/user.store';
 import { AuctionRoomLiveStreamPanel } from './AuctionRoomLiveStreamPanel';
+import { AuctionRoomAutoBidPanel } from './AuctionRoomAutoBidPanel';
 
 export type AuctionRoomCoreProps = {
   auctionId: string;
@@ -100,6 +100,10 @@ export function AuctionRoomCore({
     verifyFallbackPublicAuctionPayment,
     fallbackPublicParticipantStats,
     soldSummary,
+    autoBidConfig,
+    nextBidMin,
+    setAutoBidConfig,
+    disableAutoBidConfig,
     isHostProducer,
     localStream,
     remoteStreams,
@@ -131,11 +135,6 @@ export function AuctionRoomCore({
     remainingSeconds: cooldownRemainingSeconds,
     start: startBidCooldown,
   } = useBidCooldown();
-
-  const nextBidMin = useMemo(
-    () => computeNextBidMin(auction, currentBid?.amount ?? null),
-    [auction, currentBid?.amount]
-  );
 
   const { auctionStatusStr, endCountdown, isAuctionActive, isAuctionEnded } =
     useAuctionRoomStatus(auction, auctionStatusOverride);
@@ -344,12 +343,12 @@ export function AuctionRoomCore({
         onSubmit={handleReportAuction}
       />
 
-      <div className="relative mx-auto max-w-6xl px-3 pb-10 pt-4 sm:px-4 lg:px-6">
+      <div className="relative mx-auto max-w-[1200px] px-3 pb-10 pt-4 sm:px-4 lg:px-6">
         <div className="space-y-3">
           {error ? <AuctionRoomAlert message={error} /> : null}
 
           <Sheet open={chatOpen} onOpenChange={setChatOpen}>
-            <header className="flex flex-col gap-2 border-b border-border/40 pb-3 sm:flex-row sm:items-start sm:justify-between">
+            <header className="flex flex-col gap-2 border-b border-border/70 pb-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1 space-y-1.5">
                 <h1 className="text-balance text-lg font-semibold tracking-tight text-foreground sm:text-xl">
                   {auction?.title ?? (
@@ -395,8 +394,8 @@ export function AuctionRoomCore({
               </div>
             </header>
 
-            <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-12 xl:gap-5">
-              <div className="min-w-0 space-y-3 xl:col-span-7">
+            <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-12 xl:gap-6">
+              <div className="min-w-0 space-y-4 xl:col-span-7">
                 <AuctionRoomLiveStreamPanel
                   isLiveRoom={isLiveRoom}
                   isHostProducer={isHostProducer}
@@ -414,7 +413,7 @@ export function AuctionRoomCore({
                 <AuctionRoomDetailsSection auction={auction} />
               </div>
 
-              <aside className="min-w-0 space-y-2 xl:sticky xl:top-4 xl:col-span-5 xl:self-start">
+              <aside className="min-w-0 space-y-3 xl:sticky xl:top-4 xl:col-span-5 xl:self-start">
                 {mode === 'USER' ? (
                   <AuctionRoomYourPosition standing={userBidStanding} />
                 ) : null}
@@ -438,10 +437,22 @@ export function AuctionRoomCore({
                   isAuctionEnded={isAuctionEnded}
                   isAuctionActive={isAuctionActive}
                   canInteract={canInteract}
+                  isAutoBidActive={Boolean(autoBidConfig?.isActive)}
                   showPlaceBid={mode === 'USER'}
                   cooldownRemainingSeconds={cooldownRemainingSeconds}
                   onPlaceBid={handlePlaceBid}
                 />
+
+                {mode === 'USER' && !isSealedRoom && !isLiveRoom ? (
+                  <AuctionRoomAutoBidPanel
+                    config={autoBidConfig}
+                    nextBidMin={nextBidMin}
+                    canInteract={canInteract}
+                    isAuctionActive={isAuctionActive}
+                    onEnable={setAutoBidConfig}
+                    onDisable={disableAutoBidConfig}
+                  />
+                ) : null}
 
                 {canControlAuction ? (
                   <AuctionRoomSellerPanel

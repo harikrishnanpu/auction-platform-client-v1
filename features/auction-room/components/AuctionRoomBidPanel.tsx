@@ -42,9 +42,16 @@ type AuctionRoomBidPanelProps = {
   isAuctionEnded: boolean;
   isAuctionActive: boolean;
   canInteract: boolean;
+  isAutoBidActive: boolean;
   showPlaceBid: boolean;
   cooldownRemainingSeconds: number;
-  onPlaceBid: (amount: number) => Promise<{ success: boolean; error?: string }>;
+  onPlaceBid: (
+    amount: number
+  ) => Promise<{
+    success: boolean;
+    error?: string;
+    nextBidMin?: number | null;
+  }>;
 };
 
 export function AuctionRoomBidPanel({
@@ -59,11 +66,13 @@ export function AuctionRoomBidPanel({
   isAuctionEnded,
   isAuctionActive,
   canInteract,
+  isAutoBidActive,
   showPlaceBid,
   cooldownRemainingSeconds,
   onPlaceBid,
 }: AuctionRoomBidPanelProps) {
-  const inputDisabled = !canInteract || isAuctionEnded || !isAuctionActive;
+  const inputDisabled =
+    !canInteract || isAuctionEnded || !isAuctionActive || isAutoBidActive;
 
   const validateAmount = useCallback(
     (value: string) => validatePlaceBidAmount(value, nextBidMin),
@@ -110,11 +119,10 @@ export function AuctionRoomBidPanel({
   const onValidSubmit = async (data: PlaceBidFormValues) => {
     const amount = Number(data.amount.trim());
     const res = await onPlaceBid(amount);
-    if (res.success && auction) {
-      const nextSuggested = amount + auction.minIncrement;
-      setValue('amount', String(nextSuggested), {
+    if (res.success && res.nextBidMin != null) {
+      setValue('amount', String(res.nextBidMin), {
         shouldValidate: true,
-        shouldDirty: true,
+        shouldDirty: false,
       });
     }
   };
@@ -197,6 +205,11 @@ export function AuctionRoomBidPanel({
               <Label htmlFor="place-bid-amount" className="text-[10px]">
                 Your bid
               </Label>
+              {isAutoBidActive ? (
+                <p className="text-[10px] text-muted-foreground">
+                  Disable auto bid to place manual bids.
+                </p>
+              ) : null}
               <Input
                 id="place-bid-amount"
                 inputMode="decimal"

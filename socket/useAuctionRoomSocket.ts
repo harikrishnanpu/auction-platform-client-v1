@@ -18,6 +18,7 @@ import type {
   IAuctionRoomBid,
   IAuctionUpdatedPayload,
   IFallbackPublicParticipantStats,
+  IAuctionRoomAutoBidConfig,
   AuctionJoinedEvent,
   SocketControlAck,
   LiveCapabilitiesAck,
@@ -53,6 +54,7 @@ export function useAuctionRoomSocket({
       ? {
           auction: initialAuction,
           currentBid: null,
+          nextBidMin: initialAuction.startPrice,
           liveFeed: [],
           participants: [],
         }
@@ -376,6 +378,44 @@ export function useAuctionRoomSocket({
     );
 
     socket.on(
+      AUCTION_SOCKET_EVENTS.AUTO_BID_CONFIG_UPDATED,
+      (config: IAuctionRoomAutoBidConfig) => {
+        setSnapshot((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            autoBidConfig: config,
+          };
+        });
+      }
+    );
+    socket.on(
+      AUCTION_SOCKET_EVENTS.AUTO_BID_CONFIG_CREATED,
+      (config: IAuctionRoomAutoBidConfig) => {
+        setSnapshot((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            autoBidConfig: config,
+          };
+        });
+      }
+    );
+
+    socket.on(
+      AUCTION_SOCKET_EVENTS.AUTO_BID_CONFIG_EDITED,
+      (config: IAuctionRoomAutoBidConfig) => {
+        setSnapshot((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            autoBidConfig: config,
+          };
+        });
+      }
+    );
+
+    socket.on(
       AUCTION_SOCKET_EVENTS.CHAT_MESSAGE,
       (msg: IAuctionRoomChatMessage) => {
         setChatMessages((prev) => {
@@ -394,14 +434,30 @@ export function useAuctionRoomSocket({
         const maxLiveFeed = mode === 'ADMIN' ? 10000 : 1000;
 
         const nextLiveFeed = (() => {
-          const exists = prev.liveFeed.some((b) => b.id === bid.id);
-          if (exists) return prev.liveFeed;
-          return [bid, ...prev.liveFeed].slice(0, maxLiveFeed);
+          const merged = prev.liveFeed.some((b) => b.id === bid.id)
+            ? prev.liveFeed
+            : [bid, ...prev.liveFeed];
+          return merged
+            .slice()
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+            )
+            .slice(0, maxLiveFeed);
         })();
+
+        const nextCurrentBid =
+          prev.currentBid == null
+            ? bid
+            : new Date(bid.createdAt).getTime() >=
+                new Date(prev.currentBid.createdAt).getTime()
+              ? bid
+              : prev.currentBid;
 
         return {
           ...prev,
-          currentBid: bid,
+          currentBid: nextCurrentBid,
           liveFeed: nextLiveFeed,
         };
       });
@@ -417,6 +473,10 @@ export function useAuctionRoomSocket({
 
           return {
             ...prev,
+            nextBidMin:
+              payload.nextBidMin !== undefined
+                ? payload.nextBidMin
+                : prev.nextBidMin,
             auction: {
               ...prev.auction,
               ...(payload.endAt ? { endAt: new Date(payload.endAt) } : {}),
@@ -492,7 +552,7 @@ export function useAuctionRoomSocket({
 
   async function placeBid(
     amount: number
-  ): Promise<{ success: boolean; error?: string }> {
+  ): Promise<{ success: boolean; error?: string; nextBidMin?: number | null }> {
     const socket = socketRef.current;
     if (!socket) {
       return { success: false, error: 'Not connected' };
@@ -506,7 +566,57 @@ export function useAuctionRoomSocket({
       if (ack.success === false) {
         return { success: false, error: ack.error ?? 'Bid failed' };
       }
-      return { success: true };
+      const payload = ack.data as
+        | {
+            placedBids?: IAuctionRoomBid[];
+            participants?: IAuctionRoomParticipant[];
+            nextBidMin?: number | null;
+            endAt?: string;
+          }
+        | undefined;
+      const placedBids = payload?.placedBids ?? [];
+      if (placedBids.length > 0) {
+        setSnapshot((prev) => {
+          if (!prev) return prev;
+          const maxLiveFeed = mode === 'ADMIN' ? 10000 : 1000;
+          const placedIds = new Set(placedBids.map((b) => b.id));
+          const orderedPlacedBids = placedBids
+            .slice()
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+            );
+          const merged = [
+            ...orderedPlacedBids,
+            ...prev.liveFeed.filter((b) => !placedIds.has(b.id)),
+          ]
+            .slice()
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+            );
+          return {
+            ...prev,
+            currentBid:
+              orderedPlacedBids[0] ??
+              placedBids[placedBids.length - 1] ??
+              prev.currentBid,
+            liveFeed: merged.slice(0, maxLiveFeed),
+            participants: payload?.participants ?? prev.participants,
+            nextBidMin:
+              payload?.nextBidMin !== undefined
+                ? payload.nextBidMin
+                : prev.nextBidMin,
+            auction: {
+              ...prev.auction,
+              ...(payload?.endAt ? { endAt: new Date(payload.endAt) } : {}),
+            },
+          };
+        });
+      }
+      return { success: true, nextBidMin: payload?.nextBidMin };
     } catch {
       return { success: false, error: 'Bid failed' };
     }
@@ -702,6 +812,56 @@ export function useAuctionRoomSocket({
     }
   }
 
+  async function setAutoBidConfig(input: {
+    strategy: 'SLOW' | 'FASTER' | 'SNIPER';
+    maxBidAmount: number;
+  }): Promise<{ success: boolean; error?: string }> {
+    const socket = socketRef.current;
+    if (!socket) return { success: false, error: 'Not connected' };
+    try {
+      const ack = (await socket.emitWithAck(
+        AUCTION_SOCKET_EVENTS.SET_AUTO_BID,
+        {
+          auctionId,
+          strategy: input.strategy,
+          maxBidAmount: input.maxBidAmount,
+        }
+      )) as SocketControlAck;
+      if (ack.success === false) {
+        return {
+          success: false,
+          error: ack.error ?? 'Could not enable auto bid',
+        };
+      }
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Could not enable auto bid' };
+    }
+  }
+
+  async function disableAutoBidConfig(): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    const socket = socketRef.current;
+    if (!socket) return { success: false, error: 'Not connected' };
+    try {
+      const ack = (await socket.emitWithAck(
+        AUCTION_SOCKET_EVENTS.DISABLE_AUTO_BID,
+        { auctionId }
+      )) as SocketControlAck;
+      if (ack.success === false) {
+        return {
+          success: false,
+          error: ack.error ?? 'Could not disable auto bid',
+        };
+      }
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Could not disable auto bid' };
+    }
+  }
+
   function toggleLocalAudio(): boolean {
     if (!localStream) return false;
     const audioTracks = localStream.getAudioTracks();
@@ -736,6 +896,8 @@ export function useAuctionRoomSocket({
     fallbackPublicParticipantStats:
       snapshot?.fallbackPublicParticipantStats ?? null,
     soldSummary: snapshot?.soldSummary ?? null,
+    autoBidConfig: snapshot?.autoBidConfig ?? null,
+    nextBidMin: snapshot?.nextBidMin ?? null,
     chatMessages,
     agentResponses,
     connectionState,
@@ -761,5 +923,7 @@ export function useAuctionRoomSocket({
     payFallbackPublic,
     declineFallbackPublic,
     verifyFallbackPublicAuctionPayment,
+    setAutoBidConfig,
+    disableAutoBidConfig,
   };
 }
