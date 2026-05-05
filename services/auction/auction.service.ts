@@ -84,7 +84,13 @@ export const auctionService = {
     cookieStore: ReadonlyRequestCookies,
     limit: number
   ): Promise<ApiResponse<IGetBrowseAuctionsResponse>> => {
-    const query = buildQuery({ limit });
+    const query = buildQuery({
+      limit,
+      page: 1,
+      scope: 'ending_soon',
+      sort: 'endAt',
+      order: 'asc',
+    });
     const url = `${buildApiUrl(API_ENDPOINTS.auction.getLatestAuctions)}?${query}`;
 
     return apiFetch<IGetBrowseAuctionsResponse>(

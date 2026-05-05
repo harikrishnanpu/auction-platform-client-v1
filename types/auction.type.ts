@@ -71,6 +71,10 @@ export interface IAuctionDto {
     position?: number;
     assetType?: AuctionAssetType;
   }[];
+  participation?: {
+    outcome: string;
+    label: string;
+  };
 }
 
 export enum AuctionCategoryStatus {

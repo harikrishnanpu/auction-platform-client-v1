@@ -33,13 +33,13 @@ const SORT_OPTIONS: Array<{ label: string; value: string }> = [
   { label: 'Created', value: 'createdAt' },
 ];
 
-const LIMIT_OPTIONS = [4, 5, 8, 10, 20];
+const LIMIT_OPTIONS = [8, 12, 16, 24];
 
 const DEFAULT_FILTERS: IGetBrowseAuctionsFilter = {
   auctionType: 'ALL' as AuctionType | 'ALL',
   categoryId: 'ALL',
   page: 1,
-  limit: 8,
+  limit: 12,
   sort: 'startAt',
   order: 'desc',
   search: '',
@@ -57,6 +57,7 @@ export default function AuctionsPage() {
 
   const totalPages = response?.totalPages ?? 1;
   const currentPage = response?.currentPage ?? filters.page;
+  const totalListings = response?.total ?? 0;
 
   useEffect(() => {
     getAuctionCategoriesForSellerAction()
@@ -108,6 +109,7 @@ export default function AuctionsPage() {
       filters.order !== DEFAULT_FILTERS.order
     )
       count += 1;
+    if (filters.limit !== DEFAULT_FILTERS.limit) count += 1;
     return count;
   }, [filters]);
 
@@ -133,22 +135,29 @@ export default function AuctionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-3 py-4 sm:px-4">
-      <header className="flex flex-col gap-3 border-b border-border/60 pb-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-lg font-semibold tracking-tight text-foreground">
+    <div className="mx-auto max-w-[1200px] px-3 py-6 sm:px-4 sm:py-8">
+      <header className="flex flex-col gap-4 border-b border-border/70 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0 space-y-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Browse
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[28px] sm:leading-tight">
             Auctions
           </h1>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
-            ACTIVE auctions only. Filter, search, and bid in real time.
+          <p className="max-w-xl text-sm text-muted-foreground">
+            Active listings only — search, filter by type and category, and jump
+            into live rooms. Layout follows a white canvas, soft gray panels,
+            and black primary actions.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
-          <Button asChild variant="outline" size="sm" className="h-8 text-xs">
-            <Link href="/home">Home</Link>
-          </Button>
-        </div>
+        <Button
+          asChild
+          size="sm"
+          className="h-9 shrink-0 rounded-[8px] bg-[#111111] text-white hover:bg-[#242424] dark:bg-primary"
+        >
+          <Link href="/home">Back to dashboard</Link>
+        </Button>
       </header>
 
       <UserAuctionFilters
@@ -162,13 +171,24 @@ export default function AuctionsPage() {
         onReset={() => setFilters({ ...DEFAULT_FILTERS, page: 1 })}
       />
 
-      <div className="mt-4">
+      <div className="mt-8">
+        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-sm font-semibold text-foreground">Results</h2>
+          <p className="text-[11px] text-muted-foreground">
+            {loading
+              ? 'Loading…'
+              : `${totalListings} listing${totalListings === 1 ? '' : 's'}`}
+          </p>
+        </div>
+
         {loading ? (
-          <UserAuctionsCardsSkeleton count={Math.min(filters.limit, 8)} />
+          <UserAuctionsCardsSkeleton count={Math.min(filters.limit, 12)} />
         ) : error ? (
-          <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-3 text-center">
-            <p className="text-xs font-medium text-destructive">{error}</p>
-            <p className="mt-1 text-[11px] text-muted-foreground">Try again.</p>
+          <div className="rounded-[12px] border border-destructive/25 bg-destructive/5 p-4 text-center">
+            <p className="text-sm font-medium text-destructive">{error}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Try adjusting filters or refresh.
+            </p>
           </div>
         ) : (
           <UserAuctionsCards
@@ -178,7 +198,7 @@ export default function AuctionsPage() {
             emptyAction={
               <Button
                 variant="outline"
-                className="h-8 text-xs rounded-lg mt-2"
+                className="mt-2 h-9 rounded-[8px] text-xs"
                 asChild
               >
                 <Link href="/auctions">Refresh</Link>
