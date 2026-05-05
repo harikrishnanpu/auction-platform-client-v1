@@ -10,6 +10,7 @@ export interface HomeHeroProps {
   name?: string;
   avatarUrl?: string;
   isVerified?: boolean;
+  planSummary?: string;
   className?: string;
 }
 
@@ -32,6 +33,7 @@ export function HomeHero({
   name,
   avatarUrl,
   isVerified,
+  planSummary,
   className,
 }: HomeHeroProps) {
   const firstName = resolveDisplayName(name);
@@ -84,6 +86,11 @@ export function HomeHero({
                 {firstName}
               </span>
             </h1>
+            {planSummary ? (
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                {planSummary}
+              </p>
+            ) : null}
           </div>
         </div>
 

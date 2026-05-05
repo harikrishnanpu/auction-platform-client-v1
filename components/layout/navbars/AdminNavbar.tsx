@@ -81,6 +81,12 @@ export function AdminNavbar() {
               </Link>
               <Link
                 className="hover:text-[#111111] dark:hover:text-white transition-colors"
+                href="/admin/subscriptions"
+              >
+                Subscriptions
+              </Link>
+              <Link
+                className="hover:text-[#111111] dark:hover:text-white transition-colors"
                 href="#"
               >
                 Financials

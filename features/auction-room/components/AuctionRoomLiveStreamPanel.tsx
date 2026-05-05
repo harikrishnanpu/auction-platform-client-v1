@@ -41,6 +41,10 @@ export function AuctionRoomLiveStreamPanel({
   isHostProducer,
   localStream,
   remoteStreams,
+  isLocalAudioEnabled,
+  isLocalVideoEnabled,
+  onToggleLocalAudio,
+  onToggleLocalVideo,
 }: {
   isLiveRoom: boolean;
   isHostProducer: boolean;
@@ -50,6 +54,10 @@ export function AuctionRoomLiveStreamPanel({
     stream: MediaStream;
     kind: 'audio' | 'video';
   }>;
+  isLocalAudioEnabled: boolean;
+  isLocalVideoEnabled: boolean;
+  onToggleLocalAudio: () => void;
+  onToggleLocalVideo: () => void;
 }) {
   const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
   const [isAudioStarted, setIsAudioStarted] = useState(false);
@@ -111,6 +119,27 @@ export function AuctionRoomLiveStreamPanel({
               ? 'Unmute Audio'
               : 'Mute Audio'}
         </Button>
+      ) : null}
+
+      {isHostProducer && localStream ? (
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={onToggleLocalAudio}
+          >
+            {isLocalAudioEnabled ? 'Turn Mic Off' : 'Turn Mic On'}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={onToggleLocalVideo}
+          >
+            {isLocalVideoEnabled ? 'Turn Camera Off' : 'Turn Camera On'}
+          </Button>
+        </div>
       ) : null}
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">

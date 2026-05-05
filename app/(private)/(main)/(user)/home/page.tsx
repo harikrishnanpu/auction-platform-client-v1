@@ -39,12 +39,18 @@ export default async function HomePage() {
   const featured =
     featuredRes.success && featuredRes.data ? featuredRes.data.auctions : [];
 
+  const planSummary =
+    profile?.subscription != null
+      ? `${profile.subscription.planName} · ${profile.subscription.status}`
+      : undefined;
+
   return (
     <div className="mx-auto max-w-7xl space-y-4 px-3 py-4 sm:px-4 sm:py-5">
       <HomeHero
         name={profile?.name}
         avatarUrl={profile?.avatar_url || undefined}
         isVerified={profile?.isVerified}
+        planSummary={planSummary}
       />
 
       <HomeStats stats={stats} />

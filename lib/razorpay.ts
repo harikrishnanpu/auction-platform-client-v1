@@ -6,16 +6,36 @@ export type RazorpayPaymentResponse = {
   razorpay_signature: string;
 };
 
-export type RazorpayConstructor = new (options: {
+export type RazorpayOptions = {
   key: string;
-  amount: number;
-  currency: string;
-  order_id: string;
+  amount?: number;
+  currency?: string;
+  order_id?: string;
+  subscription_id?: string;
   name: string;
   description: string;
-  handler: (response: RazorpayPaymentResponse) => void;
+  image?: string;
+  callback_url?: string;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  notes?: Record<string, string>;
+  theme?: {
+    color?: string;
+  };
+  handler?: (
+    response: RazorpayPaymentResponse | Record<string, string>
+  ) => void;
   modal?: { ondismiss?: () => void };
-}) => { open: () => void };
+};
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: RazorpayOptions) => { open: () => void };
+  }
+}
 
 export async function loadRazorpayScript(): Promise<boolean> {
   if (typeof window === 'undefined') return false;

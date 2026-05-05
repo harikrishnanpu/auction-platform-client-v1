@@ -1,7 +1,8 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Mail, Phone, MapPin, Shield } from 'lucide-react';
+import Link from 'next/link';
+import { Mail, Phone, MapPin, Shield, Crown } from 'lucide-react';
 import useUserStore from '@/store/user.store';
 import { InfoGroup } from '@/components/ui/info-group/InfoGroup';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,16 @@ export function ProfileView() {
                     value={user.address || 'Not provided'}
                     fullWidth
                   />
+                  <InfoGroup
+                    icon={<Crown className="h-4 w-4" />}
+                    label="Subscription"
+                    value={
+                      user.subscription
+                        ? `${user.subscription.planName} (${user.subscription.status})`
+                        : 'No subscription on file'
+                    }
+                    fullWidth
+                  />
                 </div>
               </div>
 
@@ -73,6 +84,11 @@ export function ProfileView() {
                     className="w-full cursor-pointer"
                   >
                     Change Password
+                  </Button>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/profile/subscription">
+                      Manage subscription
+                    </Link>
                   </Button>
                 </div>
 
