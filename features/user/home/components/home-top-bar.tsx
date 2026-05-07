@@ -95,16 +95,15 @@ export function HomeTopBar({
           </div>
 
           <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end">
-            <Button
+            {/* <Button
               asChild
               size="sm"
-              className="h-9 rounded-[8px] bg-[#111111] text-white hover:bg-[#242424] dark:bg-primary dark:hover:bg-primary/90"
-            >
+className="h-9 rounded-[8px] text-black hover:bg-gray-200 dark:bg-primary dark:text-white dark:hover:bg-primary/90"            >
               <Link href="/auctions">
                 Browse auctions
                 <ArrowRight className="size-3.5" />
               </Link>
-            </Button>
+            </Button> */}
             <Button
               asChild
               variant="outline"
