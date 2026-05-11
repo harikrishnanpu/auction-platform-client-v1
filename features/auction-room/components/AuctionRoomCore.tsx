@@ -14,7 +14,8 @@ import {
 } from '@/utils/auction-utils';
 
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 import { useAuctionRoomChatSheet } from '../hooks/useAuctionRoomChatSheet';
 import { useAuctionRoomHostControls } from '../hooks/useAuctionRoomHostControls';
@@ -25,11 +26,11 @@ import { useAuctionRoomSocket } from '../../../socket/useAuctionRoomSocket';
 import {
   auctionParticipationDepositAmount,
   checkIsPlaceBidEligible,
-  computeNextBidMin,
   computeUserBidStanding,
   isLiveAuctionType,
   isSealedAuctionType,
 } from '../utils/auction-room.utils';
+import { buildAuctionRoomMetricTiles } from '../utils/auction-room-metrics';
 
 import { AuctionRoomAlert } from './AuctionRoomAlert';
 import { AuctionRoomBidPanel } from './AuctionRoomBidPanel';
@@ -51,6 +52,17 @@ import { AuctionRoomYourPosition } from './AuctionRoomYourPosition';
 import { FallbackPublicParticipantStatsCard } from './FallbackPublicParticipantStatsCard';
 import useUserStore from '@/store/user.store';
 import { AuctionRoomLiveStreamPanel } from './AuctionRoomLiveStreamPanel';
+import { AuctionRoomAutoBidPanel } from './AuctionRoomAutoBidPanel';
+import {
+  AuctionRoomAnalyticsCharts,
+  AuctionRoomAnalyticsKpis,
+} from './AuctionRoomCenterAnalytics';
+import {
+  AuctionRoomHeaderChatTrigger,
+  AuctionRoomListingHeader,
+} from './AuctionRoomListingHeader';
+
+import { arCardCanvas, arContainer, arPage } from '../lib/auction-room-design';
 
 export type AuctionRoomCoreProps = {
   auctionId: string;
@@ -100,9 +112,19 @@ export function AuctionRoomCore({
     verifyFallbackPublicAuctionPayment,
     fallbackPublicParticipantStats,
     soldSummary,
+    autoBidConfig,
+    nextBidMin,
+    setAutoBidConfig,
+    disableAutoBidConfig,
+    metrics: roomMetrics,
+    charts: roomCharts,
     isHostProducer,
     localStream,
     remoteStreams,
+    isLocalAudioEnabled,
+    isLocalVideoEnabled,
+    toggleLocalAudio,
+    toggleLocalVideo,
   } = useAuctionRoomSocket({
     auctionId,
     mode,
@@ -127,11 +149,6 @@ export function AuctionRoomCore({
     remainingSeconds: cooldownRemainingSeconds,
     start: startBidCooldown,
   } = useBidCooldown();
-
-  const nextBidMin = useMemo(
-    () => computeNextBidMin(auction, currentBid?.amount ?? null),
-    [auction, currentBid?.amount]
-  );
 
   const { auctionStatusStr, endCountdown, isAuctionActive, isAuctionEnded } =
     useAuctionRoomStatus(auction, auctionStatusOverride);
@@ -163,6 +180,31 @@ export function AuctionRoomCore({
       isSealedRoom,
       currentBid?.userId,
       liveFeed,
+    ]
+  );
+
+  const metricTiles = useMemo(
+    () =>
+      buildAuctionRoomMetricTiles({
+        auction,
+        liveFeed,
+        participantsCount: participants.length,
+        metrics: roomMetrics,
+        extensionsUsed: roomMetrics?.extensionsUsed ?? 0,
+        endCountdown,
+        isAuctionEnded,
+        isAuctionActive,
+        currentBidAmount: currentBid?.amount ?? null,
+      }),
+    [
+      auction,
+      liveFeed,
+      participants.length,
+      roomMetrics,
+      endCountdown,
+      isAuctionEnded,
+      isAuctionActive,
+      currentBid?.amount,
     ]
   );
 
@@ -256,6 +298,13 @@ export function AuctionRoomCore({
     ? auctionStatusLabel(auctionStatusStr)
     : '—';
 
+  const listingSectionLabel =
+    mode === 'USER'
+      ? 'Auction room'
+      : mode === 'SELLER'
+        ? 'Your listing'
+        : 'Admin · Auction';
+
   const handleReportParticipant = useCallback(
     async (input: {
       targetedUserId: string;
@@ -308,7 +357,7 @@ export function AuctionRoomCore({
   );
 
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className={arPage('relative')}>
       <AuctionPlaceBidTermsModal
         open={placeBidTermsOpen}
         onOpenChange={setPlaceBidTermsOpen}
@@ -340,64 +389,57 @@ export function AuctionRoomCore({
         onSubmit={handleReportAuction}
       />
 
-      <div className="relative mx-auto max-w-6xl px-3 pb-10 pt-4 sm:px-4 lg:px-6">
-        <div className="space-y-3">
-          {error ? <AuctionRoomAlert message={error} /> : null}
+      <div className={arContainer('relative')}>
+        <Sheet open={chatOpen} onOpenChange={setChatOpen}>
+          <div className="space-y-3">
+            {error ? (
+              <AuctionRoomAlert
+                message={error}
+                className={arCardCanvas('px-2.5 py-2')}
+              />
+            ) : null}
 
-          <Sheet open={chatOpen} onOpenChange={setChatOpen}>
-            <header className="flex flex-col gap-2 border-b border-border/40 pb-3 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0 flex-1 space-y-1.5">
-                <h1 className="text-balance text-lg font-semibold tracking-tight text-foreground sm:text-xl">
-                  {auction?.title ?? (
-                    <span className="text-muted-foreground">
-                      Loading auction…
-                    </span>
-                  )}
-                </h1>
-                <AuctionRoomMetaBadges
-                  categoryName={categoryName}
-                  typeLabel={typeLabel}
-                  statusLabel={statusLabel}
-                  connectionSlot={
-                    <AuctionRoomConnectionStatus
-                      state={connectionState}
-                      roomReady={roomReady}
+            {/* Left: listing header + media + details · Middle: stream + analytics + bid + activity · Right: tools */}
+            <div className="flex flex-col gap-3 xl:grid xl:grid-cols-[minmax(0,240px)_minmax(0,1fr)_minmax(0,252px)] xl:items-start xl:gap-4">
+              <div className="order-1 flex min-w-0 flex-col gap-2">
+                <AuctionRoomListingHeader
+                  sectionLabel={listingSectionLabel}
+                  title={
+                    auction?.title ?? (
+                      <span className="text-muted-foreground">
+                        Loading auction…
+                      </span>
+                    )
+                  }
+                  badgesSlot={
+                    <AuctionRoomMetaBadges
+                      categoryName={categoryName}
+                      typeLabel={typeLabel}
+                      statusLabel={statusLabel}
+                      connectionSlot={
+                        <AuctionRoomConnectionStatus
+                          state={connectionState}
+                          roomReady={roomReady}
+                        />
+                      }
                     />
                   }
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                {canReportAuction ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-7 shrink-0 rounded-full border-border/60 px-3 text-[11px] font-medium"
-                    onClick={() => setReportAuctionOpen(true)}
-                  >
-                    Report Auction
-                  </Button>
-                ) : null}
-                <SheetTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-7 shrink-0 rounded-full border-border/60 px-3 text-[11px] font-medium"
-                  >
-                    Chat
-                  </Button>
-                </SheetTrigger>
-              </div>
-            </header>
-
-            <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-12 xl:gap-5">
-              <div className="min-w-0 space-y-3 xl:col-span-7">
-                <AuctionRoomLiveStreamPanel
-                  isLiveRoom={isLiveRoom}
-                  isHostProducer={isHostProducer}
-                  localStream={localStream}
-                  remoteStreams={remoteStreams}
+                  actionsSlot={
+                    <>
+                      {canReportAuction ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-9 shrink-0 rounded-[8px] px-3 text-xs font-semibold"
+                          onClick={() => setReportAuctionOpen(true)}
+                        >
+                          Report
+                        </Button>
+                      ) : null}
+                      <AuctionRoomHeaderChatTrigger />
+                    </>
+                  }
                 />
                 <AuctionRoomMediaGallery
                   key={auction?.id ?? auctionId}
@@ -406,18 +448,21 @@ export function AuctionRoomCore({
                 <AuctionRoomDetailsSection auction={auction} />
               </div>
 
-              <aside className="min-w-0 space-y-2 xl:sticky xl:top-4 xl:col-span-5 xl:self-start">
-                {mode === 'USER' ? (
-                  <AuctionRoomYourPosition standing={userBidStanding} />
-                ) : null}
-
-                {auctionStatusStr === 'SOLD' && soldSummaryDisplay ? (
-                  <AuctionSoldSummaryCard
-                    winnerUserName={soldSummaryDisplay.winnerUserName}
-                    soldAmount={soldSummaryDisplay.soldAmount}
-                  />
-                ) : null}
-
+              <div className="order-2 flex min-w-0 flex-col gap-2">
+                <AuctionRoomLiveStreamPanel
+                  isLiveRoom={isLiveRoom}
+                  isHostProducer={isHostProducer}
+                  localStream={localStream}
+                  remoteStreams={remoteStreams}
+                  isLocalAudioEnabled={isLocalAudioEnabled}
+                  isLocalVideoEnabled={isLocalVideoEnabled}
+                  onToggleLocalAudio={toggleLocalAudio}
+                  onToggleLocalVideo={toggleLocalVideo}
+                />
+                <AuctionRoomAnalyticsKpis
+                  metricTiles={metricTiles}
+                  showLivePulse={isAuctionActive && !isAuctionEnded}
+                />
                 <AuctionRoomBidPanel
                   auctionId={auctionId}
                   auction={auction}
@@ -430,10 +475,57 @@ export function AuctionRoomCore({
                   isAuctionEnded={isAuctionEnded}
                   isAuctionActive={isAuctionActive}
                   canInteract={canInteract}
+                  isAutoBidActive={Boolean(autoBidConfig?.isActive)}
                   showPlaceBid={mode === 'USER'}
                   cooldownRemainingSeconds={cooldownRemainingSeconds}
                   onPlaceBid={handlePlaceBid}
                 />
+                <AuctionRoomAnalyticsCharts
+                  auction={auction}
+                  liveFeed={liveFeed}
+                  charts={roomCharts}
+                  currentBidAmount={currentBid?.amount ?? null}
+                  isAuctionEnded={isAuctionEnded}
+                />
+                <AuctionRoomLiveBidFeed
+                  bids={liveFeed}
+                  mode={mode}
+                  isSealedRoom={isSealedRoom}
+                  isLiveRoom={isLiveRoom}
+                  currentUserId={user?.id}
+                />
+              </div>
+
+              <aside className="order-3 z-10 flex min-w-0 flex-col gap-2 xl:sticky xl:top-16 xl:self-start">
+                {mode === 'USER' ? (
+                  <AuctionRoomYourPosition standing={userBidStanding} />
+                ) : null}
+
+                {auctionStatusStr === 'SOLD' && soldSummaryDisplay ? (
+                  <AuctionSoldSummaryCard
+                    winnerUserName={soldSummaryDisplay.winnerUserName}
+                    soldAmount={soldSummaryDisplay.soldAmount}
+                  />
+                ) : null}
+
+                <AuctionRoomParticipantsPanel
+                  participants={participants}
+                  currentUserId={user?.id}
+                  canReport={canReportParticipants}
+                  onReportUser={handleReportParticipant}
+                />
+
+                {mode === 'USER' && !isSealedRoom ? (
+                  <AuctionRoomAutoBidPanel
+                    config={autoBidConfig}
+                    nextBidMin={nextBidMin}
+                    canInteract={canInteract}
+                    isAuctionActive={isAuctionActive}
+                    isLiveAuction={isLiveRoom}
+                    onEnable={setAutoBidConfig}
+                    onDisable={disableAutoBidConfig}
+                  />
+                ) : null}
 
                 {canControlAuction ? (
                   <AuctionRoomSellerPanel
@@ -483,44 +575,27 @@ export function AuctionRoomCore({
                     onDecline={declineFallbackPublic}
                   />
                 ) : null}
-
-                <AuctionRoomLiveBidFeed
-                  bids={liveFeed}
-                  mode={mode}
-                  isSealedRoom={isSealedRoom}
-                  isLiveRoom={isLiveRoom}
-                  currentUserId={user?.id}
-                />
-
-                <AuctionRoomParticipantsPanel
-                  participants={participants}
-                  currentUserId={user?.id}
-                  canReport={canReportParticipants}
-                  onReportUser={handleReportParticipant}
-                />
               </aside>
             </div>
+          </div>
 
-            <SheetContent
-              side="left"
-              className="flex h-full w-[min(100vw,20rem)] flex-col gap-0 border-border/40 p-0 sm:max-w-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <div className="flex h-full min-h-0 flex-1 flex-col">
-                <AuctionRoomChatPanel
-                  messages={chatMessages}
-                  draft={chatDraft}
-                  onDraftChange={setChatDraft}
-                  onSend={sendChat}
-                  canInteract={canInteract}
-                  dense
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+          <SheetContent
+            side="left"
+            className="flex h-full w-[min(100vw,22rem)] flex-col gap-0 border-border/80 bg-card p-0 sm:max-w-md"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <AuctionRoomChatPanel
+              messages={chatMessages}
+              draft={chatDraft}
+              onDraftChange={setChatDraft}
+              onSend={sendChat}
+              canInteract={canInteract}
+              dense
+            />
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   );

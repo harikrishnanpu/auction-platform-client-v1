@@ -8,7 +8,6 @@ type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'error';
 
 type AuctionRoomConnectionStatusProps = {
   state: ConnectionState;
-  /** When false and connected, room snapshot has not arrived yet. */
   roomReady?: boolean;
   className?: string;
 };
@@ -21,14 +20,14 @@ export function AuctionRoomConnectionStatus({
   const syncing = state === 'connected' && !roomReady;
   const label =
     state === 'connecting'
-      ? 'Connecting…'
+      ? 'Connecting'
       : syncing
-        ? 'Syncing…'
+        ? 'Syncing'
         : state === 'connected'
-          ? 'Live'
+          ? 'Connected'
           : state === 'disconnected'
             ? 'Offline'
-            : 'Connection issue';
+            : 'Issue';
 
   const Icon =
     state === 'connected' && roomReady
@@ -40,23 +39,21 @@ export function AuctionRoomConnectionStatus({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-0.5 rounded-full border px-1.5 py-px text-[8px] font-semibold uppercase tracking-wide',
+        'inline-flex items-center gap-1.5 rounded-full border border-[#e5e7eb] bg-white px-3 py-1.5 text-[13px] font-semibold text-[#374151] shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
+        'dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-300',
         state === 'connected' &&
           roomReady &&
-          'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
+          'border-emerald-500/30 bg-emerald-500/[0.07] text-[#059669]',
         (state === 'connecting' || syncing) &&
-          'border-border bg-muted/50 text-muted-foreground',
-        state === 'connected' &&
-          !roomReady &&
-          'border-sky-500/25 bg-sky-500/10 text-sky-800 dark:text-sky-200',
+          'border-[#e5e7eb] bg-[#f8f9fa] text-[#6b7280]',
         (state === 'disconnected' || state === 'error') &&
-          'border-destructive/25 bg-destructive/10 text-destructive',
+          'border-red-200 bg-red-50 text-[#b91c1c] dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300',
         className
       )}
     >
       <Icon
         className={cn(
-          'size-2.5',
+          'size-3.5 shrink-0',
           (state === 'connecting' || syncing) && 'animate-spin'
         )}
         aria-hidden

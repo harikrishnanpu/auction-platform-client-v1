@@ -5,16 +5,16 @@ import { useState } from 'react';
 import { Ban, Pause, Play, Square } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 import { AuctionIrreversibleConfirmDialog } from './AuctionIrreversibleConfirmDialog';
 import { AuctionRoomAlert } from './AuctionRoomAlert';
+
+import {
+  arBtnSecondary,
+  arCardCanvas,
+  arType,
+} from '../lib/auction-room-design';
 
 type ActionBusy = 'pause' | 'resume' | 'end' | null;
 
@@ -43,28 +43,29 @@ export function AuctionRoomSellerPanel({
 
   return (
     <>
-      <Card className="rounded-xl border-border/50 bg-card/30 shadow-none">
-        <CardHeader className="space-y-0 px-2.5 py-1.5 pb-0">
-          <CardTitle className="text-[10px] font-semibold">Control</CardTitle>
-          <CardDescription className="text-[9px] leading-snug">
-            Pause, resume, or end.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-1 px-2.5 pb-2 pt-1">
+      <section className={arCardCanvas('overflow-hidden')}>
+        <div className="border-b border-border/80 px-2.5 py-2">
+          <h3 className={arType.cardTitle}>Host controls</h3>
+          <p className={arType.cardDesc}>Pause, resume, or end.</p>
+        </div>
+        <div className="space-y-2 px-2.5 py-2">
           {actionError ? (
             <AuctionRoomAlert message={actionError} variant="destructive" />
           ) : null}
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             {auctionStatus === 'ACTIVE' ? (
               <Button
                 variant="outline"
-                size="sm"
-                className="h-7 justify-start gap-1 rounded-md text-[11px]"
+                type="button"
+                className={cn(
+                  arBtnSecondary('h-11 justify-start gap-2 px-4'),
+                  'border-border/80'
+                )}
                 onClick={onPause}
                 disabled={!canInteract || isAuctionEnded || actionBusy != null}
               >
-                <Pause className="size-3.5" />
+                <Pause className="size-4" />
                 Pause auction
               </Button>
             ) : null}
@@ -72,57 +73,57 @@ export function AuctionRoomSellerPanel({
             {auctionStatus === 'PAUSED' ? (
               <Button
                 variant="outline"
-                size="sm"
-                className="h-7 justify-start gap-1 rounded-md text-[11px]"
+                type="button"
+                className={cn(
+                  arBtnSecondary('h-11 justify-start gap-2 px-4'),
+                  'border-border/80'
+                )}
                 onClick={onResume}
                 disabled={!canInteract || isAuctionEnded || actionBusy != null}
               >
-                <Play className="size-3.5" />
+                <Play className="size-4" />
                 Resume auction
               </Button>
             ) : null}
 
             {auctionStatus === 'ACTIVE' || auctionStatus === 'PAUSED' ? (
               <Button
+                type="button"
                 variant="destructive"
-                size="sm"
-                className="h-7 justify-start gap-1 rounded-md text-[11px]"
+                className="h-11 justify-start gap-2 rounded-[8px] px-4 text-sm font-semibold"
                 onClick={() => setEndConfirmOpen(true)}
                 disabled={!canInteract || isAuctionEnded || actionBusy != null}
               >
-                <Square className="size-3.5" />
+                <Square className="size-4" />
                 End auction
               </Button>
             ) : null}
 
             {auctionStatus === 'SOLD' ? (
-              <p className="flex items-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-2 py-1.5 text-[10px] leading-snug text-muted-foreground">
-                <Ban className="size-3 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                Sold — winner payment completed. No further actions are
-                available.
+              <p className="flex gap-2 rounded-[8px] border border-emerald-500/25 bg-emerald-500/[0.06] px-3 py-2 text-xs leading-relaxed text-emerald-800 dark:text-emerald-100">
+                <Ban className="mt-0.5 size-4 shrink-0" />
+                Sold — settlement complete. No further host actions.
               </p>
             ) : null}
 
             {auctionStatus === 'ENDED' ? (
-              <p className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2 py-1.5 text-[10px] leading-snug text-muted-foreground">
-                <Ban className="size-3 shrink-0" />
-                This auction has ended. No further actions are available.
+              <p className="flex gap-2 rounded-[8px] border border-border/80 bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                <Ban className="mt-0.5 size-3.5 shrink-0 text-foreground/70" />
+                This auction has ended. Controls are closed.
               </p>
             ) : null}
 
             {auctionStatus === 'FALLBACK_ENDED' ? (
-              <p className="flex items-center gap-1.5 rounded-lg border border-amber-500/25 bg-amber-500/5 px-2 py-1.5 text-[10px] leading-snug text-muted-foreground">
-                <Ban className="size-3 shrink-0 text-amber-600 dark:text-amber-400" />
-                Fallback period ended. Use the actions below to notify bidders
-                or close the auction.
+              <p className="flex gap-2 rounded-[12px] border border-amber-400/30 bg-amber-500/[0.07] px-4 py-3 text-sm text-amber-950 dark:text-amber-100">
+                <Ban className="mt-0.5 size-4 shrink-0" />
+                Fallback window ended — use the panel below for bidder outreach.
               </p>
             ) : null}
 
             {auctionStatus === 'FALLBACK_PUBLIC_NOTIFICATION' ? (
-              <p className="flex items-center gap-1.5 rounded-lg border border-sky-500/25 bg-sky-500/5 px-2 py-1.5 text-[10px] leading-snug text-muted-foreground">
-                <Ban className="size-3 shrink-0 text-sky-600 dark:text-sky-400" />
-                Bidders can pay the start price or decline. No pause or end
-                controls here.
+              <p className="flex gap-2 rounded-[12px] border border-sky-400/30 bg-sky-500/[0.07] px-4 py-3 text-sm text-sky-950 dark:text-sky-100">
+                <Ban className="mt-0.5 size-4 shrink-0" />
+                Public-offer phase — bidders pay or decline. No pause/end here.
               </p>
             ) : null}
 
@@ -133,14 +134,16 @@ export function AuctionRoomSellerPanel({
             auctionStatus !== 'SOLD' &&
             auctionStatus !== 'FALLBACK_ENDED' &&
             auctionStatus !== 'FALLBACK_PUBLIC_NOTIFICATION' ? (
-              <p className="text-[10px] text-muted-foreground">
-                Controls are not available for status:{' '}
-                <span className="font-mono">{auctionStatus}</span>
+              <p className="text-xs text-muted-foreground">
+                Controls unavailable for status{' '}
+                <span className="font-mono text-foreground">
+                  {auctionStatus}
+                </span>
               </p>
             ) : null}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <AuctionIrreversibleConfirmDialog
         open={endConfirmOpen}

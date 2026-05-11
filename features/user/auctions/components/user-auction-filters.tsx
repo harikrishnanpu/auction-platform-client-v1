@@ -1,10 +1,8 @@
 'use client';
 
-import { Funnel, RotateCcw, Sparkles } from 'lucide-react';
+import { Funnel, RotateCcw, SlidersHorizontal } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SearchInput } from '@/components/ui/search-input';
 import {
   Select,
@@ -13,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 import type {
   AuctionCategory,
   IGetBrowseAuctionsFilter,
@@ -48,81 +47,104 @@ export function UserAuctionFilters({
   onReset,
 }: UserAuctionFiltersProps) {
   return (
-    <Card className="mt-4 overflow-hidden rounded-2xl border-border/70 bg-linear-to-b from-card to-card/70 shadow-[0_14px_32px_-28px_rgba(15,23,42,0.9)]">
-      <CardHeader className="border-b border-border/60 bg-muted/20 pb-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Funnel className="size-4 text-blue-500" />
-              Refine auctions
-            </CardTitle>
-            <p className="text-[11px] text-muted-foreground">
-              Filter active auctions by type, category, sorting, and search
-              terms.
-            </p>
+    <section
+      className={cn(
+        'mt-6 rounded-[12px] border border-border/80 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.05)]'
+      )}
+    >
+      <div className="border-b border-border/70 bg-[#f8f9fa] px-4 py-3 dark:bg-muted/30">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="flex size-9 items-center justify-center rounded-[8px] bg-card shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+              <SlidersHorizontal
+                className="size-4 text-foreground/80"
+                aria-hidden
+              />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold tracking-tight text-foreground">
+                Search & filters
+              </h2>
+              <p className="text-[11px] text-muted-foreground">
+                Narrow active listings — monochrome UI per design system.
+              </p>
+            </div>
           </div>
-          {activeFilterCount > 0 ? (
-            <Badge
-              variant="secondary"
-              className="gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-[11px] text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+          <div className="flex items-center gap-2">
+            {activeFilterCount > 0 ? (
+              <span className="rounded-full border border-border/80 bg-[#f5f5f5] px-2.5 py-1 text-[11px] font-medium text-foreground dark:bg-muted">
+                {activeFilterCount} filter{activeFilterCount === 1 ? '' : 's'}
+              </span>
+            ) : null}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-[8px] border-border/80 text-xs"
+              onClick={onReset}
             >
-              <Sparkles className="size-3" />
-              {activeFilterCount} active
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="rounded-full text-[11px]">
-              Default
-            </Badge>
-          )}
+              <RotateCcw className="size-3.5" />
+              Reset
+            </Button>
+          </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="pt-4">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-          <div className="md:col-span-2 xl:col-span-3">
-            <SearchInput
-              placeholder="Search title..."
-              value={filters.search}
-              onChange={(v) => onUpdate('search', v)}
-              debounceMs={500}
-            />
+      <div className="space-y-4 p-4">
+        <div>
+          <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">
+            Search
+          </label>
+          <SearchInput
+            placeholder="Search by title…"
+            value={filters.search}
+            onChange={(v) => onUpdate('search', v)}
+            debounceMs={500}
+            className="h-10 rounded-[8px] border-border/80 bg-background"
+          />
+        </div>
+
+        <div className="rounded-[12px] bg-[#f5f5f5] p-2 dark:bg-muted/40">
+          <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Auction type
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {auctionTypeOptions.map((o) => {
+              const active = String(filters.auctionType) === o.value;
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() =>
+                    onUpdate(
+                      'auctionType',
+                      o.value as IGetBrowseAuctionsFilter['auctionType']
+                    )
+                  }
+                  className={cn(
+                    'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
+                    active
+                      ? 'bg-card text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.06)]'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {o.label}
+                </button>
+              );
+            })}
           </div>
+        </div>
 
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <label className="mb-1 block text-[11px] text-muted-foreground">
-              Auction type
-            </label>
-            <Select
-              value={String(filters.auctionType)}
-              onValueChange={(v: string) =>
-                onUpdate(
-                  'auctionType',
-                  v as IGetBrowseAuctionsFilter['auctionType']
-                )
-              }
-            >
-              <SelectTrigger className="h-10 rounded-xl text-sm">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {auctionTypeOptions.map((o) => (
-                  <SelectItem key={o.value} value={o.value}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-[11px] text-muted-foreground">
+            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">
               Category
             </label>
             <Select
               value={filters.categoryId}
               onValueChange={(v: string) => onUpdate('categoryId', v)}
             >
-              <SelectTrigger className="h-10 rounded-xl text-sm">
+              <SelectTrigger className="h-10 rounded-[8px] border-border/80 bg-background text-sm">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -137,14 +159,14 @@ export function UserAuctionFilters({
           </div>
 
           <div>
-            <label className="mb-1 block text-[11px] text-muted-foreground">
-              Sort
+            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">
+              Sort by
             </label>
             <Select
               value={filters.sort}
               onValueChange={(v: string) => onUpdate('sort', v)}
             >
-              <SelectTrigger className="h-10 rounded-xl text-sm">
+              <SelectTrigger className="h-10 rounded-[8px] border-border/80 bg-background text-sm">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent>
@@ -158,7 +180,7 @@ export function UserAuctionFilters({
           </div>
 
           <div>
-            <label className="mb-1 block text-[11px] text-muted-foreground">
+            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">
               Order
             </label>
             <Select
@@ -167,7 +189,7 @@ export function UserAuctionFilters({
                 onUpdate('order', v as IGetBrowseAuctionsFilter['order'])
               }
             >
-              <SelectTrigger className="h-10 rounded-xl text-sm">
+              <SelectTrigger className="h-10 rounded-[8px] border-border/80 bg-background text-sm">
                 <SelectValue placeholder="Order" />
               </SelectTrigger>
               <SelectContent>
@@ -178,20 +200,20 @@ export function UserAuctionFilters({
           </div>
 
           <div>
-            <label className="mb-1 block text-[11px] text-muted-foreground">
-              Items per page
+            <label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">
+              Per page
             </label>
             <Select
               value={String(filters.limit)}
               onValueChange={(v: string) => onUpdate('limit', Number(v))}
             >
-              <SelectTrigger className="h-10 rounded-xl text-sm">
+              <SelectTrigger className="h-10 rounded-[8px] border-border/80 bg-background text-sm">
                 <SelectValue placeholder="Limit" />
               </SelectTrigger>
               <SelectContent>
                 {limitOptions.map((n) => (
                   <SelectItem key={n} value={String(n)}>
-                    {n} per page
+                    {n} listings
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -199,21 +221,11 @@ export function UserAuctionFilters({
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 p-2.5">
-          <p className="text-[11px] text-muted-foreground">
-            Showing results for current filters.
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 rounded-lg text-xs"
-            onClick={onReset}
-          >
-            <RotateCcw className="size-3.5" />
-            Reset
-          </Button>
+        <div className="flex items-center gap-2 rounded-[8px] border border-dashed border-border/70 bg-[#f8f9fa] px-3 py-2 text-[11px] text-muted-foreground dark:bg-muted/20">
+          <Funnel className="size-3.5 shrink-0 opacity-70" aria-hidden />
+          Active auctions only. Adjust filters to refresh results.
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

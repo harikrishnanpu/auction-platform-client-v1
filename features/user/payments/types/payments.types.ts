@@ -13,6 +13,8 @@ export interface IUserPaymentItem {
   currency: string;
   status: PaymentStatus;
   paymentId: string;
+  referenceId?: string;
+  paymentFor?: string;
   phase: PaymentPhase;
   dueAt: string;
   createdAt: string;

@@ -3,6 +3,10 @@ import { apiFetch } from '@/lib/fetch';
 import { ZodChangePasswordFormValues } from '@/features/user/profile/schemes/changeprofilePassword.schema';
 import { ZodEditProfileFormValues } from '@/features/user/profile/schemes/editProfile.schema';
 import { ApiResponse } from '@/types/api.index';
+import type {
+  IPublicSubscriptionPlan,
+  IStartSubscriptionCheckoutResult,
+} from '@/types/user-subscription.type';
 import { IUser } from '@/types/user.type';
 import { getErrorMessage } from '@/utils/get-app-error';
 import { cookies } from 'next/headers';
@@ -99,6 +103,31 @@ export const profileService = {
     } catch (error: unknown) {
       return { success: false, data: null, error: getErrorMessage(error) };
     }
+  },
+
+  getSubscriptionPlans: async (): Promise<
+    ApiResponse<IPublicSubscriptionPlan[]>
+  > => {
+    const cookieStorage = await cookies();
+    return await apiFetch<IPublicSubscriptionPlan[]>(
+      buildApiUrl(API_ENDPOINTS.user.subscriptionPlans),
+      { method: 'GET' },
+      cookieStorage
+    );
+  },
+
+  startSubscriptionCheckout: async (
+    subscriptionPlanId: string
+  ): Promise<ApiResponse<IStartSubscriptionCheckoutResult>> => {
+    const cookieStorage = await cookies();
+    return await apiFetch<IStartSubscriptionCheckoutResult>(
+      buildApiUrl(API_ENDPOINTS.user.subscriptionsStart),
+      {
+        method: 'POST',
+        body: JSON.stringify({ subscriptionPlanId }),
+      },
+      cookieStorage
+    );
   },
 
   updateAvatar: async (

@@ -29,7 +29,7 @@ export const useChangePassword = () => {
 
   const onSubmit = async (data: ZodChangePasswordValues) => {
     const response = await changePasswordAction({
-      newPassword: data.newPassword,
+      ...data,
       token: token as string,
     });
 

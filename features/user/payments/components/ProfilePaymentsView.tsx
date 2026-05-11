@@ -72,22 +72,30 @@ export function ProfilePaymentsView() {
         order_id: order.orderId,
         name: 'Auction Payment',
         description: `Payment request ${order.paymentId}`,
-        handler: async (response: RazorpayPaymentResponse) => {
-          try {
-            await verifyPayment({
-              paymentId: order.paymentId,
-              orderId: response.razorpay_order_id,
-              gatewayPaymentId: response.razorpay_payment_id,
-              signature: response.razorpay_signature,
-            });
-            showModal('Payment Successful', 'Payment completed successfully.');
-            await refresh();
-          } catch {
-            showModal(
-              'Verification Failed',
-              'Payment captured but verification failed. Please contact support.'
-            );
-          }
+        handler: (
+          response: Record<string, string> | RazorpayPaymentResponse
+        ) => {
+          void (async () => {
+            const r = response as RazorpayPaymentResponse;
+            try {
+              await verifyPayment({
+                paymentId: order.paymentId,
+                orderId: r.razorpay_order_id,
+                gatewayPaymentId: r.razorpay_payment_id,
+                signature: r.razorpay_signature,
+              });
+              showModal(
+                'Payment Successful',
+                'Payment completed successfully.'
+              );
+              await refresh();
+            } catch {
+              showModal(
+                'Verification Failed',
+                'Payment captured but verification failed. Please contact support.'
+              );
+            }
+          })();
         },
         modal: {
           ondismiss: () => {

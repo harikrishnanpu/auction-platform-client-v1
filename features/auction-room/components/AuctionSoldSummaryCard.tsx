@@ -2,7 +2,7 @@
 
 import { Trophy } from 'lucide-react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { arCardCanvas, arType } from '../lib/auction-room-design';
 
 type AuctionSoldSummaryCardProps = {
   winnerUserName: string;
@@ -22,25 +22,32 @@ export function AuctionSoldSummaryCard({
   soldAmount,
 }: AuctionSoldSummaryCardProps) {
   return (
-    <Card className="rounded-xl border-emerald-500/25 bg-emerald-500/[0.04] shadow-none">
-      <CardHeader className="space-y-0 px-2.5 py-1.5 pb-0">
-        <CardTitle className="flex items-center gap-1 text-[10px] font-semibold">
-          <Trophy className="size-2.5 text-emerald-600 dark:text-emerald-400" />
-          Sold
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-0.5 px-2.5 pb-2 pt-1 text-[9px] leading-snug">
-        <p>
-          <span className="text-muted-foreground">Winner · </span>
-          <span className="font-medium text-foreground">{winnerUserName}</span>
-        </p>
-        <p>
-          <span className="text-muted-foreground">Price · </span>
-          <span className="font-semibold tabular-nums text-foreground">
-            {formatSoldAmount(soldAmount)}
-          </span>
-        </p>
-      </CardContent>
-    </Card>
+    <section
+      className={arCardCanvas(
+        'border-emerald-500/25 bg-emerald-500/[0.06] dark:bg-emerald-950/25'
+      )}
+    >
+      <div className="flex items-start gap-2 px-3 py-3">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-emerald-600 text-white">
+          <Trophy className="size-4" aria-hidden />
+        </span>
+        <div className="min-w-0 space-y-1.5">
+          <div>
+            <p className={arType.sectionLabel}>Sold</p>
+            <p className="mt-0.5 text-sm font-semibold tracking-tight text-emerald-800 dark:text-emerald-200">
+              <span className="tabular-nums">
+                {formatSoldAmount(soldAmount)}
+              </span>
+            </p>
+          </div>
+          <p className="text-[11px] leading-snug text-foreground/90">
+            <span className="font-medium text-foreground">
+              {winnerUserName}
+            </span>{' '}
+            wins
+          </p>
+        </div>
+      </div>
+    </section>
   );
 }

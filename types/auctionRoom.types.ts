@@ -24,19 +24,51 @@ export interface IFallbackPublicParticipantStats {
   rejected: number;
 }
 
+export interface IAuctionRoomMetrics {
+  totalBidCount?: number | null;
+  uniqueBidderCount?: number | null;
+  watchingNow?: number | null;
+  listingViews?: number | null;
+  savesCount?: number | null;
+  extensionsUsed?: number | null;
+  bidsInLastHour?: number | null;
+}
+
+export interface IAuctionBidVolumeBucket {
+  key: string;
+  label: string;
+  count: number;
+}
+
+export interface IAuctionRoomCharts {
+  bidVolumeBuckets: IAuctionBidVolumeBucket[];
+  peakBid: { amount: number; createdAt: string } | null;
+}
+
 export interface IAuctionSoldSummary {
   winnerUserName: string;
   winnerUserId: string;
   soldAmount: number;
 }
 
+export interface IAuctionRoomAutoBidConfig {
+  id: string;
+  strategy: 'SLOW' | 'FASTER' | 'SNIPER';
+  maxBidAmount: number;
+  isActive: boolean;
+}
+
 export interface IAuctionRoomSnapshot {
   auction: IAuctionDto;
   currentBid: IAuctionRoomBid | null;
+  nextBidMin: number | null;
   liveFeed: IAuctionRoomBid[];
   participants?: IAuctionRoomParticipant[];
   fallbackPublicParticipantStats?: IFallbackPublicParticipantStats;
   soldSummary?: IAuctionSoldSummary;
+  autoBidConfig?: IAuctionRoomAutoBidConfig | null;
+  metrics?: IAuctionRoomMetrics | null;
+  charts?: IAuctionRoomCharts | null;
 }
 
 export interface IAuctionRoomParticipant {
@@ -52,6 +84,7 @@ export interface IAuctionUpdatedPayload {
   endAt?: string;
   status?: string;
   extensionCount?: number;
+  nextBidMin?: number | null;
 }
 
 export interface IAuctionRoomChatMessage {

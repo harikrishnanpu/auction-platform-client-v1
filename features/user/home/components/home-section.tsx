@@ -29,7 +29,7 @@ export function HomeSection({
         <div className="min-w-0">
           <h2 className="flex items-center gap-1.5 text-base font-semibold tracking-tight text-foreground">
             {Icon ? (
-              <Icon className="size-4 text-blue-600 dark:text-blue-400" />
+              <Icon className="size-4 text-muted-foreground" aria-hidden />
             ) : null}
             {title}
           </h2>
@@ -44,9 +44,9 @@ export function HomeSection({
           <Link
             href={linkHref}
             className={cn(
-              'inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1',
-              'text-[11px] font-semibold text-blue-600 transition-colors',
-              'hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/50'
+              'inline-flex shrink-0 items-center gap-1 rounded-[8px] px-2 py-1',
+              'text-[11px] font-semibold text-foreground transition-colors',
+              'hover:bg-muted/80'
             )}
           >
             {linkLabel}

@@ -1,21 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { Users } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { formatAuctionDateTime } from '@/utils/auction-utils';
 import { cn } from '@/lib/utils';
+
 import { AuctionFraudReportDialog } from './AuctionFraudReportDialog';
 
 import type { IAuctionRoomParticipant } from '@/types/auctionRoom.types';
+
+import {
+  arBtnSecondary,
+  arCardCanvas,
+  arType,
+} from '../lib/auction-room-design';
 
 type AuctionRoomParticipantsPanelProps = {
   participants: IAuctionRoomParticipant[];
@@ -31,6 +29,7 @@ type AuctionRoomParticipantsPanelProps = {
   className?: string;
 };
 
+/** Matches `HomeParticipatedRail`: compact title + list rows for narrow right column */
 export function AuctionRoomParticipantsPanel({
   participants,
   currentUserId,
@@ -43,84 +42,81 @@ export function AuctionRoomParticipantsPanel({
   );
 
   return (
-    <Card
-      className={cn(
-        'rounded-xl border-border/50 bg-card/30 py-0 shadow-none',
-        className
-      )}
-    >
-      <CardHeader className="gap-0 space-y-0 border-b border-border/35 px-2.5 py-2">
-        <div className="flex items-center gap-1.5">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Users className="size-3.5" aria-hidden />
-          </span>
-          <div className="min-w-0">
-            <CardTitle className="text-xs font-semibold tracking-tight">
-              Participants
-            </CardTitle>
-            <CardDescription className="text-[10px] leading-snug">
-              {participants.length === 1
-                ? '1 bidder'
-                : `${participants.length} bidders`}
-            </CardDescription>
-          </div>
+    <section className={cn(arCardCanvas('overflow-hidden p-3'), className)}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="text-sm font-semibold tracking-tight text-foreground">
+            Participants
+          </h2>
+          <p className={cn(arType.cardDesc, 'mt-0.5')}>
+            {participants.length === 1
+              ? '1 registered bidder'
+              : `${participants.length} registered bidders`}
+          </p>
         </div>
-      </CardHeader>
-      <CardContent className="px-2.5 pb-2 pt-1.5">
-        {participants.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border/50 bg-muted/15 px-2 py-3 text-center text-[10px] text-muted-foreground">
-            No participants yet.
-          </div>
-        ) : (
-          <ul className="max-h-36 space-y-1 overflow-y-auto pr-0.5 [scrollbar-width:thin]">
-            {participants.map((p) => {
-              const isYou = p.userId === currentUserId;
-              return (
-                <li
-                  key={p.id}
-                  className={cn(
-                    'flex items-center justify-between gap-1.5 rounded-lg border border-border/40 bg-background/40 px-2 py-1',
-                    isYou && 'border-primary/30 bg-primary/4'
-                  )}
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[11px] font-medium text-foreground">
+      </div>
+
+      {participants.length === 0 ? (
+        <div className="mt-3 flex flex-col items-center rounded-[8px] border border-dashed border-border/80 bg-muted/30 px-3 py-4 text-center dark:bg-muted/20">
+          <p className="text-xs font-medium text-foreground">
+            No participants yet
+          </p>
+          <p className="mt-1 max-w-56 text-[11px] text-muted-foreground">
+            Bidders appear here once they join.
+          </p>
+        </div>
+      ) : (
+        <ul className="mt-3 max-h-52 space-y-1.5 overflow-y-auto pr-0.5 [scrollbar-width:thin]">
+          {participants.map((p) => {
+            const isYou = p.userId === currentUserId;
+            return (
+              <li
+                key={p.id}
+                className={cn(
+                  'rounded-[8px] border border-border/80 px-2 py-1.5 transition-colors',
+                  isYou ? 'border-primary/25 bg-muted/40' : 'bg-card'
+                )}
+              >
+                <div className="flex flex-col gap-1">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-medium leading-snug text-foreground">
                       {p.userName}
                       {isYou ? (
-                        <span className="ml-1 text-[9px] font-normal text-muted-foreground">
+                        <span className="ml-1 font-normal text-muted-foreground">
                           (you)
                         </span>
                       ) : null}
                     </p>
-                    <p className="text-[9px] text-muted-foreground">
-                      {formatAuctionDateTime(p.joinedAt)}
+                    <p className="text-[10px] text-muted-foreground">
+                      Joined {formatAuctionDateTime(p.joinedAt)}
                     </p>
                   </div>
-                  {currentUserId && p.userId === currentUserId ? null : (
-                    <div className="flex items-center gap-1">
-                      <Badge
-                        variant="outline"
-                        className="h-4 shrink-0 rounded px-1 text-[8px] font-normal"
+                  <div className="flex flex-wrap items-center justify-between gap-1">
+                    {currentUserId && p.userId === currentUserId ? null : (
+                      <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                        …{p.userId.slice(-4)}
+                      </span>
+                    )}
+                    {currentUserId &&
+                    p.userId === currentUserId ? null : canReport ? (
+                      <button
+                        type="button"
+                        className={arBtnSecondary(
+                          'h-7 shrink-0 px-2 text-[11px] font-semibold'
+                        )}
+                        onClick={() => setReportTargetUserId(p.userId)}
                       >
-                        ID …{p.userId.slice(-4)}
-                      </Badge>
-                      {canReport ? (
-                        <button
-                          type="button"
-                          className="h-4 rounded border px-1 text-[8px]"
-                          onClick={() => setReportTargetUserId(p.userId)}
-                        >
-                          Report
-                        </button>
-                      ) : null}
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </CardContent>
+                        Report
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
       <AuctionFraudReportDialog
         open={Boolean(reportTargetUserId)}
         onOpenChange={(open) => {
@@ -142,6 +138,6 @@ export function AuctionRoomParticipantsPanel({
           });
         }}
       />
-    </Card>
+    </section>
   );
 }

@@ -10,6 +10,7 @@ import {
   Gavel,
   Wallet,
   CreditCard,
+  Crown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
@@ -49,6 +50,7 @@ export default function ProfileLayout({
     { href: '/profile/my-auctions', label: 'My Auctions', icon: Gavel },
     { href: '/profile/wallet', label: 'Wallet', icon: Wallet },
     { href: '/profile/payments', label: 'Payments', icon: CreditCard },
+    { href: '/profile/subscription', label: 'Subscription', icon: Crown },
   ];
 
   return (

@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   changePasswordSchema,
-  ChangePasswordFormValues,
+  ZodChangePasswordFormValues,
 } from '@/features/user/profile/schemes/changeprofilePassword.schema';
 import { UserInfo as User, AuthProvider } from '@/types/user.type';
 import { toast } from 'sonner';
@@ -45,7 +45,7 @@ export function ChangePasswordModal({
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<ChangePasswordFormValues>({
+  } = useForm<ZodChangePasswordFormValues>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
       otp: '',
@@ -76,7 +76,7 @@ export function ChangePasswordModal({
     }
   };
 
-  const onSubmit = async (data: ChangePasswordFormValues) => {
+  const onSubmit = async (data: ZodChangePasswordFormValues) => {
     try {
       const response = await changeProfilePasswordAction(data);
 

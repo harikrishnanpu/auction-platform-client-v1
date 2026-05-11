@@ -9,6 +9,7 @@ type AuctionRoomStatTileProps = {
   children: ReactNode;
   icon?: ReactNode;
   className?: string;
+  title?: string;
 };
 
 export function AuctionRoomStatTile({
@@ -16,27 +17,27 @@ export function AuctionRoomStatTile({
   children,
   icon,
   className,
+  title,
 }: AuctionRoomStatTileProps) {
   return (
     <div
+      title={title}
       className={cn(
-        'rounded-lg border border-border/35 bg-background/30 px-1.5 py-1 transition-colors hover:bg-background/50',
+        'rounded-[8px] border border-border/80 bg-card p-2 shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
         className
       )}
     >
-      <div className="flex items-center justify-between gap-1">
-        <p className="text-[8px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="flex items-start justify-between gap-1.5">
+        <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </p>
         {icon ? (
-          <span className="text-muted-foreground/60 [&_svg]:size-2.5">
+          <span className="text-muted-foreground opacity-70 [&_svg]:size-3">
             {icon}
           </span>
         ) : null}
       </div>
-      <div className="mt-px text-[11px] font-medium leading-tight text-foreground">
-        {children}
-      </div>
+      <div className="mt-1 leading-tight text-foreground">{children}</div>
     </div>
   );
 }

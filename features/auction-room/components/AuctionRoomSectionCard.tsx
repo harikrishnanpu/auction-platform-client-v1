@@ -2,13 +2,7 @@
 
 import type { ReactNode } from 'react';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { arCardCanvas, arType } from '../lib/auction-room-design';
 
 type AuctionRoomSectionCardProps = {
   title: string;
@@ -22,18 +16,16 @@ export function AuctionRoomSectionCard({
   children,
 }: AuctionRoomSectionCardProps) {
   return (
-    <Card className="rounded-xl border-border/50 bg-card/30 shadow-none">
-      <CardHeader className="space-y-0 px-2.5 py-1.5 pb-0">
-        <CardTitle className="text-[10px] font-semibold">{title}</CardTitle>
+    <section className={arCardCanvas('overflow-hidden')}>
+      <div className="border-b border-border/80 px-2.5 py-2">
+        <h3 className={arType.cardTitle}>{title}</h3>
         {description ? (
-          <CardDescription className="text-[9px] leading-snug">
+          <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
             {description}
-          </CardDescription>
+          </p>
         ) : null}
-      </CardHeader>
-      <CardContent className="space-y-1.5 px-2.5 pb-2 pt-1">
-        {children}
-      </CardContent>
-    </Card>
+      </div>
+      <div className="space-y-2 px-2.5 py-2">{children}</div>
+    </section>
   );
 }
