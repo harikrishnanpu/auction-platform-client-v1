@@ -8,13 +8,8 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+
+import { arCardCanvas, arType } from '../lib/auction-room-design';
 
 const chartConfig = {
   pending: {
@@ -52,16 +47,14 @@ export function FallbackPublicParticipantStatsCard({
   ];
 
   return (
-    <Card className="rounded-xl border-border/50 bg-card/30 shadow-none">
-      <CardHeader className="px-2.5 py-1.5 pb-0">
-        <CardTitle className="text-[10px] font-semibold">
-          Fallback public responses
-        </CardTitle>
-        <CardDescription className="text-[9px] leading-tight">
-          Pending vs rejected participants (public offer round).
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="px-2.5 pb-2 pt-1">
+    <section className={arCardCanvas('overflow-hidden')}>
+      <div className="border-b border-border/80 px-2.5 py-2">
+        <h3 className={arType.cardTitle}>Fallback responses</h3>
+        <p className={arType.cardDesc}>
+          Pending vs rejected bidders in the public-offer round.
+        </p>
+      </div>
+      <div className="px-2.5 py-2">
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[140px] w-full"
@@ -69,7 +62,7 @@ export function FallbackPublicParticipantStatsCard({
           <BarChart
             accessibilityLayer
             data={data}
-            margin={{ left: 4, right: 4, top: 4, bottom: 4 }}
+            margin={{ left: 8, right: 8, top: 8, bottom: 8 }}
           >
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis
@@ -77,24 +70,24 @@ export function FallbackPublicParticipantStatsCard({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              fontSize={11}
+              fontSize={12}
             />
             <YAxis
               allowDecimals={false}
-              width={32}
+              width={36}
               tickLine={false}
               axisLine={false}
-              fontSize={11}
+              fontSize={12}
             />
             <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-            <Bar dataKey="count" radius={4} maxBarSize={48}>
+            <Bar dataKey="count" radius={6} maxBarSize={52}>
               {data.map((d) => (
                 <Cell key={d.key} fill={d.fill} />
               ))}
             </Bar>
           </BarChart>
         </ChartContainer>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

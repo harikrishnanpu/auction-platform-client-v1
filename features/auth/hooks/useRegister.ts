@@ -23,7 +23,7 @@ export const useRegister = () => {
     defaultValues: {
       firstName: 'one',
       lastName: 'ine',
-      email: 'one1@gmail.com',
+      email: 'one2@gmail.com',
       phone: '9876543210',
       address: 'sample address',
       password: 'Hari123',

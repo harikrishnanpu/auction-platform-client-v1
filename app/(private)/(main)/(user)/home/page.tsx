@@ -6,6 +6,7 @@ import { getUserHomeStatsAction } from '@/actions/user/home.actions';
 import { getMyAuctionsAction } from '@/actions/user/my-auctions.actions';
 import { HomeAuctionsGrid } from '@/features/user/home/components/home-auctions-grid';
 import { HomeEmptyState } from '@/features/user/home/components/home-empty-state';
+import { HomeFooterLinksCard } from '@/features/user/home/components/home-footer-links-card';
 import { HomeLeftRail } from '@/features/user/home/components/home-left-rail';
 import { HomeParticipatedCards } from '@/features/user/home/components/home-participated-cards';
 import { HomeParticipatedRail } from '@/features/user/home/components/home-participated-rail';
@@ -81,11 +82,13 @@ export default async function HomePage() {
   return (
     <div className="mx-auto max-w-[1200px] px-3 py-4 sm:px-4 sm:py-6">
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[220px_1fr_280px] lg:items-start lg:gap-8">
-        <div className="order-2 lg:order-1 lg:sticky lg:top-20">
-          <HomeLeftRail />
+        <div className="order-2 lg:order-1">
+          <div className="lg:fixed lg:top-26 lg:z-20 lg:w-[220px] lg:max-h-[calc(100dvh-4rem)] lg:overflow-hidden lg:left-[max(1rem,calc((100vw-1200px)/2+1rem))]">
+            <HomeLeftRail />
+          </div>
         </div>
 
-        <div className="order-1 min-w-0 space-y-6 lg:order-2 lg:col-span-1">
+        <div className="order-1 min-w-0 space-y-6 lg:order-2">
           <HomeTopBar
             name={profile?.name}
             avatarUrl={profile?.avatar_url || undefined}
@@ -140,13 +143,15 @@ export default async function HomePage() {
           </HomeSection>
         </div>
 
-        <div className="order-3 flex min-w-0 flex-col gap-4 lg:sticky lg:top-20">
+        {/* Right: same window scroll; sticky under header so feed can scroll past after rail ends */}
+        <div className="order-3 flex min-w-0 flex-col gap-4 z-10 lg:sticky lg:top-16 lg:self-start">
           <HomeParticipatedRail
             auctions={railAuctions}
             totalJoined={participatedTotal}
           />
           <HomeWishlistPlaceholder />
           <HomePremiumCta />
+          <HomeFooterLinksCard />
         </div>
       </div>
     </div>

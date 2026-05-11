@@ -55,7 +55,9 @@ export function WalletPageView() {
       order_id: order.orderId,
       name: 'Wallet Top-up',
       description: 'Add funds to your wallet',
-      handler: async (response: RazorpayPaymentResponse) => {
+      handler: async (
+        response: RazorpayPaymentResponse | Record<string, string>
+      ) => {
         try {
           await verifyTopup({
             orderId: response.razorpay_order_id,

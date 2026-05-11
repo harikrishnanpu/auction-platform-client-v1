@@ -19,6 +19,7 @@ export const AUCTION_SOCKET_EVENTS = {
   ASK_AGENT: 'auction:askAgent',
 
   JOINED: 'auction:joined',
+  STATS_UPDATED: 'auction:statsUpdated',
   BID_PLACED: 'auction:bidPlaced',
   CHAT_MESSAGE: 'auction:chatMessage',
   UPDATED: 'auction:updated',

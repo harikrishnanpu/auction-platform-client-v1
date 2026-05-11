@@ -11,9 +11,12 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import { formatAuctionDateTime } from '@/utils/auction-utils';
 
 import type { IAuctionRoomChatMessage } from '@/types/auctionRoom.types';
+
+import { arBtnPrimary, arCardCanvas, arType } from '../lib/auction-room-design';
 
 type AuctionRoomChatPanelProps = {
   messages: IAuctionRoomChatMessage[];
@@ -37,42 +40,42 @@ export function AuctionRoomChatPanel({
 
   if (dense) {
     return (
-      <div className="flex h-full min-h-0 flex-col bg-background pt-10">
-        <header className="shrink-0 border-b border-border/60 px-3 py-2 pr-10">
-          <CardTitle className="text-xs font-semibold">Room chat</CardTitle>
-          <CardDescription className="text-[10px] leading-tight">
-            Visible to everyone in this auction
-          </CardDescription>
+      <div className="flex h-full min-h-0 flex-col bg-white dark:bg-zinc-950">
+        <header className="shrink-0 border-b border-[#e5e7eb] px-5 pb-4 pt-14 dark:border-white/10">
+          <p className={arType.sectionLabel}>Room chat</p>
+          <p className="mt-1 text-sm leading-relaxed text-[#374151] dark:text-zinc-300">
+            Visible to everyone in this auction.
+          </p>
         </header>
 
         <div
-          className="min-h-0 flex-1 overflow-y-auto px-2 py-2"
+          className="min-h-0 flex-1 overflow-y-auto px-4 py-4"
           role="log"
           aria-live="polite"
         >
           {messages.length === 0 ? (
-            <p className="py-6 text-center text-[11px] text-muted-foreground">
+            <p className="py-10 text-center text-sm text-[#6b7280]">
               No messages yet.
             </p>
           ) : (
-            <ul className="space-y-1.5">
+            <ul className="space-y-3">
               {messages.map((m) => (
                 <li
                   key={m.id}
-                  className="rounded-md border border-border/40 bg-muted/15 px-2 py-1.5"
+                  className="rounded-[12px] border border-[#e5e7eb] bg-[#f8f9fa] px-4 py-3 dark:border-white/10 dark:bg-zinc-900/80"
                 >
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-[11px] font-semibold text-foreground">
+                    <span className="text-sm font-semibold text-[#111111] dark:text-zinc-50">
                       {m.userName}
                     </span>
                     <time
-                      className="shrink-0 text-[9px] text-muted-foreground"
+                      className="shrink-0 text-[13px] text-[#6b7280]"
                       dateTime={m.createdAt}
                     >
                       {formatAuctionDateTime(m.createdAt)}
                     </time>
                   </div>
-                  <p className="mt-0.5 whitespace-pre-wrap text-[11px] leading-snug text-foreground">
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#374151] dark:text-zinc-300">
                     {m.message}
                   </p>
                 </li>
@@ -81,15 +84,15 @@ export function AuctionRoomChatPanel({
           )}
         </div>
 
-        <footer className="shrink-0 border-t border-border/60 bg-background/95 p-2 backdrop-blur supports-backdrop-filter:bg-background/80">
+        <footer className="shrink-0 border-t border-[#e5e7eb] bg-white p-4 dark:border-white/10 dark:bg-zinc-950">
           <div className="flex gap-2">
             <Textarea
               value={draft}
               onChange={(e) => onDraftChange(e.target.value)}
-              placeholder="Message…"
+              placeholder="Write a message…"
               disabled={!canInteract}
               rows={2}
-              className="min-h-[52px] flex-1 resize-none rounded-md border-border/80 py-2 text-xs focus-visible:ring-primary/30"
+              className="min-h-[52px] flex-1 resize-none rounded-[8px] border-[#e5e7eb] py-2.5 text-sm focus-visible:ring-[#111111]/15 dark:border-white/15"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -99,13 +102,12 @@ export function AuctionRoomChatPanel({
             />
             <Button
               type="button"
-              variant="default"
-              className="h-[52px] w-10 shrink-0 rounded-md px-0"
+              className={arBtnPrimary('h-[52px] w-12 min-w-12 shrink-0 px-0')}
               onClick={onSend}
               disabled={!canSend}
               aria-label="Send message"
             >
-              <SendHorizontal className="size-4" />
+              <SendHorizontal className="size-5" />
             </Button>
           </div>
         </footer>
@@ -114,74 +116,80 @@ export function AuctionRoomChatPanel({
   }
 
   return (
-    <Card className="rounded-2xl border-border/60 bg-card/70 shadow-sm">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-semibold">Room chat</CardTitle>
-        <CardDescription>
-          Messages are visible to everyone in this auction
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div
-          className="max-h-56 space-y-2 overflow-y-auto rounded-xl border border-border/60 bg-muted/15 p-3"
-          role="log"
-          aria-live="polite"
-        >
-          {messages.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">
-              Say hello — the conversation starts here.
-            </p>
-          ) : (
-            messages.map((m) => (
-              <article
-                key={m.id}
-                className="rounded-lg border border-border/40 bg-background/70 px-3 py-2 shadow-sm"
-              >
-                <header className="flex items-baseline justify-between gap-2">
-                  <span className="text-xs font-semibold text-foreground">
-                    {m.userName}
-                  </span>
-                  <time
-                    className="text-[10px] text-muted-foreground"
-                    dateTime={m.createdAt}
-                  >
-                    {formatAuctionDateTime(m.createdAt)}
-                  </time>
-                </header>
-                <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                  {m.message}
-                </p>
-              </article>
-            ))
-          )}
-        </div>
-
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-          <Textarea
-            value={draft}
-            onChange={(e) => onDraftChange(e.target.value)}
-            placeholder="Write a message…"
-            disabled={!canInteract}
-            className="min-h-[88px] flex-1 resize-none rounded-xl border-border/80 focus-visible:ring-primary/30"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                if (canSend) onSend();
-              }
-            }}
-          />
-          <Button
-            type="button"
-            size="lg"
-            className="h-11 shrink-0 rounded-xl sm:h-[88px] sm:w-14 sm:px-0"
-            onClick={onSend}
-            disabled={!canSend}
-            aria-label="Send message"
+    <section className={arCardCanvas('overflow-hidden')}>
+      <Card className="border-0 bg-transparent shadow-none">
+        <CardHeader className="border-b border-[#e5e7eb] px-6 py-5 dark:border-white/10">
+          <CardTitle className={arType.cardTitle}>Room chat</CardTitle>
+          <CardDescription className="text-sm text-[#6b7280]">
+            Messages are visible to everyone in this auction.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5 px-6 py-6">
+          <div
+            className="max-h-64 space-y-3 overflow-y-auto rounded-[12px] border border-[#e5e7eb] bg-[#f8f9fa] p-4 dark:border-white/10 dark:bg-zinc-900/50"
+            role="log"
+            aria-live="polite"
           >
-            <SendHorizontal className="size-5" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+            {messages.length === 0 ? (
+              <p className="py-8 text-center text-sm text-[#6b7280]">
+                Say hello — the conversation starts here.
+              </p>
+            ) : (
+              messages.map((m) => (
+                <article
+                  key={m.id}
+                  className="rounded-[12px] border border-[#e5e7eb] bg-white px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:border-white/10 dark:bg-zinc-950"
+                >
+                  <header className="flex items-baseline justify-between gap-2">
+                    <span className="text-sm font-semibold text-[#111111] dark:text-zinc-50">
+                      {m.userName}
+                    </span>
+                    <time
+                      className="text-[13px] text-[#6b7280]"
+                      dateTime={m.createdAt}
+                    >
+                      {formatAuctionDateTime(m.createdAt)}
+                    </time>
+                  </header>
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#374151] dark:text-zinc-300">
+                    {m.message}
+                  </p>
+                </article>
+              ))
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <Textarea
+              value={draft}
+              onChange={(e) => onDraftChange(e.target.value)}
+              placeholder="Write a message…"
+              disabled={!canInteract}
+              className="min-h-[88px] flex-1 resize-none rounded-[12px] border-[#e5e7eb] focus-visible:ring-[#111111]/15 dark:border-white/15"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  if (canSend) onSend();
+                }
+              }}
+            />
+            <Button
+              type="button"
+              className={cn(
+                arBtnPrimary(
+                  'h-11 shrink-0 px-6 sm:h-[88px] sm:w-14 sm:px-0 sm:py-0'
+                ),
+                'sm:min-h-[88px]'
+              )}
+              onClick={onSend}
+              disabled={!canSend}
+              aria-label="Send message"
+            >
+              <SendHorizontal className="size-5" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </section>
   );
 }

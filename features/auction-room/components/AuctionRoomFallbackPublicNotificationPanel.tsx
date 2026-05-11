@@ -114,31 +114,37 @@ export function AuctionRoomFallbackPublicNotificationPanel({
         description: auctionTitle?.trim()
           ? `${auctionTitle.trim()} · fallback`
           : `Auction ${auctionId.slice(0, 8)}…`,
-        handler: async (response: RazorpayPaymentResponse) => {
-          try {
-            const verify = verifyFallbackPublicAuctionPayment;
-            if (!verify) {
-              toast.error('Verification handler not available');
-              return;
+        handler: (
+          response: Record<string, string> | RazorpayPaymentResponse
+        ) => {
+          void (async () => {
+            const r = response as RazorpayPaymentResponse;
+            try {
+              const verify = verifyFallbackPublicAuctionPayment;
+              if (!verify) {
+                toast.error('Verification handler not available');
+                return;
+              }
+              const ver = await verify({
+                paymentId: order.paymentId,
+                orderId: r.razorpay_order_id,
+                gatewayPaymentId: r.razorpay_payment_id,
+                signature: r.razorpay_signature,
+              });
+              if (!ver.success) {
+                toast.error(ver.error ?? 'Payment verification failed');
+                return;
+              }
+              toast.success('Payment completed');
+              const next = (ver.data as { status?: string } | undefined)
+                ?.status;
+              if (next) onStatusUpdated?.(next);
+            } catch {
+              toast.error(
+                'Payment was taken, but verification failed. Contact support if needed.'
+              );
             }
-            const ver = await verify({
-              paymentId: order.paymentId,
-              orderId: response.razorpay_order_id,
-              gatewayPaymentId: response.razorpay_payment_id,
-              signature: response.razorpay_signature,
-            });
-            if (!ver.success) {
-              toast.error(ver.error ?? 'Payment verification failed');
-              return;
-            }
-            toast.success('Payment completed');
-            const next = (ver.data as { status?: string } | undefined)?.status;
-            if (next) onStatusUpdated?.(next);
-          } catch {
-            toast.error(
-              'Payment was taken, but verification failed. Contact support if needed.'
-            );
-          }
+          })();
         },
         modal: {
           ondismiss: () => toast.message('Payment cancelled'),

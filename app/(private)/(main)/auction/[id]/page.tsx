@@ -29,9 +29,5 @@ export default async function AuctionDetailPage({
     }
   }
 
-  return (
-    <div className="bg-background">
-      <UserAuctionRoomView auctionId={id} />
-    </div>
-  );
+  return <UserAuctionRoomView auctionId={id} />;
 }

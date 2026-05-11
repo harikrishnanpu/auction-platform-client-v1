@@ -8,9 +8,5 @@ export default async function AdminAuctionRoomPage({
   const resolvedParams = await params;
   const id = resolvedParams.id;
 
-  return (
-    <div className="min-h-[60vh] bg-background">
-      <AdminAuctionRoomView auctionId={id} />
-    </div>
-  );
+  return <AdminAuctionRoomView auctionId={id} />;
 }

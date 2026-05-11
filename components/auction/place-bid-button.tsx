@@ -24,7 +24,7 @@ export function PlaceBidButton({
 }: PlaceBidButtonProps) {
   const inCooldown = cooldownRemainingSeconds > 0;
   const label = pending
-    ? 'Placing…'
+    ? 'Placing bid…'
     : inCooldown
       ? `Wait ${cooldownRemainingSeconds}s`
       : 'Place bid';
@@ -32,16 +32,16 @@ export function PlaceBidButton({
   return (
     <Button
       type={type}
-      size="sm"
+      variant="default"
       onClick={type === 'button' ? onClick : undefined}
       disabled={disabled || inCooldown || pending}
       className={cn(
-        'h-9 w-full gap-2 rounded-md text-xs font-semibold shadow-sm',
+        'h-9 gap-2 rounded-[8px] text-sm font-semibold shadow-none',
         className
       )}
     >
       {pending ? (
-        <Loader2 className="size-3.5 shrink-0 animate-spin" aria-hidden />
+        <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden />
       ) : null}
       {label}
     </Button>

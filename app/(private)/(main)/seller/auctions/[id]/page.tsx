@@ -18,9 +18,5 @@ export default async function SellerAuctionsDetailPage({
     redirect(`/seller/auction/${id}/draft`);
   }
 
-  return (
-    <div className="bg-background">
-      <SellerAuctionRoomView auctionId={id} initialAuction={res.data} />
-    </div>
-  );
+  return <SellerAuctionRoomView auctionId={id} initialAuction={res.data} />;
 }

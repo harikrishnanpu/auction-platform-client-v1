@@ -25,6 +25,7 @@ export function useSubscriptionCheckout() {
         return;
       }
 
+      console.log('RESPONSE FRM BACKEND: ', response.data);
       const isRazorpayLoaded = await loadRazorpayScript();
 
       if (!isRazorpayLoaded || !window.Razorpay) {
@@ -42,13 +43,6 @@ export function useSubscriptionCheckout() {
           name: user?.name,
           email: user?.email,
           contact: user?.phone,
-        },
-        notes: {
-          source: 'profile-subscription',
-          plan_id: subscriptionPlanId,
-        },
-        theme: {
-          color: '#F37254',
         },
         handler: () => {
           toast.success('Subscription checkout successful');

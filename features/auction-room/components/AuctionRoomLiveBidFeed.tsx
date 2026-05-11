@@ -2,13 +2,6 @@
 
 import { TrendingUp } from 'lucide-react';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { formatAuctionDateTime } from '@/utils/auction-utils';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +14,8 @@ import type {
   AuctionRoomMode,
   IAuctionRoomBid,
 } from '@/types/auctionRoom.types';
+
+import { arCardCanvas, arType } from '../lib/auction-room-design';
 
 type AuctionRoomLiveBidFeedProps = {
   bids: IAuctionRoomBid[];
@@ -38,35 +33,35 @@ export function AuctionRoomLiveBidFeed({
   currentUserId,
 }: AuctionRoomLiveBidFeedProps) {
   const feedDescription = isLiveRoom
-    ? 'Live bids appear here'
+    ? 'Updates as bids arrive'
     : isSealedRoom
-      ? 'Latest sealed bids'
+      ? 'Latest sealed activity'
       : 'Recent bids';
 
   return (
-    <Card className="rounded-xl border-border/50 bg-card/30 shadow-none">
-      <CardHeader className="space-y-0 border-b border-border/35 px-2.5 py-2">
-        <div className="flex items-center gap-1.5">
-          <TrendingUp className="size-3 text-muted-foreground" aria-hidden />
-          <CardTitle className="text-xs font-semibold tracking-tight">
-            Bid activity
-          </CardTitle>
+    <section className={arCardCanvas('overflow-hidden')}>
+      <div className="border-b border-border/80 px-2.5 py-2">
+        <div className="flex items-center gap-2">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-[6px] bg-muted/50 text-foreground">
+            <TrendingUp className="size-3.5" aria-hidden />
+          </span>
+          <div className="min-w-0">
+            <h3 className={arType.cardTitle}>Bid activity</h3>
+            <p className={arType.cardDesc}>{feedDescription}</p>
+          </div>
         </div>
-        <CardDescription className="text-[10px] leading-snug">
-          {feedDescription}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="px-2.5 pb-2 pt-1.5">
+      </div>
+      <div className="px-2.5 py-2">
         <ul
           className={cn(
-            'space-y-1',
+            'space-y-1.5',
             mode === 'ADMIN'
-              ? 'max-h-48 overflow-y-auto pr-0.5 [scrollbar-width:thin]'
-              : 'max-h-40 overflow-y-auto pr-0.5 [scrollbar-width:thin]'
+              ? 'max-h-44 overflow-y-auto pr-1 [scrollbar-width:thin]'
+              : 'max-h-40 overflow-y-auto pr-1 [scrollbar-width:thin]'
           )}
         >
           {bids.length === 0 ? (
-            <li className="rounded-lg border border-dashed border-border/50 bg-muted/15 px-2 py-3 text-center text-[10px] text-muted-foreground">
+            <li className="rounded-[8px] border border-dashed border-border/80 bg-muted/30 px-3 py-4 text-center text-xs text-muted-foreground dark:bg-muted/20">
               {getBidFeedEmptyMessage(isLiveRoom)}
             </li>
           ) : (
@@ -78,20 +73,20 @@ export function AuctionRoomLiveBidFeed({
                 <li
                   key={b.id}
                   className={cn(
-                    'flex items-center justify-between gap-2 rounded-lg border px-2 py-1 transition-colors',
+                    'flex items-center justify-between gap-2 rounded-[8px] border px-2 py-1.5 transition-colors',
                     index === 0
-                      ? 'border-primary/25 bg-primary/[0.05]'
-                      : 'border-border/40 bg-background/40',
-                    isYou && 'ring-1 ring-foreground/10'
+                      ? 'border-primary/20 bg-muted/50'
+                      : 'border-border/80 bg-card',
+                    isYou && 'ring-1 ring-primary/15'
                   )}
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[11px] font-medium text-foreground">
+                    <p className="truncate text-xs font-semibold text-foreground">
                       {isYou ? (
                         'You'
                       ) : mode === 'ADMIN' ? (
                         <>
-                          <span className="font-mono">
+                          <span className="font-mono text-[11px]">
                             {b.userId.slice(0, 8)}
                           </span>
                           …
@@ -100,11 +95,11 @@ export function AuctionRoomLiveBidFeed({
                         'Bidder'
                       )}
                     </p>
-                    <p className="text-[9px] text-muted-foreground">
+                    <p className="text-[10px] text-muted-foreground">
                       {formatAuctionDateTime(b.createdAt)}
                     </p>
                   </div>
-                  <p className="shrink-0 text-[11px] font-semibold tabular-nums text-foreground">
+                  <p className="shrink-0 text-xs font-semibold tabular-nums text-foreground">
                     {formatBidFeedAmountLabel(isSealedRoom, b.amount)}
                   </p>
                 </li>
@@ -112,7 +107,7 @@ export function AuctionRoomLiveBidFeed({
             })
           )}
         </ul>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

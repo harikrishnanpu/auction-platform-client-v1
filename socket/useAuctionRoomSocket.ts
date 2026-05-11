@@ -25,6 +25,8 @@ import type {
   LiveTransportAck,
   LiveConsumeAck,
   RemoteStreamItem,
+  IAuctionRoomMetrics,
+  IAuctionRoomCharts,
 } from '@/types/auctionRoom.types';
 
 import {
@@ -99,15 +101,12 @@ export function useAuctionRoomSocket({
         const { success, data } = raw;
 
         if (!success) {
-          console.log(raw);
-          // setError('Failed to get capabilities');
           return;
         }
 
         await device.load({ routerRtpCapabilities: data.rtpCapabilities });
 
         deviceRef.current = device;
-        console.log('device loaded !kdkd', data.rtpCapabilities);
         await handleCreateTransport(socket, roomId, role, data.producerIds);
       }
     );
@@ -137,22 +136,11 @@ export function useAuctionRoomSocket({
         transportRef.current = transport;
 
         transport.on('connect', ({ dtlsParameters }, callback) => {
-          console.log('connect dl,ts transport');
-          console.log(dtlsParameters);
           socket.emit(
             AUCTION_SOCKET_EVENTS.LIVE_AUCTION_CONNECT_TRANSPORT,
             { auctionId, dtlsParameters },
             (params: { success: boolean; error?: string }) => {
-              if (!params) {
-                console.log('connect error from server');
-                return;
-              }
-
-              if (!params.success) {
-                console.log('connect error from server');
-                return;
-              }
-
+              if (!params?.success) return;
               callback();
             }
           );
@@ -198,7 +186,6 @@ export function useAuctionRoomSocket({
 
     for (const track of stream.getTracks()) {
       await transport.produce({ track });
-      console.log('producing:', track.kind);
     }
   };
 
@@ -207,9 +194,6 @@ export function useAuctionRoomSocket({
     roomId: string,
     producerIds: string[]
   ) => {
-    console.log('producerIds', producerIds);
-    // return;
-
     for (const producerId of producerIds) {
       await consumeStream(socket, roomId, producerId);
     }
@@ -245,12 +229,9 @@ export function useAuctionRoomSocket({
         },
         async (params: { success: boolean; data: LiveConsumeAck }) => {
           if (!params || !params.success || !params.data) {
-            console.log('consume error from server');
             resolve();
             return;
           }
-
-          console.log(params);
 
           const consumer = await transport.consume({
             id: params.data.id,
@@ -259,11 +240,6 @@ export function useAuctionRoomSocket({
             rtpParameters: params.data.rtpParameters,
           });
           consumerRef.current.set(producerId, consumer);
-
-          console.log('consumer', consumer.track.readyState);
-          console.log('consumer', consumer.track.enabled);
-
-          console.log('consume success from server', consumer);
 
           setRemoteStreams((prev) => [
             ...prev.filter(
@@ -282,11 +258,7 @@ export function useAuctionRoomSocket({
               auctionId,
               consumerId: params.data.id,
             },
-            (ack: { success: boolean }) => {
-              if (!ack?.success) {
-                console.log('resume failed from server');
-              }
-              console.log('resume success from server');
+            () => {
               resolve();
             }
           );
@@ -349,12 +321,25 @@ export function useAuctionRoomSocket({
       }
     );
 
-    // socket.on(
-    //   AUCTION_SOCKET_EVENTS.LIVE_AUCTION_NEW_PRODUCER,
-    //   (payload: { producerId: string }) => {
-    //     void addRemoteConsumer(payload.producerId);
-    //   }
-    // );
+    socket.on(
+      AUCTION_SOCKET_EVENTS.STATS_UPDATED,
+      (payload: {
+        metrics?: Partial<IAuctionRoomMetrics> | null;
+        charts?: IAuctionRoomCharts | null;
+      }) => {
+        setSnapshot((prev) => {
+          if (!prev) return prev;
+          const next: IAuctionRoomSnapshot = {
+            ...prev,
+            metrics: { ...(prev.metrics ?? {}), ...(payload.metrics ?? {}) },
+          };
+          if (payload.charts !== undefined) {
+            next.charts = payload.charts;
+          }
+          return next;
+        });
+      }
+    );
 
     socket.on(
       AUCTION_SOCKET_EVENTS.LIVE_AUCTION_PRODUCER_CLOSED,
@@ -427,16 +412,14 @@ export function useAuctionRoomSocket({
     );
 
     socket.on(AUCTION_SOCKET_EVENTS.BID_PLACED, (bid: IAuctionRoomBid) => {
-      console.log('BID_PLACED', bid);
       setSnapshot((prev) => {
         if (!prev) return prev;
 
         const maxLiveFeed = mode === 'ADMIN' ? 10000 : 1000;
+        const isNewBid = !prev.liveFeed.some((b) => b.id === bid.id);
 
         const nextLiveFeed = (() => {
-          const merged = prev.liveFeed.some((b) => b.id === bid.id)
-            ? prev.liveFeed
-            : [bid, ...prev.liveFeed];
+          const merged = isNewBid ? [bid, ...prev.liveFeed] : prev.liveFeed;
           return merged
             .slice()
             .sort(
@@ -455,10 +438,34 @@ export function useAuctionRoomSocket({
               ? bid
               : prev.currentBid;
 
+        const nextMetrics =
+          isNewBid && prev.metrics
+            ? (() => {
+                const m = { ...prev.metrics };
+                const hourAgo = Date.now() - 60 * 60 * 1000;
+                const inLastHour = new Date(bid.createdAt).getTime() >= hourAgo;
+
+                if (typeof m.totalBidCount === 'number') {
+                  m.totalBidCount = m.totalBidCount + 1;
+                }
+                if (typeof m.uniqueBidderCount === 'number') {
+                  const hadUser = prev.liveFeed.some(
+                    (b) => b.userId === bid.userId
+                  );
+                  if (!hadUser) m.uniqueBidderCount = m.uniqueBidderCount + 1;
+                }
+                if (typeof m.bidsInLastHour === 'number' && inLastHour) {
+                  m.bidsInLastHour = m.bidsInLastHour + 1;
+                }
+                return m;
+              })()
+            : prev.metrics;
+
         return {
           ...prev,
           currentBid: nextCurrentBid,
           liveFeed: nextLiveFeed,
+          metrics: nextMetrics,
         };
       });
     });
@@ -466,7 +473,6 @@ export function useAuctionRoomSocket({
     socket.on(
       AUCTION_SOCKET_EVENTS.UPDATED,
       (payload: IAuctionUpdatedPayload) => {
-        console.log('UPDATED', payload);
         setSnapshot((prev) => {
           if (!prev) return prev;
           if (payload.auctionId !== auctionId) return prev;
@@ -482,6 +488,12 @@ export function useAuctionRoomSocket({
               ...(payload.endAt ? { endAt: new Date(payload.endAt) } : {}),
               ...(payload.status
                 ? { status: payload.status as unknown as IAuctionDto['status'] }
+                : {}),
+            },
+            metrics: {
+              ...(prev.metrics ?? {}),
+              ...(payload.extensionCount !== undefined
+                ? { extensionsUsed: payload.extensionCount }
                 : {}),
             },
           };
@@ -508,7 +520,6 @@ export function useAuctionRoomSocket({
     );
 
     socket.on(AUCTION_SOCKET_EVENTS.ERROR, (payload: { message?: string }) => {
-      console.log('ERROR', payload);
       const message = payload?.message ?? 'Socket error';
       setError(message);
       setConnectionState('error');
@@ -752,7 +763,6 @@ export function useAuctionRoomSocket({
         return { success: false, error: ack.error ?? 'Request failed' };
       }
 
-      console.log('ack', ack.data);
       return {
         success: true,
         data: ack.data as IPaymentGatewayOrder | undefined,
@@ -898,6 +908,8 @@ export function useAuctionRoomSocket({
     soldSummary: snapshot?.soldSummary ?? null,
     autoBidConfig: snapshot?.autoBidConfig ?? null,
     nextBidMin: snapshot?.nextBidMin ?? null,
+    metrics: snapshot?.metrics ?? null,
+    charts: snapshot?.charts ?? null,
     chatMessages,
     agentResponses,
     connectionState,
