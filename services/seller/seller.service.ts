@@ -1,6 +1,7 @@
 import { API_ENDPOINTS, buildApiUrl, buildQuery } from '@/apiInstance';
 import { apiFetch } from '@/lib/fetch';
 import { ApiResponse } from '@/types/api.index';
+import type { ISellerDashboardStatsPayload } from '@/features/seller/dashboard/types/seller-dashboard-stats.types';
 import type { ISellerAuctionPaymentsPage } from '@/features/seller/payments/types/seller-payments.types';
 import { AuctionCategory } from '@/types/auction.type';
 import { getErrorMessage } from '@/utils/get-app-error';
@@ -64,6 +65,21 @@ export const sellerService = {
       });
       return await apiFetch<ISellerAuctionPaymentsPage>(
         `${buildApiUrl(API_ENDPOINTS.seller.getSellerAuctionPayments)}?${query}`,
+        { method: 'GET' },
+        cookieStore,
+        'no-store'
+      );
+    } catch (error: unknown) {
+      return { success: false, data: null, error: getErrorMessage(error) };
+    }
+  },
+
+  getSellerDashboardStats: async (
+    cookieStore: ReadonlyRequestCookies
+  ): Promise<ApiResponse<ISellerDashboardStatsPayload>> => {
+    try {
+      return await apiFetch<ISellerDashboardStatsPayload>(
+        buildApiUrl(API_ENDPOINTS.seller.getSellerDashboardStats),
         { method: 'GET' },
         cookieStore,
         'no-store'

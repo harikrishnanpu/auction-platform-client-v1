@@ -1,4 +1,5 @@
 'use server';
+import type { ISellerDashboardStatsPayload } from '@/features/seller/dashboard/types/seller-dashboard-stats.types';
 import type { ISellerAuctionPaymentsPage } from '@/features/seller/payments/types/seller-payments.types';
 import { sellerService } from '@/services/seller/seller.service';
 import { ApiResponse } from '@/types/api.index';
@@ -27,4 +28,11 @@ export const getSellerAuctionPaymentsAction = async (params: {
 }): Promise<ApiResponse<ISellerAuctionPaymentsPage>> => {
   const cookieStore = await cookies();
   return sellerService.getSellerAuctionPayments(params, cookieStore);
+};
+
+export const getSellerDashboardStatsAction = async (): Promise<
+  ApiResponse<ISellerDashboardStatsPayload>
+> => {
+  const cookieStore = await cookies();
+  return sellerService.getSellerDashboardStats(cookieStore);
 };

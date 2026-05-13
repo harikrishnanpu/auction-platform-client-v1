@@ -44,7 +44,7 @@ function SellerPaymentsList({ items }: { items: ISellerAuctionPaymentItem[] }) {
       {items.map((item) => (
         <div
           key={item.id}
-          className="flex flex-col gap-3 rounded-lg border border-border/60 p-4 sm:flex-row sm:items-start sm:justify-between"
+          className="flex flex-col gap-3 rounded-xl border border-border bg-background p-4 sm:flex-row sm:items-start sm:justify-between"
         >
           <div className="min-w-0 space-y-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -142,37 +142,43 @@ export function SellerAuctionPaymentsView() {
   }, [page, status, kycStatusEnum]);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4 px-3 py-4 sm:px-4">
-      <div className="space-y-1">
-        <h1 className="flex items-center gap-2 text-lg font-semibold sm:text-xl">
-          <CreditCard className="h-5 w-5" />
-          All payments
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Payment requests for buyers on your auctions: pending, paid, failed,
-          or declined.
-        </p>
-      </div>
+    <div className="mx-auto max-w-[1200px] space-y-8 px-4 py-6 sm:px-6">
+      <header className="border-b border-border pb-6">
+        <div className="flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/25">
+            <CreditCard className="size-5 text-foreground" aria-hidden />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              Payments
+            </h1>
+            <p className="max-w-xl text-sm text-muted-foreground">
+              Buyer payment requests for your auctions — pending, paid, failed,
+              or declined.
+            </p>
+          </div>
+        </div>
+      </header>
 
       {kycStatusEnum === null ? (
-        <div className="rounded-lg border border-border/70 bg-muted/10 px-3 py-8 text-center text-sm text-muted-foreground">
+        <div className="rounded-xl border border-border bg-muted/25 px-4 py-10 text-center text-sm text-muted-foreground">
           Loading…
         </div>
       ) : kycStatusEnum !== KycStatusEnum.APPROVED ? (
-        <div className="rounded-lg border border-border/70 bg-muted/10 px-3 py-6 text-center">
-          <p className="text-xs text-muted-foreground">
+        <div className="rounded-xl border border-border bg-muted/25 px-4 py-10 text-center">
+          <p className="text-sm text-muted-foreground">
             Verify your seller account to view auction payments.
           </p>
           <Link
             href="/seller/kyc"
-            className="mt-3 inline-block text-sm font-medium text-primary hover:underline"
+            className="mt-4 inline-block text-sm font-semibold text-primary hover:underline"
           >
             Seller KYC
           </Link>
         </div>
       ) : (
-        <Card className="border-border/60 bg-card/50">
-          <CardContent className="space-y-4 p-4 sm:p-6">
+        <Card className="rounded-xl border-border bg-muted/15 shadow-none">
+          <CardContent className="space-y-4 p-5 sm:p-6">
             <div className="flex justify-end">
               <Select
                 value={status}
@@ -181,7 +187,7 @@ export function SellerAuctionPaymentsView() {
                   setStatus(value as PaymentStatus | 'ALL');
                 }}
               >
-                <SelectTrigger className="h-9 w-[180px] rounded-lg">
+                <SelectTrigger className="h-9 w-[180px] rounded-lg border-border bg-background">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>

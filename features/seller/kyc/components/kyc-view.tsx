@@ -77,14 +77,14 @@ export function SellerKycView() {
     <div className="min-h-screen font-sans transition-colors duration-300 bg-background text-foreground">
       <div className="fixed inset-0 pointer-events-none -z-10 bg-[linear-gradient(135deg,var(--background)_0%,var(--muted)_100%)]" />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
+      <main className="mx-auto max-w-[1200px] px-4 py-8 animate-in fade-in duration-500 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2 ">
-            Seller KYC Verification
+          <h1 className="mb-2 text-2xl font-semibold tracking-tight text-foreground">
+            Seller KYC verification
           </h1>
-          <p className="text-muted-foreground">
-            Complete your identity verification to unlock selling privileges and
-            list high-value luxury assets.
+          <p className="text-sm text-muted-foreground">
+            Complete identity verification to unlock selling and create
+            auctions.
           </p>
           {status === 'REJECTED' && (
             <div className="mt-4 rounded-xl border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">

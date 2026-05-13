@@ -39,11 +39,11 @@ export interface AuctionCardProps {
 type PillVariant = 'live' | 'upcoming' | 'ended' | 'paused' | 'neutral';
 
 const PILL_STYLES: Record<PillVariant, string> = {
-  live: 'bg-red-500/95 text-white ring-red-300/40',
-  upcoming: 'bg-blue-600/95 text-white ring-blue-300/40',
-  ended: 'bg-slate-900/75 text-white/85 ring-white/10',
-  paused: 'bg-amber-500/95 text-white ring-amber-300/40',
-  neutral: 'bg-slate-700/80 text-white ring-white/10',
+  live: 'bg-destructive/90 text-destructive-foreground ring-destructive/30',
+  upcoming: 'bg-primary/15 text-primary ring-primary/20',
+  ended: 'bg-muted text-muted-foreground ring-border',
+  paused: 'bg-amber-500/90 text-white ring-amber-300/30',
+  neutral: 'bg-muted text-foreground ring-border',
 };
 
 function StatusPill({
@@ -57,12 +57,12 @@ function StatusPill({
     <span
       className={cn(
         'inline-flex items-center gap-1 rounded-full px-2 py-0.5',
-        'text-[10px] font-semibold uppercase tracking-wider ring-1 backdrop-blur-sm',
+        'text-[10px] font-semibold uppercase tracking-wider ring-1',
         PILL_STYLES[variant]
       )}
     >
       {variant === 'live' && (
-        <span className="inline-block size-1.5 animate-pulse rounded-full bg-white" />
+        <span className="inline-block size-1.5 animate-pulse rounded-full bg-current opacity-90" />
       )}
       {label}
     </span>
@@ -123,8 +123,8 @@ function MetaRow({
     <div
       className={cn(
         'flex items-center gap-1.5 text-[11px] font-medium tabular-nums',
-        accent === 'live' && 'text-red-600 dark:text-red-400',
-        accent === 'upcoming' && 'text-blue-600 dark:text-blue-400',
+        accent === 'live' && 'text-destructive',
+        accent === 'upcoming' && 'text-primary',
         accent === 'muted' && 'text-muted-foreground'
       )}
     >
@@ -148,10 +148,9 @@ function CardCTA({
       <Link
         href={href}
         className={cn(
-          'flex w-full items-center justify-center gap-1 rounded-md',
-          'bg-blue-600 py-1.5 text-[12px] font-semibold text-white',
-          'transition-colors hover:bg-blue-700',
-          'focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1'
+          'flex w-full items-center justify-center gap-1 rounded-md py-2 text-xs font-semibold',
+          'bg-primary text-primary-foreground shadow-sm transition-opacity hover:opacity-90',
+          'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
         )}
       >
         Place bid
@@ -164,10 +163,8 @@ function CardCTA({
       <Link
         href={href}
         className={cn(
-          'flex w-full items-center justify-center gap-1 rounded-md',
-          'border border-blue-200 bg-blue-50 py-1.5 text-[12px] font-semibold text-blue-700',
-          'transition-colors hover:bg-blue-100',
-          'dark:border-blue-900/50 dark:bg-blue-950/60 dark:text-blue-300'
+          'flex w-full items-center justify-center gap-1 rounded-md border border-border py-2 text-xs font-semibold',
+          'bg-background text-foreground transition-colors hover:bg-muted/80'
         )}
       >
         <Bell className="size-3" aria-hidden />
@@ -247,9 +244,9 @@ export function AuctionCard({
     <div
       className={cn(
         'group relative flex h-full flex-col overflow-hidden rounded-xl',
-        'border border-border bg-card shadow-sm',
-        'transition-[border-color,transform,box-shadow] duration-200',
-        'hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:hover:border-blue-700',
+        'border border-border/80 bg-card',
+        'transition-[border-color,box-shadow] duration-200',
+        'hover:border-foreground/15 hover:shadow-sm',
         display.isClosed && 'opacity-85',
         className
       )}
@@ -257,7 +254,7 @@ export function AuctionCard({
       {/* Cover */}
       <Link
         href={href}
-        className="relative block overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="relative block overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label={`Open: ${auction.title}`}
         tabIndex={display.isClosed ? -1 : undefined}
       >
@@ -269,8 +266,8 @@ export function AuctionCard({
             className="h-full w-full"
           />
         ) : (
-          <div className="flex aspect-5/4 w-full items-center justify-center bg-linear-to-br from-slate-800 to-slate-950">
-            <Gavel className="size-10 text-white/15" aria-hidden />
+          <div className="flex aspect-5/4 w-full items-center justify-center bg-muted">
+            <Gavel className="size-10 text-muted-foreground/25" aria-hidden />
           </div>
         )}
 
@@ -291,9 +288,9 @@ export function AuctionCard({
       <div className="flex flex-1 flex-col gap-2 p-2.5">
         <Link
           href={href}
-          className="block rounded outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          className="block rounded outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-foreground transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
+          <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
             {auction.title}
           </h3>
         </Link>
@@ -315,9 +312,7 @@ export function AuctionCard({
             <p
               className={cn(
                 'truncate text-[15px] font-bold tabular-nums leading-tight',
-                display.isLive
-                  ? 'text-blue-700 dark:text-blue-300'
-                  : 'text-foreground'
+                display.isLive ? 'text-primary' : 'text-foreground'
               )}
             >
               {formatAuctionPrice(priceValue)}

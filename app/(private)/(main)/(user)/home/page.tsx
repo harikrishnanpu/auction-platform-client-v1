@@ -7,17 +7,16 @@ import { getMyAuctionsAction } from '@/actions/user/my-auctions.actions';
 import { HomeAuctionsGrid } from '@/features/user/home/components/home-auctions-grid';
 import { HomeEmptyState } from '@/features/user/home/components/home-empty-state';
 import { HomeFooterLinksCard } from '@/features/user/home/components/home-footer-links-card';
-import { HomeLeftRail } from '@/features/user/home/components/home-left-rail';
 import { HomeParticipatedCards } from '@/features/user/home/components/home-participated-cards';
 import { HomeParticipatedRail } from '@/features/user/home/components/home-participated-rail';
 import { HomePremiumCta } from '@/features/user/home/components/home-premium-cta';
+import { HomeQuickNav } from '@/features/user/home/components/home-quick-nav';
 import { HomeSection } from '@/features/user/home/components/home-section';
 import { HomeTopBar } from '@/features/user/home/components/home-top-bar';
 import { HomeWishlistPlaceholder } from '@/features/user/home/components/home-wishlist-placeholder';
 import type { IUserHomeStats } from '@/features/user/home/types/home.types';
 
-const FEATURED_LIMIT = 10;
-/** Enough rows for the rail (5) and the “below feed” strip (6) from one payload */
+const FEATURED_LIMIT = 12;
 const PARTICIPATED_FETCH_LIMIT = 8;
 const RAIL_VISIBLE = 5;
 const BELOW_FEED_VISIBLE = 6;
@@ -80,78 +79,76 @@ export default async function HomePage() {
       : undefined;
 
   return (
-    <div className="mx-auto max-w-[1200px] px-3 py-4 sm:px-4 sm:py-6">
-      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[220px_1fr_280px] lg:items-start lg:gap-8">
-        <div className="order-2 lg:order-1">
-          <div className="lg:fixed lg:top-26 lg:z-20 lg:w-[220px] lg:max-h-[calc(100dvh-4rem)] lg:overflow-hidden lg:left-[max(1rem,calc((100vw-1200px)/2+1rem))]">
-            <HomeLeftRail />
-          </div>
-        </div>
+    <div className="min-h-[calc(100dvh-4rem)] w-full bg-background">
+      <div className="mx-auto w-full max-w-[min(100%,1600px)] px-5 py-6 sm:px-8 sm:py-7 md:px-10 lg:px-14 lg:py-8 xl:px-16">
+        <HomeTopBar
+          name={profile?.name}
+          avatarUrl={profile?.avatar_url || undefined}
+          isVerified={profile?.isVerified}
+          planSummary={planSummary}
+          stats={stats}
+        />
 
-        <div className="order-1 min-w-0 space-y-6 lg:order-2">
-          <HomeTopBar
-            name={profile?.name}
-            avatarUrl={profile?.avatar_url || undefined}
-            isVerified={profile?.isVerified}
-            planSummary={planSummary}
-            stats={stats}
-          />
+        <div className="mt-8 space-y-10 lg:space-y-12">
+          <HomeQuickNav />
 
           <HomeSection
             icon={Sparkles}
             title="Ending soon"
-            description="Live auctions closing soonest — bid before the timer hits zero."
+            description="Live listings closing soonest."
             linkHref="/auctions"
             linkLabel="View all"
           >
             <HomeAuctionsGrid
               auctions={featured}
               limit={FEATURED_LIMIT}
-              gridVariant="home"
+              gridVariant="homeWide"
               empty={
                 <HomeEmptyState
                   icon={Gavel}
-                  title="No auctions available right now"
-                  description="Please check again shortly for fresh listings."
+                  title="No auctions right now"
+                  description="Check back soon for new listings."
                   actionHref="/auctions"
-                  actionLabel="Refresh"
+                  actionLabel="Browse"
                 />
               }
             />
           </HomeSection>
 
-          <HomeSection
-            icon={Handshake}
-            title="Your participated auctions"
-            description="Where you’ve joined — two columns with your standing on each card."
-            linkHref="/profile/my-auctions"
-            linkLabel="View all"
-          >
-            <HomeParticipatedCards
-              auctions={belowFeedAuctions}
-              limit={BELOW_FEED_VISIBLE}
-              empty={
-                <HomeEmptyState
-                  icon={Handshake}
-                  title="You haven’t joined any auction yet"
-                  description="Browse the feed above and place a bid — your lots will show here with Win / Outbid status."
-                  actionHref="/auctions"
-                  actionLabel="Browse auctions"
-                />
-              }
-            />
-          </HomeSection>
-        </div>
+          <div className="grid items-start gap-8 lg:grid-cols-[1fr_minmax(0,22rem)] lg:gap-10 xl:grid-cols-[1fr_minmax(0,24rem)]">
+            <HomeSection
+              className="min-w-0"
+              icon={Handshake}
+              title="Your auctions"
+              description="Lots you have joined — status on each card."
+              linkHref="/profile/my-auctions"
+              linkLabel="View all"
+            >
+              <HomeParticipatedCards
+                auctions={belowFeedAuctions}
+                limit={BELOW_FEED_VISIBLE}
+                empty={
+                  <HomeEmptyState
+                    icon={Handshake}
+                    title="No joined auctions yet"
+                    description="Open any listing and place a bid to see it here."
+                    actionHref="/auctions"
+                    actionLabel="Browse auctions"
+                  />
+                }
+              />
+            </HomeSection>
 
-        {/* Right: same window scroll; sticky under header so feed can scroll past after rail ends */}
-        <div className="order-3 flex min-w-0 flex-col gap-4 z-10 lg:sticky lg:top-16 lg:self-start">
-          <HomeParticipatedRail
-            auctions={railAuctions}
-            totalJoined={participatedTotal}
-          />
-          <HomeWishlistPlaceholder />
-          <HomePremiumCta />
-          <HomeFooterLinksCard />
+            <aside className="flex w-full min-w-0 flex-col gap-4 lg:sticky lg:top-20 lg:self-start xl:gap-5">
+              <HomeParticipatedRail
+                auctions={railAuctions}
+                totalJoined={participatedTotal}
+              />
+              <HomeWishlistPlaceholder />
+              <HomePremiumCta />
+              <HomeFooterLinksCard />
+            </aside>
+          </div>
         </div>
       </div>
     </div>

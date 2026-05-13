@@ -114,6 +114,7 @@ export const API_ENDPOINTS = {
     getSellerAuctions: '/seller/auctions',
     getSellerAuctionById: (id: string) => `/seller/auctions/${id}`,
     getSellerAuctionPayments: '/seller/payments',
+    getSellerDashboardStats: '/seller/dashboard-stats',
   },
 } as const;
 

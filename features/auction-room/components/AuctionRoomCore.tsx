@@ -399,9 +399,9 @@ export function AuctionRoomCore({
               />
             ) : null}
 
-            {/* Left: listing header + media + details · Middle: stream + analytics + bid + activity · Right: tools */}
-            <div className="flex flex-col gap-3 xl:grid xl:grid-cols-[minmax(0,240px)_minmax(0,1fr)_minmax(0,252px)] xl:items-start xl:gap-4">
-              <div className="order-1 flex min-w-0 flex-col gap-2">
+            {/* Two columns on large screens: listing + media | action stack */}
+            <div className="flex flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,320px)_minmax(0,1fr)] xl:items-start xl:gap-6">
+              <div className="order-1 flex min-w-0 flex-col gap-3">
                 <AuctionRoomListingHeader
                   sectionLabel={listingSectionLabel}
                   title={
@@ -431,7 +431,7 @@ export function AuctionRoomCore({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-9 shrink-0 rounded-[8px] px-3 text-xs font-semibold"
+                          className="h-9 shrink-0 rounded-lg px-3 text-xs font-semibold"
                           onClick={() => setReportAuctionOpen(true)}
                         >
                           Report
@@ -448,7 +448,7 @@ export function AuctionRoomCore({
                 <AuctionRoomDetailsSection auction={auction} />
               </div>
 
-              <div className="order-2 flex min-w-0 flex-col gap-2">
+              <div className="order-2 flex min-w-0 flex-col gap-3">
                 <AuctionRoomLiveStreamPanel
                   isLiveRoom={isLiveRoom}
                   isHostProducer={isHostProducer}
@@ -480,6 +480,102 @@ export function AuctionRoomCore({
                   cooldownRemainingSeconds={cooldownRemainingSeconds}
                   onPlaceBid={handlePlaceBid}
                 />
+
+                <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
+                  <AuctionRoomLiveBidFeed
+                    bids={liveFeed}
+                    mode={mode}
+                    isSealedRoom={isSealedRoom}
+                    isLiveRoom={isLiveRoom}
+                    currentUserId={user?.id}
+                  />
+                  <div className="flex min-w-0 flex-col gap-3">
+                    {mode === 'USER' ? (
+                      <AuctionRoomYourPosition standing={userBidStanding} />
+                    ) : null}
+
+                    {auctionStatusStr === 'SOLD' && soldSummaryDisplay ? (
+                      <AuctionSoldSummaryCard
+                        winnerUserName={soldSummaryDisplay.winnerUserName}
+                        soldAmount={soldSummaryDisplay.soldAmount}
+                      />
+                    ) : null}
+
+                    <AuctionRoomParticipantsPanel
+                      participants={participants}
+                      currentUserId={user?.id}
+                      canReport={canReportParticipants}
+                      onReportUser={handleReportParticipant}
+                    />
+
+                    {mode === 'USER' && !isSealedRoom ? (
+                      <AuctionRoomAutoBidPanel
+                        config={autoBidConfig}
+                        nextBidMin={nextBidMin}
+                        canInteract={canInteract}
+                        isAuctionActive={isAuctionActive}
+                        isLiveAuction={isLiveRoom}
+                        onEnable={setAutoBidConfig}
+                        onDisable={disableAutoBidConfig}
+                      />
+                    ) : null}
+
+                    {canControlAuction ? (
+                      <AuctionRoomSellerPanel
+                        auctionStatus={auctionStatusStr}
+                        canInteract={canInteract}
+                        isAuctionEnded={isAuctionEnded}
+                        actionBusy={actionBusy}
+                        actionError={actionError}
+                        onPause={handlePause}
+                        onResume={handleResume}
+                        onEnd={handleEnd}
+                      />
+                    ) : null}
+
+                    {canControlAuction &&
+                    auctionStatusStr === 'FALLBACK_ENDED' ? (
+                      <AuctionRoomFallbackEndedPanel
+                        auctionId={auctionId}
+                        allowSendPublicNotification={
+                          allowSendPublicNotification
+                        }
+                        onStatusUpdated={setAuctionStatusOverride}
+                        onSendPublicNotification={
+                          sendFallbackPublicNotification
+                        }
+                        onMarkAuctionFailed={markAuctionFailed}
+                      />
+                    ) : null}
+
+                    {showFallbackParticipantStats &&
+                    auctionStatusStr === 'FALLBACK_PUBLIC_NOTIFICATION' &&
+                    fallbackPublicParticipantStats ? (
+                      <FallbackPublicParticipantStatsCard
+                        pending={fallbackPublicParticipantStats.pending}
+                        rejected={fallbackPublicParticipantStats.rejected}
+                      />
+                    ) : null}
+
+                    {mode === 'USER' &&
+                    auctionStatusStr === 'FALLBACK_PUBLIC_NOTIFICATION' &&
+                    auction ? (
+                      <AuctionRoomFallbackPublicNotificationPanel
+                        auctionId={auctionId}
+                        auctionTitle={auction.title}
+                        startPrice={auction.startPrice}
+                        canInteract={canInteract}
+                        onStatusUpdated={setAuctionStatusOverride}
+                        payFallbackPublic={payFallbackPublic}
+                        verifyFallbackPublicAuctionPayment={
+                          verifyFallbackPublicAuctionPayment
+                        }
+                        onDecline={declineFallbackPublic}
+                      />
+                    ) : null}
+                  </div>
+                </div>
+
                 <AuctionRoomAnalyticsCharts
                   auction={auction}
                   liveFeed={liveFeed}
@@ -487,95 +583,7 @@ export function AuctionRoomCore({
                   currentBidAmount={currentBid?.amount ?? null}
                   isAuctionEnded={isAuctionEnded}
                 />
-                <AuctionRoomLiveBidFeed
-                  bids={liveFeed}
-                  mode={mode}
-                  isSealedRoom={isSealedRoom}
-                  isLiveRoom={isLiveRoom}
-                  currentUserId={user?.id}
-                />
               </div>
-
-              <aside className="order-3 z-10 flex min-w-0 flex-col gap-2 xl:sticky xl:top-16 xl:self-start">
-                {mode === 'USER' ? (
-                  <AuctionRoomYourPosition standing={userBidStanding} />
-                ) : null}
-
-                {auctionStatusStr === 'SOLD' && soldSummaryDisplay ? (
-                  <AuctionSoldSummaryCard
-                    winnerUserName={soldSummaryDisplay.winnerUserName}
-                    soldAmount={soldSummaryDisplay.soldAmount}
-                  />
-                ) : null}
-
-                <AuctionRoomParticipantsPanel
-                  participants={participants}
-                  currentUserId={user?.id}
-                  canReport={canReportParticipants}
-                  onReportUser={handleReportParticipant}
-                />
-
-                {mode === 'USER' && !isSealedRoom ? (
-                  <AuctionRoomAutoBidPanel
-                    config={autoBidConfig}
-                    nextBidMin={nextBidMin}
-                    canInteract={canInteract}
-                    isAuctionActive={isAuctionActive}
-                    isLiveAuction={isLiveRoom}
-                    onEnable={setAutoBidConfig}
-                    onDisable={disableAutoBidConfig}
-                  />
-                ) : null}
-
-                {canControlAuction ? (
-                  <AuctionRoomSellerPanel
-                    auctionStatus={auctionStatusStr}
-                    canInteract={canInteract}
-                    isAuctionEnded={isAuctionEnded}
-                    actionBusy={actionBusy}
-                    actionError={actionError}
-                    onPause={handlePause}
-                    onResume={handleResume}
-                    onEnd={handleEnd}
-                  />
-                ) : null}
-
-                {canControlAuction && auctionStatusStr === 'FALLBACK_ENDED' ? (
-                  <AuctionRoomFallbackEndedPanel
-                    auctionId={auctionId}
-                    allowSendPublicNotification={allowSendPublicNotification}
-                    onStatusUpdated={setAuctionStatusOverride}
-                    onSendPublicNotification={sendFallbackPublicNotification}
-                    onMarkAuctionFailed={markAuctionFailed}
-                  />
-                ) : null}
-
-                {showFallbackParticipantStats &&
-                auctionStatusStr === 'FALLBACK_PUBLIC_NOTIFICATION' &&
-                fallbackPublicParticipantStats ? (
-                  <FallbackPublicParticipantStatsCard
-                    pending={fallbackPublicParticipantStats.pending}
-                    rejected={fallbackPublicParticipantStats.rejected}
-                  />
-                ) : null}
-
-                {mode === 'USER' &&
-                auctionStatusStr === 'FALLBACK_PUBLIC_NOTIFICATION' &&
-                auction ? (
-                  <AuctionRoomFallbackPublicNotificationPanel
-                    auctionId={auctionId}
-                    auctionTitle={auction.title}
-                    startPrice={auction.startPrice}
-                    canInteract={canInteract}
-                    onStatusUpdated={setAuctionStatusOverride}
-                    payFallbackPublic={payFallbackPublic}
-                    verifyFallbackPublicAuctionPayment={
-                      verifyFallbackPublicAuctionPayment
-                    }
-                    onDecline={declineFallbackPublic}
-                  />
-                ) : null}
-              </aside>
             </div>
           </div>
 

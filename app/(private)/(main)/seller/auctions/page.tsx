@@ -28,7 +28,9 @@ import useKycStore from '@/store/kyc.store';
 const STATUS_OPTIONS: Array<{ label: string; value: string }> = [
   { label: 'All statuses', value: 'ALL' },
   { label: 'Draft', value: 'DRAFT' },
-  { label: 'Published', value: 'PUBLISHED' },
+  { label: 'Live listings', value: 'PUBLISHED' },
+  { label: 'Active', value: 'ACTIVE' },
+  { label: 'Paused', value: 'PAUSED' },
   { label: 'Ended', value: 'ENDED' },
   { label: 'Sold', value: 'SOLD' },
   { label: 'Cancelled', value: 'CANCELLED' },
@@ -162,27 +164,32 @@ export default function SellerAuctionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-3 py-4 sm:px-4">
-      <header className="flex flex-col gap-3 border-b border-border/60 pb-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-lg font-semibold tracking-tight text-foreground">
+    <div className="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
+      <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0 space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             All auctions
           </h1>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
-            Search, filter by status/type/category, then paginate.
+          <p className="max-w-xl text-sm text-muted-foreground">
+            Search and filter your listings, then open one to edit or review.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
-          <Button asChild variant="ghost" size="sm" className="h-8 text-xs">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="h-9 rounded-lg"
+          >
             <Link href="/seller/auction/categories">
-              <Layers className="size-3.5" />
+              <Layers className="size-4" />
               Categories
             </Link>
           </Button>
-          <Button asChild size="sm" className="h-8 text-xs">
+          <Button asChild size="sm" className="h-9 rounded-lg">
             <Link href="/seller/auction/create">
-              <Plus className="size-3.5" />
+              <Plus className="size-4" />
               New auction
             </Link>
           </Button>
@@ -194,12 +201,14 @@ export default function SellerAuctionsPage() {
           <SellerListingSectionSkeleton />
         </div>
       ) : kycStatusEnum !== KycStatusEnum.APPROVED ? (
-        <Card className="mt-4 rounded-lg border-border/70 bg-muted/10">
+        <Card className="mt-6 rounded-xl border-border bg-muted/25 shadow-none">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Verify to continue</CardTitle>
+            <CardTitle className="text-lg font-semibold">
+              Verify to continue
+            </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Complete seller verification to view your auctions.
             </p>
           </CardContent>
@@ -219,7 +228,7 @@ export default function SellerAuctionsPage() {
           />
 
           {/* List + pagination */}
-          <div className="mt-4">
+          <div className="mt-6">
             {loading ? (
               <SellerAuctionsCardsSkeleton count={Math.min(filters.limit, 8)} />
             ) : error ? (

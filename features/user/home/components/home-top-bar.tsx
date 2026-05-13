@@ -45,78 +45,68 @@ export function HomeTopBar({
   const resolvedAvatar = getUserAvatarUrl(avatarUrl);
 
   return (
-    <section
-      className={cn(
-        'rounded-[12px] border border-border/80 bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.05)] sm:p-5',
-        className
-      )}
-    >
-      <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex min-w-0 flex-1 items-start gap-3">
-            <div className="relative size-12 shrink-0 overflow-hidden rounded-full border border-border/80 bg-[#f5f5f5] dark:bg-muted">
-              {resolvedAvatar ? (
-                <Image
-                  src={resolvedAvatar}
-                  alt={name ?? 'User avatar'}
-                  fill
-                  sizes="48px"
-                  className="object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm font-semibold tracking-tight text-foreground/80">
-                  {initialsOf(name)}
-                </div>
-              )}
-              {isVerified ? (
-                <span
-                  aria-label="Verified account"
-                  className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border border-background bg-emerald-600 text-white shadow-sm"
-                >
-                  <ShieldCheck className="size-2.5" />
-                </span>
-              ) : null}
-            </div>
-
-            <div className="min-w-0 flex-1 pt-0.5">
-              <h1 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
-                Hi, {firstName}
-              </h1>
-              {planSummary ? (
-                <p className="mt-1 truncate text-xs text-muted-foreground">
-                  {planSummary}
-                </p>
-              ) : (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Here’s what’s happening across the marketplace.
-                </p>
-              )}
-            </div>
+    <section className={cn('space-y-5', className)}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+          <div className="relative size-11 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+            {resolvedAvatar ? (
+              <Image
+                src={resolvedAvatar}
+                alt={name ?? 'User avatar'}
+                fill
+                sizes="44px"
+                className="object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-sm font-semibold tracking-tight text-muted-foreground">
+                {initialsOf(name)}
+              </div>
+            )}
+            {isVerified ? (
+              <span
+                aria-label="Verified account"
+                className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border border-background bg-emerald-600 text-white shadow-sm"
+              >
+                <ShieldCheck className="size-2.5" />
+              </span>
+            ) : null}
           </div>
 
-          <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end">
-            {/* <Button
-              asChild
-              size="sm"
-className="h-9 rounded-[8px] text-black hover:bg-gray-200 dark:bg-primary dark:text-white dark:hover:bg-primary/90"            >
-              <Link href="/auctions">
-                Browse auctions
-                <ArrowRight className="size-3.5" />
-              </Link>
-            </Button> */}
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="h-9 rounded-[8px]"
-            >
-              <Link href="/profile">Profile</Link>
-            </Button>
+          <div className="min-w-0 flex-1 pt-0.5">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+              Hi, {firstName}
+            </h1>
+            {planSummary ? (
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                {planSummary}
+              </p>
+            ) : (
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Discover auctions and track your bids in one place.
+              </p>
+            )}
           </div>
         </div>
 
-        <HomeStats stats={stats} variant="dashboard" />
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Button asChild size="sm" className="h-9 rounded-lg">
+            <Link href="/auctions">
+              Browse
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="h-9 rounded-lg"
+          >
+            <Link href="/profile">Profile</Link>
+          </Button>
+        </div>
       </div>
+
+      <HomeStats stats={stats} variant="dashboard" />
     </section>
   );
 }

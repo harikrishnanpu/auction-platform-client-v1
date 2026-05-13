@@ -135,28 +135,27 @@ export default function AuctionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1200px] px-3 py-6 sm:px-4 sm:py-8">
+    <div className="mx-auto w-full max-w-[min(100%,1440px)] px-4 py-6 sm:px-6 lg:px-10 sm:py-8">
       <header className="flex flex-col gap-4 border-b border-border/70 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0 space-y-1">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             Browse
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[28px] sm:leading-tight">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl sm:leading-tight">
             Auctions
           </h1>
           <p className="max-w-xl text-sm text-muted-foreground">
-            Active listings only — search, filter by type and category, and jump
-            into live rooms. Layout follows a white canvas, soft gray panels,
-            and black primary actions.
+            Active listings only. Use filters to narrow results.
           </p>
         </div>
 
         <Button
           asChild
           size="sm"
-          className="h-9 shrink-0 rounded-[8px] bg-[#111111] text-white hover:bg-[#242424] dark:bg-primary"
+          variant="outline"
+          className="h-9 shrink-0 rounded-lg"
         >
-          <Link href="/home">Back to dashboard</Link>
+          <Link href="/home">Back to home</Link>
         </Button>
       </header>
 

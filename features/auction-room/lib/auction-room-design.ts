@@ -18,9 +18,12 @@ export function arPage(className?: string) {
   return cn('relative w-full', className);
 }
 
-/** Matches `home/page.tsx` outer wrapper */
+/** Wider canvas so the room breathes on large displays */
 export function arContainer(className?: string) {
-  return cn('mx-auto max-w-[1200px] px-3 py-3 sm:px-4 sm:py-5', className);
+  return cn(
+    'mx-auto w-full max-w-[min(100%,1440px)] px-4 py-4 sm:px-6 sm:py-5',
+    className
+  );
 }
 
 /** Inset blocks (timers, forms) — like home empty-state panels */

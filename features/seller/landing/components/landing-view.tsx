@@ -30,8 +30,8 @@ export function SellerLandingView({
   };
 
   return (
-    <div className="min-h-screen font-sans transition-colors duration-300 bg-blue-50/50 dark:bg-slate-950 text-foreground flex flex-col">
-      <main className="max-w-6xl mx-auto px-6 py-8 pb-20 animate-in fade-in duration-500 grow">
+    <div className="flex min-h-screen flex-col bg-background font-sans text-foreground transition-colors duration-300">
+      <main className="mx-auto max-w-[1200px] grow px-4 py-8 pb-20 animate-in fade-in duration-500 sm:px-6">
         <HeroSection />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

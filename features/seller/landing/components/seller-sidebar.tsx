@@ -20,35 +20,36 @@ export function SellerSidebar({
     switch (kycStatus) {
       case KycStatusEnum.APPROVED:
         return (
-          <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200">
+          <Badge variant="outline" className="font-medium">
             Verified
           </Badge>
         );
       case KycStatusEnum.PENDING:
         return (
-          <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100 border-yellow-200">
+          <Badge variant="secondary" className="font-medium">
             Pending
           </Badge>
         );
       case KycStatusEnum.REJECTED:
         return <Badge variant="destructive">Rejected</Badge>;
       default:
-        return <Badge variant="secondary">Not Submitted</Badge>;
+        return <Badge variant="secondary">Not submitted</Badge>;
     }
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-border sticky top-6">
+    <div className="sticky top-6 rounded-xl border border-border bg-muted/25 p-6">
       {/* Profile Section */}
-      <div className="flex items-center gap-4 mb-6 pb-6 border-b border-border">
-        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-background shadow-sm">
-          <span className="text-xl font-bold text-muted-foreground">HS</span>
+      <div className="mb-6 flex items-center gap-4 border-b border-border pb-6">
+        <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
+          <span className="text-lg font-semibold text-muted-foreground">
+            HS
+          </span>
         </div>
         <div>
-          <h3 className="font-semibold text-lg text-foreground">Hari S.</h3>
-          {/* <p className="text-sm text-muted-foreground">Member since 2021</p> */}
-          <div className="mt-1 flex items-center gap-1 text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded-md w-fit">
-            <ShieldCheck size={12} /> Verified ID
+          <h3 className="text-lg font-semibold text-foreground">Hari S.</h3>
+          <div className="mt-1 flex w-fit items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5 text-xs text-muted-foreground">
+            <ShieldCheck size={12} aria-hidden /> Verified ID
           </div>
         </div>
       </div>
@@ -61,27 +62,27 @@ export function SellerSidebar({
       </div>
 
       {/* Eligibility Meter */}
-      <div className="space-y-4 mb-8">
+      <div className="mb-8 space-y-4">
         <div>
-          <div className="flex justify-between items-end mb-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Seller Eligibility
+          <div className="mb-2 flex items-end justify-between">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Seller eligibility
             </p>
-            <span className="text-xs font-bold text-green-600 dark:text-green-400">
+            <span className="text-xs font-semibold text-foreground">
               Excellent
             </span>
           </div>
-          <div className="flex items-end gap-2 mb-1">
-            <span className="text-3xl font-bold text-foreground">
+          <div className="mb-1 flex items-end gap-2">
+            <span className="text-3xl font-semibold tracking-tight text-foreground">
               98
-              <span className="text-lg text-muted-foreground font-normal">
+              <span className="text-lg font-normal text-muted-foreground">
                 /100
               </span>
             </span>
           </div>
-          <Progress value={98} className="h-1.5 [&>div]:bg-green-500" />
-          <p className="text-xs text-muted-foreground mt-2">
-            Your high trust score qualifies you for Tier 1 selling privileges.
+          <Progress value={98} className="h-1.5" />
+          <p className="mt-2 text-xs text-muted-foreground">
+            Your trust score qualifies you for Tier 1 selling privileges.
           </p>
         </div>
       </div>
@@ -89,13 +90,13 @@ export function SellerSidebar({
       {/* Actions */}
       <div className="space-y-3">
         {kycStatus === KycStatusEnum.APPROVED ? (
-          <div className="w-full bg-green-600 text-white py-3.5 px-6 rounded-xl font-medium flex items-center justify-center gap-2 shadow-lg shadow-green-500/20">
-            <ShieldCheck size={18} /> Verified Seller
+          <div className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground">
+            <ShieldCheck size={18} aria-hidden /> Verified seller
           </div>
         ) : kycStatus === KycStatusEnum.PENDING ? (
           <Button
             asChild
-            className="w-full py-6 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white font-medium shadow-lg group"
+            className="group h-auto w-full rounded-lg py-6 text-base font-semibold"
           >
             <Link href="/seller/kyc">
               View Application Status{' '}
@@ -110,7 +111,7 @@ export function SellerSidebar({
             asChild
             disabled={!acceptedTerms}
             variant="destructive"
-            className="w-full py-6 rounded-xl font-medium shadow-lg group disabled:opacity-50"
+            className="group h-auto w-full rounded-lg py-6 text-base font-semibold disabled:opacity-50"
           >
             <Link href={acceptedTerms ? '/seller/kyc' : '#'}>
               Re-submit Application{' '}
@@ -124,7 +125,7 @@ export function SellerSidebar({
           <Button
             type="button"
             onClick={onSubmit}
-            className={`w-full py-6 rounded-xl font-medium shadow-lg group ${!acceptedTerms ? 'opacity-70' : ''}`}
+            className={`group h-auto w-full rounded-lg py-6 text-base font-semibold ${!acceptedTerms ? 'opacity-70' : ''}`}
           >
             Submit Application{' '}
             <ArrowRight
@@ -136,26 +137,23 @@ export function SellerSidebar({
       </div>
 
       {/* Info Box */}
-      <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/30">
+      <div className="mt-6 rounded-xl border border-border bg-muted/40 p-4">
         <div className="flex gap-3">
-          <Info
-            className="text-blue-600 dark:text-blue-400 shrink-0"
-            size={20}
-          />
-          <div className="text-sm text-blue-800 dark:text-blue-200">
-            <p className="font-medium mb-1">
+          <Info className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+          <div className="text-sm text-foreground">
+            <p className="mb-1 font-semibold">
               {kycStatus === KycStatusEnum.APPROVED
-                ? 'Verification Success'
+                ? 'Verification complete'
                 : kycStatus === KycStatusEnum.PENDING
-                  ? 'Pending Verification'
-                  : 'Approval Process'}
+                  ? 'Pending verification'
+                  : 'Approval process'}
             </p>
-            <p className="opacity-80 text-xs leading-relaxed">
+            <p className="text-xs leading-relaxed text-muted-foreground">
               {kycStatus === KycStatusEnum.APPROVED
-                ? 'Your account is fully verified. You can now start listing luxury assets.'
+                ? 'Your account is verified. You can list auctions from the dashboard.'
                 : kycStatus === KycStatusEnum.PENDING
-                  ? 'Our curation team is reviewing your documents. This usually takes 24-48 hours.'
-                  : 'Applications for seller accounts are reviewed by our curation team within 48 hours.'}
+                  ? 'Our team is reviewing your documents. This usually takes 24–48 hours.'
+                  : 'Seller applications are reviewed within about 48 hours.'}
             </p>
           </div>
         </div>
