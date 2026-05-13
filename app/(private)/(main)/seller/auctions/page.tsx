@@ -44,9 +44,9 @@ const AUCTION_TYPE_OPTIONS: Array<{ label: string; value: string }> = [
 ];
 
 const SORT_OPTIONS: Array<{ label: string; value: string }> = [
-  { label: 'Start time', value: 'startAt' },
-  { label: 'End time', value: 'endAt' },
-  { label: 'Start price', value: 'startPrice' },
+  { label: 'Starts', value: 'startAt' },
+  { label: 'Ends', value: 'endAt' },
+  { label: 'Price', value: 'startPrice' },
 ];
 
 const LIMIT_OPTIONS = [4, 5, 8, 10, 20];
@@ -138,6 +138,7 @@ export default function SellerAuctionsPage() {
       filters.order !== DEFAULT_FILTERS.order
     )
       count += 1;
+    if (filters.limit !== DEFAULT_FILTERS.limit) count += 1;
     return count;
   }, [filters]);
 
@@ -216,6 +217,7 @@ export default function SellerAuctionsPage() {
       ) : (
         <>
           <SellerAuctionFilters
+            className="mt-4"
             filters={filters}
             categories={categories}
             statusOptions={STATUS_OPTIONS}
@@ -255,6 +257,7 @@ export default function SellerAuctionsPage() {
             )}
 
             <SellerAuctionsPagination
+              className="mt-3"
               currentPage={currentPage}
               totalPages={totalPages}
               loading={loading}

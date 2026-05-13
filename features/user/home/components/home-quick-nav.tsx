@@ -14,7 +14,7 @@ export function HomeQuickNav({ className }: { className?: string }) {
     <nav
       aria-label="Shortcuts"
       className={cn(
-        'flex flex-wrap gap-2 border-b border-border/60 pb-6',
+        'flex flex-wrap gap-2 border-b border-foreground/12 pb-6 dark:border-border/60',
         className
       )}
     >

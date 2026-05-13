@@ -30,6 +30,7 @@ export interface HomeTopBarProps {
   isVerified?: boolean;
   planSummary?: string;
   stats: IUserHomeStats;
+  showStats?: boolean;
   className?: string;
 }
 
@@ -39,6 +40,7 @@ export function HomeTopBar({
   isVerified,
   planSummary,
   stats,
+  showStats = true,
   className,
 }: HomeTopBarProps) {
   const firstName = resolveDisplayName(name);
@@ -106,7 +108,7 @@ export function HomeTopBar({
         </div>
       </div>
 
-      <HomeStats stats={stats} variant="dashboard" />
+      {showStats ? <HomeStats stats={stats} variant="dashboard" /> : null}
     </section>
   );
 }

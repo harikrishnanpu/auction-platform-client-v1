@@ -34,7 +34,7 @@ export function SellerKycView() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen font-sans bg-background text-foreground flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-transparent font-sans text-foreground">
         <LoaderIcon className="animate-spin text-muted-foreground" size={32} />
       </div>
     );
@@ -42,7 +42,7 @@ export function SellerKycView() {
 
   if (status === 'PENDING' || status === 'VERIFIED') {
     return (
-      <div className="min-h-screen font-sans transition-colors duration-300 bg-background text-foreground">
+      <div className="min-h-screen bg-transparent font-sans text-foreground transition-colors duration-300">
         <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 animate-in fade-in duration-500">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-4">
@@ -74,9 +74,7 @@ export function SellerKycView() {
   }
 
   return (
-    <div className="min-h-screen font-sans transition-colors duration-300 bg-background text-foreground">
-      <div className="fixed inset-0 pointer-events-none -z-10 bg-[linear-gradient(135deg,var(--background)_0%,var(--muted)_100%)]" />
-
+    <div className="min-h-screen bg-transparent font-sans text-foreground transition-colors duration-300">
       <main className="mx-auto max-w-[1200px] px-4 py-8 animate-in fade-in duration-500 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="mb-2 text-2xl font-semibold tracking-tight text-foreground">

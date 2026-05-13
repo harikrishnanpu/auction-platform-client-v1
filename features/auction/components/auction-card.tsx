@@ -27,6 +27,8 @@ export interface AuctionCardProps {
   auction: IAuctionDto;
   href?: string;
   className?: string;
+  /** Dense grid for browse / listing pages */
+  size?: 'default' | 'compact';
   /** Shown on cover (bids when live, watchers otherwise). */
   bidCount?: number;
   watcherCount?: number;
@@ -114,18 +116,21 @@ function MetaRow({
   icon,
   label,
   accent,
+  className,
 }: {
   icon: ReactNode;
   label: string;
   accent: 'live' | 'upcoming' | 'muted';
+  className?: string;
 }) {
   return (
     <div
       className={cn(
-        'flex items-center gap-1.5 text-[11px] font-medium tabular-nums',
+        'flex min-w-0 max-w-[50%] items-center gap-1 text-[11px] font-medium tabular-nums',
         accent === 'live' && 'text-destructive',
         accent === 'upcoming' && 'text-primary',
-        accent === 'muted' && 'text-muted-foreground'
+        accent === 'muted' && 'text-muted-foreground',
+        className
       )}
     >
       {icon}
@@ -139,16 +144,22 @@ function MetaRow({
 function CardCTA({
   display,
   href,
+  compact,
 }: {
   display: AuctionCardDisplay;
   href: string;
+  compact?: boolean;
 }) {
+  const btn = compact
+    ? 'py-1.5 text-[11px] rounded-md'
+    : 'py-2 text-xs rounded-md';
   if (display.isLive) {
     return (
       <Link
         href={href}
         className={cn(
-          'flex w-full items-center justify-center gap-1 rounded-md py-2 text-xs font-semibold',
+          'flex w-full items-center justify-center gap-1 font-semibold',
+          btn,
           'bg-primary text-primary-foreground shadow-sm transition-opacity hover:opacity-90',
           'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
         )}
@@ -163,7 +174,8 @@ function CardCTA({
       <Link
         href={href}
         className={cn(
-          'flex w-full items-center justify-center gap-1 rounded-md border border-border py-2 text-xs font-semibold',
+          'flex w-full items-center justify-center gap-1 border border-border font-semibold',
+          btn,
           'bg-background text-foreground transition-colors hover:bg-muted/80'
         )}
       >
@@ -176,8 +188,10 @@ function CardCTA({
     <Link
       href={href}
       className={cn(
-        'flex w-full items-center justify-center gap-1 rounded-md',
-        'border border-border bg-muted/50 py-1.5 text-[12px] font-semibold text-muted-foreground',
+        'flex w-full items-center justify-center gap-1 border border-border bg-muted/50 font-semibold text-muted-foreground',
+        compact
+          ? 'py-1.5 text-[11px] rounded-md'
+          : 'py-1.5 text-[12px] rounded-md',
         'transition-colors hover:bg-muted'
       )}
     >
@@ -193,10 +207,12 @@ export function AuctionCard({
   auction,
   href = `/auction/${auction.id}`,
   className,
+  size = 'default',
   bidCount,
   watcherCount,
   currentBid,
 }: AuctionCardProps) {
+  const compact = size === 'compact';
   const display = getAuctionCardDisplay(auction);
   const pill = pillConfigFor(display);
 
@@ -243,11 +259,11 @@ export function AuctionCard({
   return (
     <div
       className={cn(
-        'group relative flex h-full flex-col overflow-hidden rounded-xl',
-        'border border-border/80 bg-card',
+        'group relative flex h-full flex-col overflow-hidden rounded-lg border border-border/70 bg-card',
         'transition-[border-color,box-shadow] duration-200',
         'hover:border-foreground/15 hover:shadow-sm',
         display.isClosed && 'opacity-85',
+        compact && 'rounded-md',
         className
       )}
     >
@@ -263,20 +279,42 @@ export function AuctionCard({
             title={auction.title}
             imageUrl={url}
             showImage
+            aspect={compact ? '4/3' : '5/4'}
             className="h-full w-full"
           />
         ) : (
-          <div className="flex aspect-5/4 w-full items-center justify-center bg-muted">
-            <Gavel className="size-10 text-muted-foreground/25" aria-hidden />
+          <div
+            className={cn(
+              'flex w-full items-center justify-center bg-muted',
+              compact ? 'aspect-4/3' : 'aspect-5/4'
+            )}
+          >
+            <Gavel
+              className={cn(
+                'text-muted-foreground/25',
+                compact ? 'size-8' : 'size-10'
+              )}
+              aria-hidden
+            />
           </div>
         )}
 
-        <div className="absolute left-2 top-2 z-10">
+        <div
+          className={cn(
+            'absolute z-10',
+            compact ? 'left-1.5 top-1.5' : 'left-2 top-2'
+          )}
+        >
           <StatusPill label={pill.label} variant={pill.variant} />
         </div>
 
         {coverCount > 0 && (
-          <div className="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+          <div
+            className={cn(
+              'absolute right-1.5 top-1.5 z-10 flex items-center gap-0.5 rounded-full bg-black/60 px-1 py-0.5 font-semibold text-white backdrop-blur-sm',
+              compact ? 'text-[9px]' : 'text-[10px] gap-1 px-1.5 py-0.5'
+            )}
+          >
             <TrendingUp className="size-2.5" aria-hidden />
             <span className="tabular-nums">{coverCount}</span>
             <span className="text-white/70">{coverLabel}</span>
@@ -285,17 +323,32 @@ export function AuctionCard({
       </Link>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col gap-2 p-2.5">
+      <div
+        className={cn(
+          'flex flex-1 flex-col',
+          compact ? 'gap-1 p-2' : 'gap-2 p-2.5'
+        )}
+      >
         <Link
           href={href}
           className="block rounded outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+          <h3
+            className={cn(
+              'line-clamp-2 font-semibold leading-snug text-foreground transition-colors group-hover:text-primary',
+              compact ? 'text-[11px] leading-tight' : 'text-[13px]'
+            )}
+          >
             {auction.title}
           </h3>
         </Link>
 
-        <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        <div
+          className={cn(
+            'flex items-center gap-1 font-medium uppercase tracking-wide text-muted-foreground',
+            compact ? 'text-[9px]' : 'text-[10px] gap-1.5'
+          )}
+        >
           <span className="truncate">{auction.category?.name ?? '—'}</span>
           <span
             className="size-1 shrink-0 rounded-full bg-border"
@@ -304,25 +357,36 @@ export function AuctionCard({
           <span className="truncate">{auction.condition}</span>
         </div>
 
-        <div className="flex items-end justify-between gap-2">
+        <div className="flex items-end justify-between gap-1.5">
           <div className="min-w-0">
-            <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <p
+              className={cn(
+                'font-semibold uppercase tracking-wider text-muted-foreground',
+                compact ? 'text-[8px]' : 'text-[9px]'
+              )}
+            >
               {priceLabel}
             </p>
             <p
               className={cn(
-                'truncate text-[15px] font-bold tabular-nums leading-tight',
+                'truncate font-bold tabular-nums leading-tight',
+                compact ? 'text-sm' : 'text-[15px]',
                 display.isLive ? 'text-primary' : 'text-foreground'
               )}
             >
               {formatAuctionPrice(priceValue)}
             </p>
           </div>
-          <MetaRow icon={meta.icon} label={meta.label} accent={meta.accent} />
+          <MetaRow
+            icon={meta.icon}
+            label={meta.label}
+            accent={meta.accent}
+            className={compact ? 'max-w-[46%] text-[10px]' : undefined}
+          />
         </div>
 
-        <div className="mt-auto pt-1">
-          <CardCTA display={display} href={href} />
+        <div className="mt-auto pt-0.5">
+          <CardCTA display={display} href={href} compact={compact} />
         </div>
       </div>
     </div>

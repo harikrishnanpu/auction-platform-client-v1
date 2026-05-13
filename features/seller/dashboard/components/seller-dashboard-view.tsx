@@ -251,7 +251,7 @@ export default function SellerDashboardView() {
   const completedAmount = stats?.payments.completedAmountSum ?? 0;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-background">
+    <div className="min-h-[calc(100vh-4rem)] w-full min-w-0">
       <div className="mx-auto w-full max-w-[min(100%,1440px)] space-y-8 px-4 py-6 sm:px-6 lg:px-10">
         <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0 space-y-1">

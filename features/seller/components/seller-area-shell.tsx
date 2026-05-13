@@ -38,8 +38,8 @@ export default function SellerAreaShell({
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] w-full flex-col bg-background sm:flex-row">
-      <aside className="shrink-0 border-b border-border bg-background px-4 py-3 sm:w-[220px] sm:border-b-0 sm:border-r sm:py-6">
+    <div className="flex min-h-[calc(100vh-4rem)] w-full flex-col sm:flex-row">
+      <aside className="bg-app-shell-panel shrink-0 border-b border-border px-4 py-3 sm:w-[220px] sm:border-b-0 sm:border-r sm:py-6">
         <p className="mb-2 hidden px-1 text-xs font-medium uppercase tracking-wide text-muted-foreground sm:block">
           Seller
         </p>

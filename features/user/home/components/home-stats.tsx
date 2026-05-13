@@ -95,7 +95,8 @@ function StatChip({
   return (
     <div
       className={cn(
-        'flex min-w-19 shrink-0 flex-col gap-1 rounded-lg border border-border/70 bg-muted/25 px-2.5 py-2 sm:min-w-0 sm:flex-1 sm:px-3'
+        'flex min-w-19 shrink-0 flex-col gap-1 rounded-lg border border-foreground/12 bg-muted/25 px-2.5 py-2 sm:min-w-0 sm:flex-1 sm:px-3',
+        'dark:border-border/70'
       )}
     >
       <div className="flex items-center gap-1.5">
@@ -142,7 +143,13 @@ export function HomeStats({
   }
 
   return (
-    <section className={cn('w-full', className)} aria-label="Your stats">
+    <section
+      className={cn(
+        'w-full border-b border-foreground/12 pb-4 dark:border-border/60',
+        className
+      )}
+      aria-label="Your stats"
+    >
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
         At a glance
       </p>
@@ -159,7 +166,7 @@ export function HomeStats({
             </div>
           ))}
           <div
-            className="hidden h-auto w-px shrink-0 self-stretch bg-border/80 sm:block"
+            className="hidden h-auto w-px shrink-0 self-stretch bg-foreground/15 sm:block dark:bg-border/80"
             aria-hidden
           />
           {POSITION_STATS.map((item) => (

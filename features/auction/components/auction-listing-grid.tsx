@@ -10,7 +10,7 @@ const VARIANTS = {
   homeWide:
     'grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
   browse:
-    'grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+    'grid w-full grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-3 lg:grid-cols-4',
 } as const;
 
 export type AuctionListingGridVariant = keyof typeof VARIANTS;

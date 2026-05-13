@@ -12,7 +12,7 @@ import {
   AuctionCardSkeleton,
 } from '@/features/auction/components/auction-card';
 import { AuctionListingGrid } from '@/features/auction/components/auction-listing-grid';
-import { AdminAuctionFilters } from '@/features/admin/auctions/components/auctions-view/admin-auction-filters';
+import { UserAuctionFilters } from '@/features/user/auctions/components/user-auction-filters';
 import type {
   AuctionCategory,
   AuctionType,
@@ -28,10 +28,10 @@ const AUCTION_TYPE_OPTIONS: Array<{ label: string; value: string }> = [
 ];
 
 const SORT_OPTIONS: Array<{ label: string; value: string }> = [
-  { label: 'Start time', value: 'startAt' },
-  { label: 'End time', value: 'endAt' },
-  { label: 'Start price', value: 'startPrice' },
-  { label: 'Created', value: 'createdAt' },
+  { label: 'Starts', value: 'startAt' },
+  { label: 'Ends', value: 'endAt' },
+  { label: 'Price', value: 'startPrice' },
+  { label: 'Added', value: 'createdAt' },
 ];
 
 const LIMIT_OPTIONS = [4, 5, 8, 10, 20];
@@ -109,6 +109,7 @@ export default function AdminAuctionsPage() {
       filters.order !== DEFAULT_FILTERS.order
     )
       count += 1;
+    if (filters.limit !== DEFAULT_FILTERS.limit) count += 1;
     return count;
   }, [filters]);
 
@@ -155,7 +156,8 @@ export default function AdminAuctionsPage() {
         </Button>
       </header>
 
-      <AdminAuctionFilters
+      <UserAuctionFilters
+        className="mt-4"
         filters={filters}
         categories={categories}
         auctionTypeOptions={AUCTION_TYPE_OPTIONS}
@@ -164,6 +166,7 @@ export default function AdminAuctionsPage() {
         activeFilterCount={activeFilterCount}
         onUpdate={update}
         onReset={() => setFilters({ ...DEFAULT_FILTERS, page: 1 })}
+        searchPlaceholder="Search title…"
       />
 
       <div className="mt-4">
@@ -211,6 +214,7 @@ export default function AdminAuctionsPage() {
         )}
 
         <SellerAuctionsPagination
+          className="mt-3"
           currentPage={currentPage}
           totalPages={totalPages}
           loading={loading}

@@ -10,6 +10,8 @@ interface SearchInputProps {
   onChange: (value: string) => void;
   className?: string;
   debounceMs?: number;
+  /** Applied to the inner text field (e.g. borderless inside a split control). */
+  inputClassName?: string;
 }
 
 export function SearchInput({
@@ -18,6 +20,7 @@ export function SearchInput({
   onChange,
   className,
   debounceMs = 500,
+  inputClassName,
 }: SearchInputProps) {
   const [internalValue, setInternalValue] = useState(controlledValue ?? '');
 
@@ -44,7 +47,10 @@ export function SearchInput({
         value={internalValue}
         onChange={(e) => setInternalValue(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-9 pl-9 pr-9 text-sm bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition"
+        className={cn(
+          'w-full h-9 pl-9 pr-9 text-sm bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition',
+          inputClassName
+        )}
       />
       {internalValue && (
         <button
