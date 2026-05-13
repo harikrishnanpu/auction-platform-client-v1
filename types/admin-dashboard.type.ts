@@ -5,4 +5,8 @@ export interface IAdminDashboardStats {
   pendingKyc: number;
   totalAuctions: number;
   liveAuctions: number;
+  upcomingAuctions: number;
+  endedAuctions: number;
+  buyerUsers: number;
+  adminUsers: number;
 }
