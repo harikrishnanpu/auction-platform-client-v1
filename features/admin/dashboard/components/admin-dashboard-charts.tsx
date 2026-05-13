@@ -7,6 +7,9 @@ import {
   CartesianGrid,
   Cell,
   LabelList,
+  Legend,
+  Pie,
+  PieChart,
   XAxis,
   YAxis,
 } from 'recharts';
@@ -40,9 +43,16 @@ const auctionConfig = {
   count: { label: 'Count', color: 'var(--chart-1)' },
 } satisfies ChartConfig;
 
-const usersConfig = {
-  count: { label: 'Count', color: 'var(--chart-2)' },
-} satisfies ChartConfig;
+function buildRoleChartConfig(data: AdminDashboardSeriesPoint[]): ChartConfig {
+  const config: ChartConfig = {};
+  data.forEach((d, i) => {
+    config[d.label] = {
+      label: d.label,
+      color: FILLS[i % FILLS.length],
+    };
+  });
+  return config;
+}
 
 function Panel({
   kicker,
@@ -137,6 +147,70 @@ function HorizontalBars({
   );
 }
 
+function RolePie({
+  data,
+  emptyLabel,
+}: {
+  data: AdminDashboardSeriesPoint[];
+  emptyLabel: string;
+}) {
+  const total = data.reduce((a, b) => a + b.count, 0);
+
+  if (total === 0) {
+    return (
+      <div className="flex h-[200px] items-center justify-center rounded-xl border border-dashed border-border/70 bg-muted/15 px-6 text-center text-sm text-muted-foreground">
+        {emptyLabel}
+      </div>
+    );
+  }
+
+  const pieData = data.map((d) => ({
+    name: d.label,
+    value: d.count,
+  }));
+
+  return (
+    <ChartContainer
+      config={buildRoleChartConfig(data)}
+      className="mx-auto aspect-auto h-[260px] w-full max-w-sm sm:h-[280px]"
+    >
+      <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+        <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+        <Pie
+          data={pieData}
+          dataKey="value"
+          nameKey="name"
+          cx="50%"
+          cy="46%"
+          innerRadius={52}
+          outerRadius={86}
+          paddingAngle={2}
+          stroke="var(--background)"
+          strokeWidth={2}
+        >
+          {pieData.map((entry, i) => (
+            <Cell key={entry.name} fill={FILLS[i % FILLS.length]} />
+          ))}
+          <LabelList
+            dataKey="value"
+            position="outside"
+            className="fill-muted-foreground text-[10px] font-medium tabular-nums"
+          />
+        </Pie>
+        <Legend
+          verticalAlign="bottom"
+          align="center"
+          layout="horizontal"
+          wrapperStyle={{ paddingTop: 8 }}
+          formatter={(value) => (
+            <span className="text-xs text-muted-foreground">{value}</span>
+          )}
+        />
+      </PieChart>
+    </ChartContainer>
+  );
+}
+
 export function AdminDashboardCharts({
   auctionSeries,
   userRoleSeries,
@@ -159,9 +233,8 @@ export function AdminDashboardCharts({
         title="Roles on the platform"
         description="How many accounts carry buyer, seller, or admin roles (membership can overlap)."
       >
-        <HorizontalBars
+        <RolePie
           data={userRoleSeries}
-          config={usersConfig}
           emptyLabel="No role counts returned. Check the admin stats API."
         />
       </Panel>

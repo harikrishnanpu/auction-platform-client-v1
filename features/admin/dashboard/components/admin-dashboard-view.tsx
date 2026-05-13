@@ -63,6 +63,19 @@ export function AdminDashboardView({
           <AdminDashboardRail />
 
           <div className="min-w-0 flex-1 space-y-7 lg:space-y-8">
+            <section aria-labelledby="charts-heading">
+              <h2
+                id="charts-heading"
+                className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+              >
+                Distribution
+              </h2>
+              <AdminDashboardCharts
+                auctionSeries={auctionSeries}
+                userRoleSeries={userRoleSeries}
+              />
+            </section>
+
             <section aria-labelledby="metrics-heading">
               <h2
                 id="metrics-heading"
@@ -116,19 +129,6 @@ export function AdminDashboardView({
                   />
                 </div>
               </div>
-            </section>
-
-            <section aria-labelledby="charts-heading">
-              <h2
-                id="charts-heading"
-                className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"
-              >
-                Distribution
-              </h2>
-              <AdminDashboardCharts
-                auctionSeries={auctionSeries}
-                userRoleSeries={userRoleSeries}
-              />
             </section>
           </div>
         </div>
