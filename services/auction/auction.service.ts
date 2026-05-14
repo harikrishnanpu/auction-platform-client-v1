@@ -7,6 +7,7 @@ import {
   IGetAllSellerAuctionsResponse,
   IGetBrowseAuctionsFilter,
   IGetBrowseAuctionsResponse,
+  IGetUserHomeAuctionFeedResponse,
   IAuctionDto,
   UpdateAuctionDraftInput,
 } from '@/types/auction.type';
@@ -99,6 +100,24 @@ export const auctionService = {
         method: 'GET',
       },
       cookieStore
+    );
+  },
+
+  getUserHomeAuctionFeed: async (
+    cookieStore: ReadonlyRequestCookies,
+    params: { liveLimit?: number; longSealedLimit?: number }
+  ): Promise<ApiResponse<IGetUserHomeAuctionFeedResponse>> => {
+    const query = buildQuery({
+      liveLimit: params.liveLimit ?? 8,
+      longSealedLimit: params.longSealedLimit ?? 12,
+    });
+    const url = `${buildApiUrl(API_ENDPOINTS.auction.getUserHomeAuctionFeed)}?${query}`;
+
+    return apiFetch<IGetUserHomeAuctionFeedResponse>(
+      url,
+      { method: 'GET' },
+      cookieStore,
+      'no-store'
     );
   },
 

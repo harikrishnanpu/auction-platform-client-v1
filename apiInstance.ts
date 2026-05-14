@@ -63,6 +63,7 @@ export const API_ENDPOINTS = {
     endAuction: (id: string) => `/auction/${id}/end`,
     getLatestAuctions: '/auction/auctions',
     getBrowseAuctions: '/auction/auctions',
+    getUserHomeAuctionFeed: '/auction/home-feed',
   },
 
   admin: {

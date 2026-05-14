@@ -134,6 +134,11 @@ export interface IGetBrowseAuctionsFilter {
 
 export type IGetBrowseAuctionsResponse = IGetAllSellerAuctionsResponse;
 
+export interface IGetUserHomeAuctionFeedResponse {
+  liveAuctions: IAuctionDto[];
+  longAndSealedAuctions: IAuctionDto[];
+}
+
 export interface IGetMyAuctionsFilter {
   page: number;
   limit: number;

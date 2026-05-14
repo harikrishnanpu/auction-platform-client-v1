@@ -21,6 +21,11 @@ export const ASSISTANT_MOOD_CYCLE: AssistantMood[] = [
   'thinking',
 ];
 
+export const ASSISTANT_HEAD_IMAGES = [
+  '/assist-head1.png',
+  '/assist-head2.png',
+] as const;
+
 export type AssistantChatMessage = {
   id: string;
   role: 'user' | 'assistant';

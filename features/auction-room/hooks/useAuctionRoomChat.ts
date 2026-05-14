@@ -2,10 +2,7 @@
 
 import { useCallback, useState } from 'react';
 
-export function useAuctionRoomChatSheet(
-  sendChatMessage: (message: string) => void
-) {
-  const [chatOpen, setChatOpen] = useState(false);
+export function useAuctionRoomChat(sendChatMessage: (message: string) => void) {
   const [chatDraft, setChatDraft] = useState('');
 
   const sendChat = useCallback(() => {
@@ -15,11 +12,5 @@ export function useAuctionRoomChatSheet(
     setChatDraft('');
   }, [chatDraft, sendChatMessage]);
 
-  return {
-    chatOpen,
-    setChatOpen,
-    chatDraft,
-    setChatDraft,
-    sendChat,
-  };
+  return { chatDraft, setChatDraft, sendChat };
 }

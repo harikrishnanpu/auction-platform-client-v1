@@ -171,7 +171,7 @@ export default function AdminAuctionsPage() {
 
       <div className="mt-4">
         {loading ? (
-          <AuctionListingGrid>
+          <AuctionListingGrid variant="listing">
             {Array.from({ length: Math.min(filters.limit, 8) }).map((_, i) => (
               <AuctionCardSkeleton key={i} />
             ))}
@@ -182,7 +182,7 @@ export default function AdminAuctionsPage() {
             <p className="mt-1 text-[11px] text-muted-foreground">Try again.</p>
           </div>
         ) : (
-          <AuctionListingGrid>
+          <AuctionListingGrid variant="listing">
             {(response?.auctions ?? []).length === 0 ? (
               <div className="col-span-full rounded-xl border border-dashed border-border/60 bg-muted/10 px-4 py-10 text-center">
                 <div className="text-sm font-medium text-foreground">

@@ -58,14 +58,9 @@ export function UserAuctionsCards({
   }
 
   return (
-    <AuctionListingGrid variant="browse" className={className}>
+    <AuctionListingGrid variant="listing" className={className}>
       {rows.map((a) => (
-        <AuctionCard
-          key={a.id}
-          auction={a}
-          href={`/auction/${a.id}`}
-          size="compact"
-        />
+        <AuctionCard key={a.id} auction={a} href={`/auction/${a.id}`} />
       ))}
     </AuctionListingGrid>
   );
@@ -79,9 +74,9 @@ export function UserAuctionsCardsSkeleton({
   className?: string;
 }) {
   return (
-    <AuctionListingGrid variant="browse" className={className}>
+    <AuctionListingGrid variant="listing" className={className}>
       {Array.from({ length: count }).map((_, i) => (
-        <AuctionCardSkeleton key={i} compact />
+        <AuctionCardSkeleton key={i} />
       ))}
     </AuctionListingGrid>
   );

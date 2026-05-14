@@ -25,6 +25,7 @@ type AuctionRoomChatPanelProps = {
   onSend: () => void;
   canInteract: boolean;
   dense?: boolean;
+  className?: string;
 };
 
 export function AuctionRoomChatPanel({
@@ -34,48 +35,49 @@ export function AuctionRoomChatPanel({
   onSend,
   canInteract,
   dense = false,
+  className,
 }: AuctionRoomChatPanelProps) {
   const trimmed = draft.trim();
   const canSend = trimmed.length > 0 && canInteract;
 
   if (dense) {
     return (
-      <div className="flex h-full min-h-0 flex-col bg-white dark:bg-zinc-950">
-        <header className="shrink-0 border-b border-[#e5e7eb] px-5 pb-4 pt-14 dark:border-white/10">
+      <div className={cn('flex h-full min-h-0 flex-col bg-card', className)}>
+        <header className="shrink-0 border-b border-border px-4 pb-3 pt-4">
           <p className={arType.sectionLabel}>Room chat</p>
-          <p className="mt-1 text-sm leading-relaxed text-[#374151] dark:text-zinc-300">
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
             Visible to everyone in this auction.
           </p>
         </header>
 
         <div
-          className="min-h-0 flex-1 overflow-y-auto px-4 py-4"
+          className="min-h-0 flex-1 overflow-y-auto px-3 py-3"
           role="log"
           aria-live="polite"
         >
           {messages.length === 0 ? (
-            <p className="py-10 text-center text-sm text-[#6b7280]">
+            <p className="py-8 text-center text-xs text-muted-foreground">
               No messages yet.
             </p>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               {messages.map((m) => (
                 <li
                   key={m.id}
-                  className="rounded-[12px] border border-[#e5e7eb] bg-[#f8f9fa] px-4 py-3 dark:border-white/10 dark:bg-zinc-900/80"
+                  className="rounded-lg border border-border/80 bg-muted/30 px-3 py-2 dark:bg-muted/15"
                 >
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-sm font-semibold text-[#111111] dark:text-zinc-50">
+                    <span className="text-xs font-semibold text-foreground">
                       {m.userName}
                     </span>
                     <time
-                      className="shrink-0 text-[13px] text-[#6b7280]"
+                      className="shrink-0 text-[11px] text-muted-foreground"
                       dateTime={m.createdAt}
                     >
                       {formatAuctionDateTime(m.createdAt)}
                     </time>
                   </div>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#374151] dark:text-zinc-300">
+                  <p className="mt-1.5 whitespace-pre-wrap text-xs leading-relaxed text-foreground/90">
                     {m.message}
                   </p>
                 </li>
@@ -84,7 +86,7 @@ export function AuctionRoomChatPanel({
           )}
         </div>
 
-        <footer className="shrink-0 border-t border-[#e5e7eb] bg-white p-4 dark:border-white/10 dark:bg-zinc-950">
+        <footer className="shrink-0 border-t border-border bg-card p-3">
           <div className="flex gap-2">
             <Textarea
               value={draft}
@@ -92,7 +94,7 @@ export function AuctionRoomChatPanel({
               placeholder="Write a message…"
               disabled={!canInteract}
               rows={2}
-              className="min-h-[52px] flex-1 resize-none rounded-[8px] border-[#e5e7eb] py-2.5 text-sm focus-visible:ring-[#111111]/15 dark:border-white/15"
+              className="min-h-[48px] flex-1 resize-none rounded-md border-border py-2 text-xs"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -102,12 +104,12 @@ export function AuctionRoomChatPanel({
             />
             <Button
               type="button"
-              className={arBtnPrimary('h-[52px] w-12 min-w-12 shrink-0 px-0')}
+              className={arBtnPrimary('h-[48px] w-11 min-w-11 shrink-0 px-0')}
               onClick={onSend}
               disabled={!canSend}
               aria-label="Send message"
             >
-              <SendHorizontal className="size-5" />
+              <SendHorizontal className="size-4" />
             </Button>
           </div>
         </footer>

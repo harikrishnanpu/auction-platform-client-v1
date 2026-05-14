@@ -1,23 +1,26 @@
-import { Gavel, Handshake, Sparkles } from 'lucide-react';
+import { CirclePlay, Handshake, Layers } from 'lucide-react';
 
-import { getLatestAuctionsAction } from '@/actions/auction/auction.actions';
+import { getUserHomeAuctionFeedAction } from '@/actions/auction/auction.actions';
 import { getProfileAction } from '@/actions/user/profile.actions';
 import { getUserHomeStatsAction } from '@/actions/user/home.actions';
 import { getMyAuctionsAction } from '@/actions/user/my-auctions.actions';
 import { HomeAuctionsGrid } from '@/features/user/home/components/home-auctions-grid';
 import { HomeEmptyState } from '@/features/user/home/components/home-empty-state';
 import { HomeFooterLinksCard } from '@/features/user/home/components/home-footer-links-card';
+import { HomeLiveSatisfactionStrip } from '@/features/user/home/components/home-live-satisfaction-strip';
 import { HomeParticipatedCards } from '@/features/user/home/components/home-participated-cards';
 import { HomeParticipatedRail } from '@/features/user/home/components/home-participated-rail';
 import { HomePremiumCta } from '@/features/user/home/components/home-premium-cta';
 import { HomeQuickNav } from '@/features/user/home/components/home-quick-nav';
 import { HomeSection } from '@/features/user/home/components/home-section';
 import { HomeTopBar } from '@/features/user/home/components/home-top-bar';
+import { HomeUpdatesBanner } from '@/features/user/home/components/home-updates-banner';
 import { HomeWalletLinkCard } from '@/features/user/home/components/home-wallet-link-card';
 import { HomeWishlistPlaceholder } from '@/features/user/home/components/home-wishlist-placeholder';
 import type { IUserHomeStats } from '@/features/user/home/types/home.types';
 
-const FEATURED_LIMIT = 12;
+const LIVE_HOME_LIMIT = 8;
+const LONG_SEALED_HOME_LIMIT = 12;
 const PARTICIPATED_FETCH_LIMIT = 8;
 const RAIL_VISIBLE = 5;
 const BELOW_FEED_VISIBLE = 6;
@@ -34,7 +37,7 @@ const EMPTY_STATS: IUserHomeStats = {
 };
 
 export default async function HomePage() {
-  const [profileRes, statsRes, participatedRes, featuredRes] =
+  const [profileRes, statsRes, participatedRes, homeFeedRes] =
     await Promise.all([
       getProfileAction(),
       getUserHomeStatsAction(),
@@ -46,7 +49,10 @@ export default async function HomePage() {
         status: 'ALL',
         auctionType: 'ALL',
       }),
-      getLatestAuctionsAction(FEATURED_LIMIT),
+      getUserHomeAuctionFeedAction({
+        liveLimit: LIVE_HOME_LIMIT,
+        longSealedLimit: LONG_SEALED_HOME_LIMIT,
+      }),
     ]);
 
   const profile = profileRes.success ? profileRes.data : null;
@@ -68,8 +74,14 @@ export default async function HomePage() {
     participatedCount: participatedTotal,
   };
 
-  const featured =
-    featuredRes.success && featuredRes.data ? featuredRes.data.auctions : [];
+  const liveAuctions =
+    homeFeedRes.success && homeFeedRes.data
+      ? homeFeedRes.data.liveAuctions
+      : [];
+  const longAndSealedAuctions =
+    homeFeedRes.success && homeFeedRes.data
+      ? homeFeedRes.data.longAndSealedAuctions
+      : [];
 
   const railAuctions = participatedAll.slice(0, RAIL_VISIBLE);
   const belowFeedAuctions = participatedAll.slice(0, BELOW_FEED_VISIBLE);
@@ -83,7 +95,6 @@ export default async function HomePage() {
     <div className="min-h-[calc(100dvh-4rem)] w-full">
       <div className="mx-auto w-full max-w-[min(100%,1600px)] px-5 py-6 sm:px-8 sm:py-7 md:px-10 lg:px-14 lg:py-8 xl:px-16">
         <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,22rem)] lg:gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(300px,24rem)]">
-          {/* Main column: hero + feed (does not span full viewport width alone) */}
           <div className="min-w-0 space-y-8 lg:space-y-10">
             <HomeTopBar
               name={profile?.name}
@@ -93,24 +104,54 @@ export default async function HomePage() {
               stats={stats}
             />
 
+            <HomeUpdatesBanner />
+
             <HomeQuickNav />
 
             <HomeSection
-              icon={Sparkles}
-              title="Ending soon"
-              description="Live listings closing soonest."
+              icon={CirclePlay}
+              title="Live auctions"
+              description="Streamed lots open for bidding right now."
+              linkHref="/auctions"
+              linkLabel="View all"
+            >
+              <div className="space-y-3">
+                <HomeLiveSatisfactionStrip
+                  liveLotsOnHome={liveAuctions.length}
+                />
+                <HomeAuctionsGrid
+                  auctions={liveAuctions}
+                  limit={LIVE_HOME_LIMIT}
+                  gridVariant="homeWide"
+                  empty={
+                    <HomeEmptyState
+                      icon={CirclePlay}
+                      title="No live auctions right now"
+                      description="When sellers go live, they will show up here first."
+                      actionHref="/auctions"
+                      actionLabel="Browse all"
+                    />
+                  }
+                />
+              </div>
+            </HomeSection>
+
+            <HomeSection
+              icon={Layers}
+              title="Long & sealed"
+              description="Timed long auctions and sealed-bid listings closing soon."
               linkHref="/auctions"
               linkLabel="View all"
             >
               <HomeAuctionsGrid
-                auctions={featured}
-                limit={FEATURED_LIMIT}
+                auctions={longAndSealedAuctions}
+                limit={LONG_SEALED_HOME_LIMIT}
                 gridVariant="homeWide"
                 empty={
                   <HomeEmptyState
-                    icon={Gavel}
-                    title="No auctions right now"
-                    description="Check back soon for new listings."
+                    icon={Layers}
+                    title="No long or sealed lots"
+                    description="Check back for classic and private listings."
                     actionHref="/auctions"
                     actionLabel="Browse"
                   />
@@ -142,7 +183,6 @@ export default async function HomePage() {
             </HomeSection>
           </div>
 
-          {/* Right column: wallet, your auctions rail, then plans / wishlist / footer */}
           <aside className="flex w-full min-w-0 flex-col gap-4 lg:sticky lg:top-20 lg:self-start xl:gap-5">
             <HomeWalletLinkCard />
             <HomeParticipatedRail

@@ -15,9 +15,8 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
 
-import { useAuctionRoomChatSheet } from '../hooks/useAuctionRoomChatSheet';
+import { useAuctionRoomChat } from '../hooks/useAuctionRoomChat';
 import { useAuctionRoomHostControls } from '../hooks/useAuctionRoomHostControls';
 import { useAuctionRoomStatus } from '../hooks/useAuctionRoomStatus';
 import { useBidCooldown } from '../hooks/useBidCooldown';
@@ -57,10 +56,7 @@ import {
   AuctionRoomAnalyticsCharts,
   AuctionRoomAnalyticsKpis,
 } from './AuctionRoomCenterAnalytics';
-import {
-  AuctionRoomHeaderChatTrigger,
-  AuctionRoomListingHeader,
-} from './AuctionRoomListingHeader';
+import { AuctionRoomListingHeader } from './AuctionRoomListingHeader';
 
 import { arCardCanvas, arContainer, arPage } from '../lib/auction-room-design';
 
@@ -131,8 +127,8 @@ export function AuctionRoomCore({
     initialAuction,
   });
 
-  const { chatOpen, setChatOpen, chatDraft, setChatDraft, sendChat } =
-    useAuctionRoomChatSheet(sendChatMessage);
+  const { chatDraft, setChatDraft, sendChat } =
+    useAuctionRoomChat(sendChatMessage);
 
   const { actionBusy, actionError, handlePause, handleResume, handleEnd } =
     useAuctionRoomHostControls({
@@ -390,220 +386,209 @@ export function AuctionRoomCore({
       />
 
       <div className={arContainer('relative')}>
-        <Sheet open={chatOpen} onOpenChange={setChatOpen}>
-          <div className="space-y-3">
-            {error ? (
-              <AuctionRoomAlert
-                message={error}
-                className={arCardCanvas('px-2.5 py-2')}
-              />
-            ) : null}
-
-            {/* Two columns on large screens: listing + media | action stack */}
-            <div className="flex flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,320px)_minmax(0,1fr)] xl:items-start xl:gap-6">
-              <div className="order-1 flex min-w-0 flex-col gap-3">
-                <AuctionRoomListingHeader
-                  sectionLabel={listingSectionLabel}
-                  title={
-                    auction?.title ?? (
-                      <span className="text-muted-foreground">
-                        Loading auction…
-                      </span>
-                    )
-                  }
-                  badgesSlot={
-                    <AuctionRoomMetaBadges
-                      categoryName={categoryName}
-                      typeLabel={typeLabel}
-                      statusLabel={statusLabel}
-                      connectionSlot={
-                        <AuctionRoomConnectionStatus
-                          state={connectionState}
-                          roomReady={roomReady}
-                        />
-                      }
-                    />
-                  }
-                  actionsSlot={
-                    <>
-                      {canReportAuction ? (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-9 shrink-0 rounded-lg px-3 text-xs font-semibold"
-                          onClick={() => setReportAuctionOpen(true)}
-                        >
-                          Report
-                        </Button>
-                      ) : null}
-                      <AuctionRoomHeaderChatTrigger />
-                    </>
-                  }
-                />
-                <AuctionRoomMediaGallery
-                  key={auction?.id ?? auctionId}
-                  auction={auction}
-                />
-                <AuctionRoomDetailsSection auction={auction} />
-              </div>
-
-              <div className="order-2 flex min-w-0 flex-col gap-3">
-                <AuctionRoomLiveStreamPanel
-                  isLiveRoom={isLiveRoom}
-                  isHostProducer={isHostProducer}
-                  localStream={localStream}
-                  remoteStreams={remoteStreams}
-                  isLocalAudioEnabled={isLocalAudioEnabled}
-                  isLocalVideoEnabled={isLocalVideoEnabled}
-                  onToggleLocalAudio={toggleLocalAudio}
-                  onToggleLocalVideo={toggleLocalVideo}
-                />
-                <AuctionRoomAnalyticsKpis
-                  metricTiles={metricTiles}
-                  showLivePulse={isAuctionActive && !isAuctionEnded}
-                />
-                <AuctionRoomBidPanel
-                  auctionId={auctionId}
-                  auction={auction}
-                  currentBidAmount={currentBid?.amount ?? null}
-                  bidCount={liveFeed.length}
-                  isSealedRoom={isSealedRoom}
-                  isLiveRoom={isLiveRoom}
-                  nextBidMin={nextBidMin}
-                  endCountdown={endCountdown}
-                  isAuctionEnded={isAuctionEnded}
-                  isAuctionActive={isAuctionActive}
-                  canInteract={canInteract}
-                  isAutoBidActive={Boolean(autoBidConfig?.isActive)}
-                  showPlaceBid={mode === 'USER'}
-                  cooldownRemainingSeconds={cooldownRemainingSeconds}
-                  onPlaceBid={handlePlaceBid}
-                />
-
-                <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
-                  <AuctionRoomLiveBidFeed
-                    bids={liveFeed}
-                    mode={mode}
-                    isSealedRoom={isSealedRoom}
-                    isLiveRoom={isLiveRoom}
-                    currentUserId={user?.id}
-                  />
-                  <div className="flex min-w-0 flex-col gap-3">
-                    {mode === 'USER' ? (
-                      <AuctionRoomYourPosition standing={userBidStanding} />
-                    ) : null}
-
-                    {auctionStatusStr === 'SOLD' && soldSummaryDisplay ? (
-                      <AuctionSoldSummaryCard
-                        winnerUserName={soldSummaryDisplay.winnerUserName}
-                        soldAmount={soldSummaryDisplay.soldAmount}
-                      />
-                    ) : null}
-
-                    <AuctionRoomParticipantsPanel
-                      participants={participants}
-                      currentUserId={user?.id}
-                      canReport={canReportParticipants}
-                      onReportUser={handleReportParticipant}
-                    />
-
-                    {mode === 'USER' && !isSealedRoom ? (
-                      <AuctionRoomAutoBidPanel
-                        config={autoBidConfig}
-                        nextBidMin={nextBidMin}
-                        canInteract={canInteract}
-                        isAuctionActive={isAuctionActive}
-                        isLiveAuction={isLiveRoom}
-                        onEnable={setAutoBidConfig}
-                        onDisable={disableAutoBidConfig}
-                      />
-                    ) : null}
-
-                    {canControlAuction ? (
-                      <AuctionRoomSellerPanel
-                        auctionStatus={auctionStatusStr}
-                        canInteract={canInteract}
-                        isAuctionEnded={isAuctionEnded}
-                        actionBusy={actionBusy}
-                        actionError={actionError}
-                        onPause={handlePause}
-                        onResume={handleResume}
-                        onEnd={handleEnd}
-                      />
-                    ) : null}
-
-                    {canControlAuction &&
-                    auctionStatusStr === 'FALLBACK_ENDED' ? (
-                      <AuctionRoomFallbackEndedPanel
-                        auctionId={auctionId}
-                        allowSendPublicNotification={
-                          allowSendPublicNotification
-                        }
-                        onStatusUpdated={setAuctionStatusOverride}
-                        onSendPublicNotification={
-                          sendFallbackPublicNotification
-                        }
-                        onMarkAuctionFailed={markAuctionFailed}
-                      />
-                    ) : null}
-
-                    {showFallbackParticipantStats &&
-                    auctionStatusStr === 'FALLBACK_PUBLIC_NOTIFICATION' &&
-                    fallbackPublicParticipantStats ? (
-                      <FallbackPublicParticipantStatsCard
-                        pending={fallbackPublicParticipantStats.pending}
-                        rejected={fallbackPublicParticipantStats.rejected}
-                      />
-                    ) : null}
-
-                    {mode === 'USER' &&
-                    auctionStatusStr === 'FALLBACK_PUBLIC_NOTIFICATION' &&
-                    auction ? (
-                      <AuctionRoomFallbackPublicNotificationPanel
-                        auctionId={auctionId}
-                        auctionTitle={auction.title}
-                        startPrice={auction.startPrice}
-                        canInteract={canInteract}
-                        onStatusUpdated={setAuctionStatusOverride}
-                        payFallbackPublic={payFallbackPublic}
-                        verifyFallbackPublicAuctionPayment={
-                          verifyFallbackPublicAuctionPayment
-                        }
-                        onDecline={declineFallbackPublic}
-                      />
-                    ) : null}
-                  </div>
-                </div>
-
-                <AuctionRoomAnalyticsCharts
-                  auction={auction}
-                  liveFeed={liveFeed}
-                  charts={roomCharts}
-                  currentBidAmount={currentBid?.amount ?? null}
-                  isAuctionEnded={isAuctionEnded}
-                />
-              </div>
-            </div>
-          </div>
-
-          <SheetContent
-            side="left"
-            className="flex h-full w-[min(100vw,22rem)] flex-col gap-0 border-border/80 bg-card p-0 sm:max-w-md"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            <AuctionRoomChatPanel
-              messages={chatMessages}
-              draft={chatDraft}
-              onDraftChange={setChatDraft}
-              onSend={sendChat}
-              canInteract={canInteract}
-              dense
+        <div className="space-y-3">
+          {error ? (
+            <AuctionRoomAlert
+              message={error}
+              className={arCardCanvas('px-2.5 py-2')}
             />
-          </SheetContent>
-        </Sheet>
+          ) : null}
+
+          {/* Listing (left) · main stage (center) · chat (right on xl) */}
+          <div className="flex flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,280px)_minmax(0,1fr)_minmax(0,280px)] xl:items-start xl:gap-5">
+            <aside className="order-1 flex min-w-0 flex-col gap-3 xl:sticky xl:top-4 xl:max-h-[calc(100dvh-5rem)] xl:self-start xl:overflow-y-auto">
+              <AuctionRoomListingHeader
+                sectionLabel={listingSectionLabel}
+                title={
+                  auction?.title ?? (
+                    <span className="text-muted-foreground">
+                      Loading auction…
+                    </span>
+                  )
+                }
+                badgesSlot={
+                  <AuctionRoomMetaBadges
+                    categoryName={categoryName}
+                    typeLabel={typeLabel}
+                    statusLabel={statusLabel}
+                    connectionSlot={
+                      <AuctionRoomConnectionStatus
+                        state={connectionState}
+                        roomReady={roomReady}
+                      />
+                    }
+                  />
+                }
+                actionsSlot={
+                  canReportAuction ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-9 shrink-0 rounded-lg px-3 text-xs font-semibold"
+                      onClick={() => setReportAuctionOpen(true)}
+                    >
+                      Report
+                    </Button>
+                  ) : null
+                }
+              />
+              <AuctionRoomMediaGallery
+                key={auction?.id ?? auctionId}
+                auction={auction}
+              />
+              <AuctionRoomDetailsSection auction={auction} />
+            </aside>
+
+            <main className="order-2 flex min-w-0 flex-col gap-3">
+              <AuctionRoomLiveStreamPanel
+                isLiveRoom={isLiveRoom}
+                isHostProducer={isHostProducer}
+                localStream={localStream}
+                remoteStreams={remoteStreams}
+                isLocalAudioEnabled={isLocalAudioEnabled}
+                isLocalVideoEnabled={isLocalVideoEnabled}
+                onToggleLocalAudio={toggleLocalAudio}
+                onToggleLocalVideo={toggleLocalVideo}
+              />
+              <AuctionRoomAnalyticsKpis
+                metricTiles={metricTiles}
+                showLivePulse={isAuctionActive && !isAuctionEnded}
+              />
+              <AuctionRoomBidPanel
+                auctionId={auctionId}
+                auction={auction}
+                currentBidAmount={currentBid?.amount ?? null}
+                bidCount={liveFeed.length}
+                isSealedRoom={isSealedRoom}
+                isLiveRoom={isLiveRoom}
+                nextBidMin={nextBidMin}
+                endCountdown={endCountdown}
+                isAuctionEnded={isAuctionEnded}
+                isAuctionActive={isAuctionActive}
+                canInteract={canInteract}
+                isAutoBidActive={Boolean(autoBidConfig?.isActive)}
+                showPlaceBid={mode === 'USER'}
+                cooldownRemainingSeconds={cooldownRemainingSeconds}
+                onPlaceBid={handlePlaceBid}
+              />
+
+              <AuctionRoomLiveBidFeed
+                bids={liveFeed}
+                mode={mode}
+                isSealedRoom={isSealedRoom}
+                isLiveRoom={isLiveRoom}
+                currentUserId={user?.id}
+              />
+
+              {mode === 'USER' ? (
+                <AuctionRoomYourPosition standing={userBidStanding} />
+              ) : null}
+
+              {auctionStatusStr === 'SOLD' && soldSummaryDisplay ? (
+                <AuctionSoldSummaryCard
+                  winnerUserName={soldSummaryDisplay.winnerUserName}
+                  soldAmount={soldSummaryDisplay.soldAmount}
+                />
+              ) : null}
+
+              <AuctionRoomParticipantsPanel
+                participants={participants}
+                currentUserId={user?.id}
+                canReport={canReportParticipants}
+                onReportUser={handleReportParticipant}
+              />
+
+              {mode === 'USER' && !isSealedRoom ? (
+                <AuctionRoomAutoBidPanel
+                  config={autoBidConfig}
+                  nextBidMin={nextBidMin}
+                  canInteract={canInteract}
+                  isAuctionActive={isAuctionActive}
+                  isLiveAuction={isLiveRoom}
+                  onEnable={setAutoBidConfig}
+                  onDisable={disableAutoBidConfig}
+                />
+              ) : null}
+
+              {canControlAuction ? (
+                <AuctionRoomSellerPanel
+                  auctionStatus={auctionStatusStr}
+                  canInteract={canInteract}
+                  isAuctionEnded={isAuctionEnded}
+                  actionBusy={actionBusy}
+                  actionError={actionError}
+                  onPause={handlePause}
+                  onResume={handleResume}
+                  onEnd={handleEnd}
+                />
+              ) : null}
+
+              {canControlAuction && auctionStatusStr === 'FALLBACK_ENDED' ? (
+                <AuctionRoomFallbackEndedPanel
+                  auctionId={auctionId}
+                  allowSendPublicNotification={allowSendPublicNotification}
+                  onStatusUpdated={setAuctionStatusOverride}
+                  onSendPublicNotification={sendFallbackPublicNotification}
+                  onMarkAuctionFailed={markAuctionFailed}
+                />
+              ) : null}
+
+              {showFallbackParticipantStats &&
+              auctionStatusStr === 'FALLBACK_PUBLIC_NOTIFICATION' &&
+              fallbackPublicParticipantStats ? (
+                <FallbackPublicParticipantStatsCard
+                  pending={fallbackPublicParticipantStats.pending}
+                  rejected={fallbackPublicParticipantStats.rejected}
+                />
+              ) : null}
+
+              {mode === 'USER' &&
+              auctionStatusStr === 'FALLBACK_PUBLIC_NOTIFICATION' &&
+              auction ? (
+                <AuctionRoomFallbackPublicNotificationPanel
+                  auctionId={auctionId}
+                  auctionTitle={auction.title}
+                  startPrice={auction.startPrice}
+                  canInteract={canInteract}
+                  onStatusUpdated={setAuctionStatusOverride}
+                  payFallbackPublic={payFallbackPublic}
+                  verifyFallbackPublicAuctionPayment={
+                    verifyFallbackPublicAuctionPayment
+                  }
+                  onDecline={declineFallbackPublic}
+                />
+              ) : null}
+
+              <AuctionRoomAnalyticsCharts
+                auction={auction}
+                liveFeed={liveFeed}
+                charts={roomCharts}
+                currentBidAmount={currentBid?.amount ?? null}
+                isAuctionEnded={isAuctionEnded}
+              />
+            </main>
+
+            <aside className="order-3 flex min-h-[min(360px,55vh)] min-w-0 flex-col xl:sticky xl:top-4 xl:h-[calc(100dvh-5rem)] xl:max-h-[calc(100dvh-5rem)] xl:min-h-0 xl:self-start">
+              <div
+                className={cn(
+                  arCardCanvas(),
+                  'flex min-h-0 flex-1 flex-col overflow-hidden'
+                )}
+              >
+                <AuctionRoomChatPanel
+                  className="min-h-0 flex-1"
+                  messages={chatMessages}
+                  draft={chatDraft}
+                  onDraftChange={setChatDraft}
+                  onSend={sendChat}
+                  canInteract={canInteract}
+                  dense
+                />
+              </div>
+            </aside>
+          </div>
+        </div>
       </div>
     </div>
   );

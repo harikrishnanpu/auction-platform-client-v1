@@ -10,6 +10,7 @@ import {
   IGetAllSellerAuctionsResponse,
   IGetBrowseAuctionsFilter,
   IGetBrowseAuctionsResponse,
+  IGetUserHomeAuctionFeedResponse,
   IAuctionDto,
   UpdateAuctionDraftInput,
 } from '@/types/auction.type';
@@ -56,6 +57,14 @@ export async function getLatestAuctionsAction(
 ): Promise<ApiResponse<IGetBrowseAuctionsResponse>> {
   const cookieStore = await cookies();
   return auctionService.getLatestAuctions(cookieStore, limit);
+}
+
+export async function getUserHomeAuctionFeedAction(params?: {
+  liveLimit?: number;
+  longSealedLimit?: number;
+}): Promise<ApiResponse<IGetUserHomeAuctionFeedResponse>> {
+  const cookieStore = await cookies();
+  return auctionService.getUserHomeAuctionFeed(cookieStore, params ?? {});
 }
 
 export async function getBrowseAuctionsAction(

@@ -19,7 +19,7 @@ export function SellerHeaderSkeleton() {
 
 export function SellerAuctionListSkeleton({ count = 5 }: { count?: number }) {
   return (
-    <AuctionListingGrid>
+    <AuctionListingGrid variant="listing">
       {Array.from({ length: count }).map((_, i) => (
         <AuctionCardSkeleton key={i} />
       ))}
