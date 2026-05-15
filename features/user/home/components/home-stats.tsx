@@ -31,12 +31,12 @@ interface StatConfig {
 }
 
 const MARKET_STATS: StatConfig[] = [
-  { key: 'liveCount', label: 'Live now', icon: Flame, accent: 'red' },
-  { key: 'upcomingCount', label: 'Starting soon', icon: Timer, accent: 'blue' },
+  { key: 'liveCount', label: 'Live', icon: Flame, accent: 'red' },
+  { key: 'upcomingCount', label: 'Soon', icon: Timer, accent: 'blue' },
   { key: 'endedCount', label: 'Closed', icon: Gavel, accent: 'emerald' },
   {
     key: 'participatedCount',
-    label: 'You joined',
+    label: 'Joined',
     icon: Handshake,
     accent: 'amber',
   },
@@ -64,49 +64,24 @@ const POSITION_STATS: StatConfig[] = [
   },
 ];
 
-const ACCENT_STYLES: Record<Accent, { icon: string; ring: string }> = {
-  red: {
-    icon: 'text-red-500 bg-red-500/10',
-    ring: 'group-hover:border-red-300 dark:group-hover:border-red-900/60',
-  },
-  blue: {
-    icon: 'text-blue-500 bg-blue-500/10',
-    ring: 'group-hover:border-blue-300 dark:group-hover:border-blue-900/60',
-  },
-  emerald: {
-    icon: 'text-emerald-500 bg-emerald-500/10',
-    ring: 'group-hover:border-emerald-300 dark:group-hover:border-emerald-900/60',
-  },
-  amber: {
-    icon: 'text-amber-500 bg-amber-500/10',
-    ring: 'group-hover:border-amber-300 dark:group-hover:border-amber-900/60',
-  },
-  violet: {
-    icon: 'text-violet-500 bg-violet-500/10',
-    ring: 'group-hover:border-violet-300 dark:group-hover:border-violet-900/60',
-  },
-  orange: {
-    icon: 'text-orange-500 bg-orange-500/10',
-    ring: 'group-hover:border-orange-300 dark:group-hover:border-orange-900/60',
-  },
-  teal: {
-    icon: 'text-teal-500 bg-teal-500/10',
-    ring: 'group-hover:border-teal-300 dark:group-hover:border-teal-900/60',
-  },
-  slate: {
-    icon: 'text-slate-500 bg-slate-500/10',
-    ring: 'group-hover:border-slate-300 dark:group-hover:border-slate-900/60',
-  },
+const ACCENT_DOT: Record<Accent, string> = {
+  red: 'bg-red-500',
+  blue: 'bg-blue-500',
+  emerald: 'bg-emerald-500',
+  amber: 'bg-amber-500',
+  violet: 'bg-violet-500',
+  orange: 'bg-orange-500',
+  teal: 'bg-teal-500',
+  slate: 'bg-slate-400 dark:bg-slate-500',
 };
 
 export interface HomeStatsProps {
   stats: IUserHomeStats;
   className?: string;
-  /** Full dashboard: two labeled rows (marketplace + your position). */
   variant?: 'dashboard' | 'inline';
 }
 
-function StatCard({
+function StatChip({
   label,
   value,
   icon: Icon,
@@ -117,52 +92,26 @@ function StatCard({
   icon: LucideIcon;
   accent: Accent;
 }) {
-  const styles = ACCENT_STYLES[accent];
   return (
     <div
       className={cn(
-        'group flex min-w-0 flex-1 items-center gap-2.5 rounded-[8px] border border-border/70 bg-[#f5f5f5] px-3 py-2.5 transition-colors dark:bg-muted/50',
-        styles.ring
+        'flex min-w-19 shrink-0 flex-col gap-1 rounded-lg border border-foreground/12 bg-muted/25 px-2.5 py-2 sm:min-w-0 sm:flex-1 sm:px-3',
+        'dark:border-border/70'
       )}
     >
-      <div
-        className={cn(
-          'flex size-8 shrink-0 items-center justify-center rounded-md',
-          styles.icon
-        )}
-      >
-        <Icon className="size-4" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-xl font-bold tabular-nums leading-none text-foreground">
-          {value}
-        </p>
-        <p className="mt-0.5 truncate text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-          {label}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function StatGrid({
-  items,
-  stats,
-}: {
-  items: StatConfig[];
-  stats: IUserHomeStats;
-}) {
-  return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-      {items.map((item) => (
-        <StatCard
-          key={item.key}
-          label={item.label}
-          value={stats[item.key] ?? 0}
-          icon={item.icon}
-          accent={item.accent}
+      <div className="flex items-center gap-1.5">
+        <span
+          className={cn('size-1.5 shrink-0 rounded-full', ACCENT_DOT[accent])}
+          aria-hidden
         />
-      ))}
+        <Icon className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+        <span className="truncate text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+          {label}
+        </span>
+      </div>
+      <p className="pl-0 text-lg font-semibold tabular-nums leading-none tracking-tight text-foreground sm:text-xl">
+        {value}
+      </p>
     </div>
   );
 }
@@ -176,12 +125,12 @@ export function HomeStats({
     return (
       <section
         className={cn(
-          'flex flex-wrap gap-2 sm:grid sm:grid-cols-4 sm:gap-3',
+          'flex flex-wrap gap-2 sm:grid sm:grid-cols-4 sm:gap-2 lg:grid-cols-8',
           className
         )}
       >
         {[...MARKET_STATS, ...POSITION_STATS].map((item) => (
-          <StatCard
+          <StatChip
             key={item.key}
             label={item.label}
             value={stats[item.key] ?? 0}
@@ -194,18 +143,43 @@ export function HomeStats({
   }
 
   return (
-    <section className={cn('space-y-4', className)}>
-      <div>
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Marketplace
-        </p>
-        <StatGrid items={MARKET_STATS} stats={stats} />
-      </div>
-      <div>
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Your position
-        </p>
-        <StatGrid items={POSITION_STATS} stats={stats} />
+    <section
+      className={cn(
+        'w-full border-b border-foreground/12 pb-4 dark:border-border/60',
+        className
+      )}
+      aria-label="Your stats"
+    >
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+        At a glance
+      </p>
+      <div className="w-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:overflow-visible">
+        <div className="flex min-w-min snap-x snap-mandatory gap-2 pb-0.5 sm:min-w-0 sm:flex-wrap sm:gap-2">
+          {MARKET_STATS.map((item) => (
+            <div key={item.key} className="snap-start">
+              <StatChip
+                label={item.label}
+                value={stats[item.key] ?? 0}
+                icon={item.icon}
+                accent={item.accent}
+              />
+            </div>
+          ))}
+          <div
+            className="hidden h-auto w-px shrink-0 self-stretch bg-foreground/15 sm:block dark:bg-border/80"
+            aria-hidden
+          />
+          {POSITION_STATS.map((item) => (
+            <div key={item.key} className="snap-start">
+              <StatChip
+                label={item.label}
+                value={stats[item.key] ?? 0}
+                icon={item.icon}
+                accent={item.accent}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

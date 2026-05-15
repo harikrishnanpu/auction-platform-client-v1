@@ -124,3 +124,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Matches private main layout: soft blue → warm tint (light), slate stack (dark). */
+@layer utilities {
+  .bg-app-shell {
+    @apply bg-linear-to-b from-blue-200 via-blue-50 to-amber-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950;
+  }
+
+  .bg-app-shell-panel {
+    @apply bg-white/55 backdrop-blur-md dark:bg-background/85;
+  }
+}

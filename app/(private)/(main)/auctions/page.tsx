@@ -27,10 +27,10 @@ const AUCTION_TYPE_OPTIONS: Array<{ label: string; value: string }> = [
 ];
 
 const SORT_OPTIONS: Array<{ label: string; value: string }> = [
-  { label: 'Start time', value: 'startAt' },
-  { label: 'End time', value: 'endAt' },
-  { label: 'Start price', value: 'startPrice' },
-  { label: 'Created', value: 'createdAt' },
+  { label: 'Starts', value: 'startAt' },
+  { label: 'Ends', value: 'endAt' },
+  { label: 'Price', value: 'startPrice' },
+  { label: 'Added', value: 'createdAt' },
 ];
 
 const LIMIT_OPTIONS = [8, 12, 16, 24];
@@ -135,59 +135,57 @@ export default function AuctionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1200px] px-3 py-6 sm:px-4 sm:py-8">
-      <header className="flex flex-col gap-4 border-b border-border/70 pb-6 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0 space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            Browse
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[28px] sm:leading-tight">
-            Auctions
+    <div className="mx-auto w-full max-w-[min(100%,1600px)] px-4 pb-8 pt-5 sm:px-6 sm:pt-6 lg:px-10 lg:pb-10">
+      <div className="flex flex-col gap-3 border-b border-border/60 pb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="min-w-0">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+            Browse auctions
           </h1>
-          <p className="max-w-xl text-sm text-muted-foreground">
-            Active listings only — search, filter by type and category, and jump
-            into live rooms. Layout follows a white canvas, soft gray panels,
-            and black primary actions.
+          <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
+            Active listings
+            {!loading && (
+              <>
+                {' · '}
+                <span className="tabular-nums text-foreground/90">
+                  {totalListings}
+                </span>{' '}
+                {totalListings === 1 ? 'result' : 'results'}
+              </>
+            )}
+            {loading ? ' · …' : null}
           </p>
         </div>
-
         <Button
           asChild
           size="sm"
-          className="h-9 shrink-0 rounded-[8px] bg-[#111111] text-white hover:bg-[#242424] dark:bg-primary"
+          variant="outline"
+          className="h-8 shrink-0 self-start rounded-md text-xs sm:self-auto"
         >
-          <Link href="/home">Back to dashboard</Link>
+          <Link href="/home">Home</Link>
         </Button>
-      </header>
+      </div>
 
-      <UserAuctionFilters
-        filters={filters}
-        categories={categories}
-        auctionTypeOptions={AUCTION_TYPE_OPTIONS}
-        sortOptions={SORT_OPTIONS}
-        limitOptions={LIMIT_OPTIONS}
-        activeFilterCount={activeFilterCount}
-        onUpdate={update}
-        onReset={() => setFilters({ ...DEFAULT_FILTERS, page: 1 })}
-      />
+      <div className="mt-4">
+        <UserAuctionFilters
+          filters={filters}
+          categories={categories}
+          auctionTypeOptions={AUCTION_TYPE_OPTIONS}
+          sortOptions={SORT_OPTIONS}
+          limitOptions={LIMIT_OPTIONS}
+          activeFilterCount={activeFilterCount}
+          onUpdate={update}
+          onReset={() => setFilters({ ...DEFAULT_FILTERS, page: 1 })}
+        />
+      </div>
 
-      <div className="mt-8">
-        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-sm font-semibold text-foreground">Results</h2>
-          <p className="text-[11px] text-muted-foreground">
-            {loading
-              ? 'Loading…'
-              : `${totalListings} listing${totalListings === 1 ? '' : 's'}`}
-          </p>
-        </div>
-
+      <div className="mt-4">
         {loading ? (
           <UserAuctionsCardsSkeleton count={Math.min(filters.limit, 12)} />
         ) : error ? (
-          <div className="rounded-[12px] border border-destructive/25 bg-destructive/5 p-4 text-center">
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-6 text-center">
             <p className="text-sm font-medium text-destructive">{error}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Try adjusting filters or refresh.
+              Try different filters or refresh.
             </p>
           </div>
         ) : (
@@ -198,7 +196,7 @@ export default function AuctionsPage() {
             emptyAction={
               <Button
                 variant="outline"
-                className="mt-2 h-9 rounded-[8px] text-xs"
+                className="mt-2 h-8 rounded-md text-xs"
                 asChild
               >
                 <Link href="/auctions">Refresh</Link>
@@ -207,20 +205,23 @@ export default function AuctionsPage() {
           />
         )}
 
-        <SellerAuctionsPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          loading={loading}
-          onPrev={() =>
-            setFilters((p) => ({ ...p, page: Math.max(1, p.page - 1) }))
-          }
-          onNext={() =>
-            setFilters((p) => ({
-              ...p,
-              page: Math.min(totalPages, p.page + 1),
-            }))
-          }
-        />
+        <div className="mt-4">
+          <SellerAuctionsPagination
+            variant="minimal-end"
+            currentPage={currentPage}
+            totalPages={totalPages}
+            loading={loading}
+            onPrev={() =>
+              setFilters((p) => ({ ...p, page: Math.max(1, p.page - 1) }))
+            }
+            onNext={() =>
+              setFilters((p) => ({
+                ...p,
+                page: Math.min(totalPages, p.page + 1),
+              }))
+            }
+          />
+        </div>
       </div>
     </div>
   );

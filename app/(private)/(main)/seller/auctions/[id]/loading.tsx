@@ -1,6 +1,6 @@
 export default function SellerAuctionsDetailLoading() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[calc(100dvh-4rem)] w-full min-w-0 bg-transparent">
       <div className="mx-auto max-w-5xl space-y-4 px-3 py-6">
         <div className="h-6 w-64 animate-pulse rounded bg-muted/40" />
         <div className="h-24 w-full animate-pulse rounded bg-muted/30" />

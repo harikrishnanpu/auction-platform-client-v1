@@ -24,7 +24,7 @@ export default async function EditSellerAuctionPage({
     : [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[calc(100dvh-4rem)] w-full min-w-0">
       <div className="mx-auto max-w-5xl px-3 py-6">
         <SellerAuctionEditDraftContainer
           auction={auctionRes.data}

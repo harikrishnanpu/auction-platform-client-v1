@@ -50,7 +50,7 @@ export function HomeParticipatedRail({
       </div>
 
       {auctions.length === 0 ? (
-        <div className="mt-4 flex flex-col items-center rounded-[8px] border border-dashed border-border/80 bg-[#f8f9fa] px-3 py-6 text-center dark:bg-muted/30">
+        <div className="mt-4 flex flex-col items-center rounded-lg border border-dashed border-border/80 bg-muted/30 px-3 py-6 text-center">
           <Handshake className="mb-2 size-8 text-muted-foreground/60" />
           <p className="text-xs font-medium text-foreground">No activity yet</p>
           <p className="mt-1 max-w-[16rem] text-[11px] text-muted-foreground">
@@ -74,7 +74,7 @@ export function HomeParticipatedRail({
               <li key={auction.id}>
                 <Link
                   href={`/auction/${auction.id}`}
-                  className="group flex flex-col gap-1.5 rounded-[8px] border border-transparent px-2 py-2 transition-colors hover:border-border/80 hover:bg-[#f5f5f5] dark:hover:bg-muted/50"
+                  className="group flex flex-col gap-1.5 rounded-lg border border-transparent px-2 py-2 transition-colors hover:border-border/80 hover:bg-muted/40"
                 >
                   <div className="flex gap-2">
                     <div className="min-w-0 flex-1">
@@ -90,7 +90,7 @@ export function HomeParticipatedRail({
                     <span className="inline-flex items-center rounded-full border border-border/70 bg-muted/40 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                       {listingStatus}
                     </span>
-                    <span className="inline-flex items-center rounded-full border border-border/80 bg-[#f5f5f5] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground dark:bg-muted">
+                    <span className="inline-flex items-center rounded-full border border-border/80 bg-muted/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
                       You: {standing}
                     </span>
                   </div>

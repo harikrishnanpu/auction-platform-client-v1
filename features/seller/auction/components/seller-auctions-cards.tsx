@@ -58,7 +58,7 @@ export function SellerAuctionsCards({
   }
 
   return (
-    <AuctionListingGrid className={className}>
+    <AuctionListingGrid variant="listing" className={className}>
       {rows.map((a) => (
         <AuctionCard key={a.id} auction={a} href={`/seller/auctions/${a.id}`} />
       ))}
@@ -76,7 +76,7 @@ export function SellerAuctionsCardsSkeleton({
   className,
 }: SellerAuctionsCardsSkeletonProps) {
   return (
-    <AuctionListingGrid className={className}>
+    <AuctionListingGrid variant="listing" className={className}>
       {Array.from({ length: count }).map((_, i) => (
         <AuctionCardSkeleton key={i} />
       ))}

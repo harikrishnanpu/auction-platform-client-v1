@@ -37,7 +37,7 @@ export default async function SellerAuctionDraftPage({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[calc(100dvh-4rem)] w-full min-w-0">
       <div className="mx-auto max-w-5xl px-3 py-6">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">

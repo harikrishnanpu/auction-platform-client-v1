@@ -2,25 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Crown,
-  Gavel,
-  Handshake,
-  Home,
-  LayoutGrid,
-  UserRound,
-} from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
-const NAV = [
-  { href: '/home', label: 'Home', icon: Home },
-  { href: '/auctions', label: 'Browse auctions', icon: LayoutGrid },
-  { href: '/profile/my-auctions', label: 'My auctions', icon: Handshake },
-  { href: '/profile', label: 'Profile', icon: UserRound },
-  { href: '/profile/subscription', label: 'Subscription', icon: Crown },
-  { href: '/seller/landing', label: 'Seller hub', icon: Gavel },
-] as const;
+import { HOME_NAV_LINKS, homeNavLinkActive } from '../config/home-nav';
 
 export function HomeLeftRail({ className }: { className?: string }) {
   const pathname = usePathname();
@@ -36,30 +21,8 @@ export function HomeLeftRail({ className }: { className?: string }) {
         Quick links
       </p>
       <nav className="flex flex-col gap-0.5" aria-label="Home shortcuts">
-        {NAV.map(({ href, label, icon: Icon }) => {
-          const active = (() => {
-            if (href === '/home') return pathname === '/home';
-            if (href === '/profile/my-auctions') {
-              return (
-                pathname === '/profile/my-auctions' ||
-                pathname.startsWith('/profile/my-auctions/')
-              );
-            }
-            if (href === '/profile/subscription') {
-              return (
-                pathname === '/profile/subscription' ||
-                pathname.startsWith('/profile/subscription/')
-              );
-            }
-            if (href === '/profile') {
-              if (pathname === '/profile') return true;
-              if (!pathname.startsWith('/profile/')) return false;
-              if (pathname.startsWith('/profile/my-auctions')) return false;
-              if (pathname.startsWith('/profile/subscription')) return false;
-              return true;
-            }
-            return pathname === href || pathname.startsWith(`${href}/`);
-          })();
+        {HOME_NAV_LINKS.map(({ href, label, icon: Icon }) => {
+          const active = homeNavLinkActive(pathname, href);
           return (
             <Link
               key={href}

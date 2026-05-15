@@ -8,16 +8,19 @@ export function AuctionCardCover({
   imageUrl,
   showImage,
   className,
+  aspect = '5/4',
 }: {
   title: string;
   imageUrl: string;
   showImage: boolean;
   className?: string;
+  aspect?: '5/4' | '4/3';
 }) {
   return (
     <div
       className={cn(
-        'relative aspect-5/4 w-full overflow-hidden bg-muted/40',
+        'relative w-full overflow-hidden bg-muted/40',
+        aspect === '4/3' ? 'aspect-4/3' : 'aspect-5/4',
         className
       )}
     >

@@ -1,23 +1,26 @@
-import { Gavel, Handshake, Sparkles } from 'lucide-react';
+import { CirclePlay, Handshake, Layers } from 'lucide-react';
 
-import { getLatestAuctionsAction } from '@/actions/auction/auction.actions';
+import { getUserHomeAuctionFeedAction } from '@/actions/auction/auction.actions';
 import { getProfileAction } from '@/actions/user/profile.actions';
 import { getUserHomeStatsAction } from '@/actions/user/home.actions';
 import { getMyAuctionsAction } from '@/actions/user/my-auctions.actions';
 import { HomeAuctionsGrid } from '@/features/user/home/components/home-auctions-grid';
 import { HomeEmptyState } from '@/features/user/home/components/home-empty-state';
 import { HomeFooterLinksCard } from '@/features/user/home/components/home-footer-links-card';
-import { HomeLeftRail } from '@/features/user/home/components/home-left-rail';
+import { HomeLiveSatisfactionStrip } from '@/features/user/home/components/home-live-satisfaction-strip';
 import { HomeParticipatedCards } from '@/features/user/home/components/home-participated-cards';
 import { HomeParticipatedRail } from '@/features/user/home/components/home-participated-rail';
 import { HomePremiumCta } from '@/features/user/home/components/home-premium-cta';
+import { HomeQuickNav } from '@/features/user/home/components/home-quick-nav';
 import { HomeSection } from '@/features/user/home/components/home-section';
 import { HomeTopBar } from '@/features/user/home/components/home-top-bar';
+import { HomeUpdatesBanner } from '@/features/user/home/components/home-updates-banner';
+import { HomeWalletLinkCard } from '@/features/user/home/components/home-wallet-link-card';
 import { HomeWishlistPlaceholder } from '@/features/user/home/components/home-wishlist-placeholder';
 import type { IUserHomeStats } from '@/features/user/home/types/home.types';
 
-const FEATURED_LIMIT = 10;
-/** Enough rows for the rail (5) and the “below feed” strip (6) from one payload */
+const LIVE_HOME_LIMIT = 8;
+const LONG_SEALED_HOME_LIMIT = 12;
 const PARTICIPATED_FETCH_LIMIT = 8;
 const RAIL_VISIBLE = 5;
 const BELOW_FEED_VISIBLE = 6;
@@ -34,7 +37,7 @@ const EMPTY_STATS: IUserHomeStats = {
 };
 
 export default async function HomePage() {
-  const [profileRes, statsRes, participatedRes, featuredRes] =
+  const [profileRes, statsRes, participatedRes, homeFeedRes] =
     await Promise.all([
       getProfileAction(),
       getUserHomeStatsAction(),
@@ -46,7 +49,10 @@ export default async function HomePage() {
         status: 'ALL',
         auctionType: 'ALL',
       }),
-      getLatestAuctionsAction(FEATURED_LIMIT),
+      getUserHomeAuctionFeedAction({
+        liveLimit: LIVE_HOME_LIMIT,
+        longSealedLimit: LONG_SEALED_HOME_LIMIT,
+      }),
     ]);
 
   const profile = profileRes.success ? profileRes.data : null;
@@ -68,8 +74,14 @@ export default async function HomePage() {
     participatedCount: participatedTotal,
   };
 
-  const featured =
-    featuredRes.success && featuredRes.data ? featuredRes.data.auctions : [];
+  const liveAuctions =
+    homeFeedRes.success && homeFeedRes.data
+      ? homeFeedRes.data.liveAuctions
+      : [];
+  const longAndSealedAuctions =
+    homeFeedRes.success && homeFeedRes.data
+      ? homeFeedRes.data.longAndSealedAuctions
+      : [];
 
   const railAuctions = participatedAll.slice(0, RAIL_VISIBLE);
   const belowFeedAuctions = participatedAll.slice(0, BELOW_FEED_VISIBLE);
@@ -80,78 +92,107 @@ export default async function HomePage() {
       : undefined;
 
   return (
-    <div className="mx-auto max-w-[1200px] px-3 py-4 sm:px-4 sm:py-6">
-      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[220px_1fr_280px] lg:items-start lg:gap-8">
-        <div className="order-2 lg:order-1">
-          <div className="lg:fixed lg:top-26 lg:z-20 lg:w-[220px] lg:max-h-[calc(100dvh-4rem)] lg:overflow-hidden lg:left-[max(1rem,calc((100vw-1200px)/2+1rem))]">
-            <HomeLeftRail />
+    <div className="min-h-[calc(100dvh-4rem)] w-full">
+      <div className="mx-auto w-full max-w-[min(100%,1600px)] px-5 py-6 sm:px-8 sm:py-7 md:px-10 lg:px-14 lg:py-8 xl:px-16">
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,22rem)] lg:gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(300px,24rem)]">
+          <div className="min-w-0 space-y-8 lg:space-y-10">
+            <HomeTopBar
+              name={profile?.name}
+              avatarUrl={profile?.avatar_url || undefined}
+              isVerified={profile?.isVerified}
+              planSummary={planSummary}
+              stats={stats}
+            />
+
+            <HomeUpdatesBanner />
+
+            <HomeQuickNav />
+
+            <HomeSection
+              icon={CirclePlay}
+              title="Live auctions"
+              description="Streamed lots open for bidding right now."
+              linkHref="/auctions"
+              linkLabel="View all"
+            >
+              <div className="space-y-3">
+                <HomeLiveSatisfactionStrip
+                  liveLotsOnHome={liveAuctions.length}
+                />
+                <HomeAuctionsGrid
+                  auctions={liveAuctions}
+                  limit={LIVE_HOME_LIMIT}
+                  gridVariant="homeWide"
+                  empty={
+                    <HomeEmptyState
+                      icon={CirclePlay}
+                      title="No live auctions right now"
+                      description="When sellers go live, they will show up here first."
+                      actionHref="/auctions"
+                      actionLabel="Browse all"
+                    />
+                  }
+                />
+              </div>
+            </HomeSection>
+
+            <HomeSection
+              icon={Layers}
+              title="Long & sealed"
+              description="Timed long auctions and sealed-bid listings closing soon."
+              linkHref="/auctions"
+              linkLabel="View all"
+            >
+              <HomeAuctionsGrid
+                auctions={longAndSealedAuctions}
+                limit={LONG_SEALED_HOME_LIMIT}
+                gridVariant="homeWide"
+                empty={
+                  <HomeEmptyState
+                    icon={Layers}
+                    title="No long or sealed lots"
+                    description="Check back for classic and private listings."
+                    actionHref="/auctions"
+                    actionLabel="Browse"
+                  />
+                }
+              />
+            </HomeSection>
+
+            <HomeSection
+              className="min-w-0"
+              icon={Handshake}
+              title="Your auctions"
+              description="Lots you have joined — status on each card."
+              linkHref="/profile/my-auctions"
+              linkLabel="View all"
+            >
+              <HomeParticipatedCards
+                auctions={belowFeedAuctions}
+                limit={BELOW_FEED_VISIBLE}
+                empty={
+                  <HomeEmptyState
+                    icon={Handshake}
+                    title="No joined auctions yet"
+                    description="Open any listing and place a bid to see it here."
+                    actionHref="/auctions"
+                    actionLabel="Browse auctions"
+                  />
+                }
+              />
+            </HomeSection>
           </div>
-        </div>
 
-        <div className="order-1 min-w-0 space-y-6 lg:order-2">
-          <HomeTopBar
-            name={profile?.name}
-            avatarUrl={profile?.avatar_url || undefined}
-            isVerified={profile?.isVerified}
-            planSummary={planSummary}
-            stats={stats}
-          />
-
-          <HomeSection
-            icon={Sparkles}
-            title="Ending soon"
-            description="Live auctions closing soonest — bid before the timer hits zero."
-            linkHref="/auctions"
-            linkLabel="View all"
-          >
-            <HomeAuctionsGrid
-              auctions={featured}
-              limit={FEATURED_LIMIT}
-              gridVariant="home"
-              empty={
-                <HomeEmptyState
-                  icon={Gavel}
-                  title="No auctions available right now"
-                  description="Please check again shortly for fresh listings."
-                  actionHref="/auctions"
-                  actionLabel="Refresh"
-                />
-              }
+          <aside className="flex w-full min-w-0 flex-col gap-4 lg:sticky lg:top-20 lg:self-start xl:gap-5">
+            <HomeWalletLinkCard />
+            <HomeParticipatedRail
+              auctions={railAuctions}
+              totalJoined={participatedTotal}
             />
-          </HomeSection>
-
-          <HomeSection
-            icon={Handshake}
-            title="Your participated auctions"
-            description="Where you’ve joined — two columns with your standing on each card."
-            linkHref="/profile/my-auctions"
-            linkLabel="View all"
-          >
-            <HomeParticipatedCards
-              auctions={belowFeedAuctions}
-              limit={BELOW_FEED_VISIBLE}
-              empty={
-                <HomeEmptyState
-                  icon={Handshake}
-                  title="You haven’t joined any auction yet"
-                  description="Browse the feed above and place a bid — your lots will show here with Win / Outbid status."
-                  actionHref="/auctions"
-                  actionLabel="Browse auctions"
-                />
-              }
-            />
-          </HomeSection>
-        </div>
-
-        {/* Right: same window scroll; sticky under header so feed can scroll past after rail ends */}
-        <div className="order-3 flex min-w-0 flex-col gap-4 z-10 lg:sticky lg:top-16 lg:self-start">
-          <HomeParticipatedRail
-            auctions={railAuctions}
-            totalJoined={participatedTotal}
-          />
-          <HomeWishlistPlaceholder />
-          <HomePremiumCta />
-          <HomeFooterLinksCard />
+            <HomePremiumCta />
+            <HomeWishlistPlaceholder />
+            <HomeFooterLinksCard />
+          </aside>
         </div>
       </div>
     </div>

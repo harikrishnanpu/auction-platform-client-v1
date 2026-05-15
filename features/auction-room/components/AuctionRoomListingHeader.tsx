@@ -2,8 +2,6 @@
 
 import type { ReactNode } from 'react';
 
-import { Button } from '@/components/ui/button';
-import { SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 
 import { arCardCanvas, arType } from '../lib/auction-room-design';
@@ -45,20 +43,5 @@ export function AuctionRoomListingHeader({
         </div>
       ) : null}
     </div>
-  );
-}
-
-export function AuctionRoomHeaderChatTrigger() {
-  return (
-    <SheetTrigger asChild>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="h-9 shrink-0 rounded-[8px] px-3 text-xs font-semibold"
-      >
-        Chat
-      </Button>
-    </SheetTrigger>
   );
 }

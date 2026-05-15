@@ -47,13 +47,13 @@ export function CreateAuctionContainer({
 
   if (!auctionType) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans antialiased">
-        <main className="grow max-w-4xl mx-auto px-4 sm:px-6 py-8 w-full">
+      <div className="flex min-h-[calc(100dvh-4rem)] w-full min-w-0 flex-col bg-transparent font-sans antialiased">
+        <main className="mx-auto w-full max-w-4xl grow px-4 py-8 sm:px-6">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold  text-slate-900 dark:text-white mb-2">
+            <h1 className="mb-2 text-3xl font-bold text-foreground">
               Create Auction
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
+            <p className="text-sm text-muted-foreground">
               Choose an auction type to get started.
             </p>
           </div>
@@ -74,22 +74,22 @@ export function CreateAuctionContainer({
   const typeLabel = getAuctionTypeLabel(auctionType);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans antialiased">
-      <main className="grow max-w-3xl mx-auto px-4 sm:px-6 py-8 w-full">
+    <div className="flex min-h-[calc(100dvh-4rem)] w-full min-w-0 flex-col bg-transparent font-sans antialiased">
+      <main className="mx-auto w-full max-w-3xl grow px-4 py-8 sm:px-6">
         <div className="mb-8">
           <Button variant="ghost" size="sm" asChild>
             <Link
               href="/seller/auction/create"
               className="text-muted-foreground"
             >
-              <ArrowLeft className="h-4 w-4 mr-1" />
+              <ArrowLeft className="mr-1 h-4 w-4" />
               Change type
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold  text-slate-900 dark:text-white mb-2 mt-2">
+          <h1 className="mb-2 mt-2 text-3xl font-bold text-foreground">
             Creating {typeLabel} auction
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">
+          <p className="text-sm text-muted-foreground">
             Add details and media. You can save as draft and publish when ready.
           </p>
         </div>

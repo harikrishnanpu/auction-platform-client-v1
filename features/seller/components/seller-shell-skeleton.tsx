@@ -19,7 +19,7 @@ export function SellerHeaderSkeleton() {
 
 export function SellerAuctionListSkeleton({ count = 5 }: { count?: number }) {
   return (
-    <AuctionListingGrid>
+    <AuctionListingGrid variant="listing">
       {Array.from({ length: count }).map((_, i) => (
         <AuctionCardSkeleton key={i} />
       ))}
@@ -46,7 +46,7 @@ export function SellerListingSectionSkeleton() {
 
 export function SellerShellSkeleton() {
   return (
-    <div className="min-h-[50vh] bg-background">
+    <div className="min-h-[50vh] w-full min-w-0">
       <div className="mx-auto max-w-7xl space-y-4 px-3 py-4 sm:px-4">
         <SellerHeaderSkeleton />
         <SellerListingSectionSkeleton />

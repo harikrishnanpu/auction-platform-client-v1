@@ -44,7 +44,7 @@ export function UserAuctionsCards({
     return (
       <div
         className={cn(
-          'flex flex-col items-center justify-center rounded-lg border border-dashed border-border/60 bg-muted/10 px-4 py-10 text-center',
+          'flex flex-col items-center justify-center rounded-lg border border-dashed border-border/50 bg-muted/20 px-3 py-8 text-center',
           className
         )}
       >
@@ -58,7 +58,7 @@ export function UserAuctionsCards({
   }
 
   return (
-    <AuctionListingGrid variant="browse" className={className}>
+    <AuctionListingGrid variant="listing" className={className}>
       {rows.map((a) => (
         <AuctionCard key={a.id} auction={a} href={`/auction/${a.id}`} />
       ))}
@@ -74,7 +74,7 @@ export function UserAuctionsCardsSkeleton({
   className?: string;
 }) {
   return (
-    <AuctionListingGrid variant="browse" className={className}>
+    <AuctionListingGrid variant="listing" className={className}>
       {Array.from({ length: count }).map((_, i) => (
         <AuctionCardSkeleton key={i} />
       ))}

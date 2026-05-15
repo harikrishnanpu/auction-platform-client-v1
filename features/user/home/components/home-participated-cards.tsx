@@ -22,7 +22,7 @@ export function HomeParticipatedCards({
   const rows = typeof limit === 'number' ? auctions.slice(0, limit) : auctions;
 
   return (
-    <AuctionListingGrid variant="home">
+    <AuctionListingGrid variant="homeWide">
       {rows.map((auction) => (
         <div key={auction.id} className="relative min-w-0">
           {auction.participation ? (
