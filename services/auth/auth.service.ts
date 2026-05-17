@@ -6,6 +6,7 @@ import { ApiResponse } from '@/types/api.index';
 import { getErrorMessage } from '@/utils/get-app-error';
 import { IUser } from '@/types/user.type';
 import { apiFetch } from '@/lib/fetch';
+import { clearAuthCookies, setAuthCookies } from '@/lib/auth-cookies';
 import { OtpPurpose } from '@/constants/auth/otp.constants';
 import { ZodVerifyEmailValues } from '@/features/verify/email/schemes/verify-email.schema';
 import { ZodCompleteProfileValues } from '@/features/complete-profile/schemes/complete-profile-schema';
@@ -45,8 +46,10 @@ const login = async (
     return response;
   }
 
-  cookieStorage.set('accessToken', response.data.accessToken);
-  cookieStorage.set('refreshToken', response.data.refreshToken);
+  setAuthCookies(cookieStorage, {
+    accessToken: response.data.accessToken,
+    refreshToken: response.data.refreshToken,
+  });
 
   return response;
 };
@@ -105,8 +108,10 @@ const verifyEmail = async (
     return response;
   }
 
-  cookieStorage.set('accessToken', response.data.accessToken);
-  cookieStorage.set('refreshToken', response.data.refreshToken);
+  setAuthCookies(cookieStorage, {
+    accessToken: response.data.accessToken,
+    refreshToken: response.data.refreshToken,
+  });
 
   return response;
 };
@@ -129,8 +134,7 @@ const completeProfile = async (
 const logout = async (): Promise<ApiResponse<null>> => {
   try {
     const cookieStorage = await cookies();
-    cookieStorage.delete('accessToken');
-    cookieStorage.delete('refreshToken');
+    clearAuthCookies(cookieStorage);
     return { success: true, data: null };
   } catch (error: unknown) {
     return { success: false, data: null, error: getErrorMessage(error) };
