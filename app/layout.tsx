@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import './globals.css';
 import { Providers } from '@/providers';
 import { Toaster } from '@/components/ui/sonner';
-import { authGetSesssion } from '@/actions/auth/auth.actions';
+import { authGetSesssion, logoutAction } from '@/actions/auth/auth.actions';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -28,8 +28,13 @@ export default async function RootLayout({
 }>) {
   const user = await authGetSesssion();
 
-  if (user.success === false && user.error === 'ACCOUNT_BLOCKED') {
-    redirect('/login?error=blocked');
+  if (
+    user.success === false &&
+    (user.error === 'ACCOUNT_BLOCKED' || user.error === 'ACCOUNT_SUSPENDED')
+  ) {
+    await logoutAction();
+    const q = user.error === 'ACCOUNT_SUSPENDED' ? 'suspended' : 'blocked';
+    redirect(`/login?error=${q}`);
   }
   return (
     <html lang="en" suppressHydrationWarning>

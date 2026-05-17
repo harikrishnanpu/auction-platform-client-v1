@@ -33,7 +33,7 @@ export function HomeLiveSatisfactionStrip({
             />
           ))}
         </div>
-        <div className="min-w-0">
+        {/* <div className="min-w-0">
           <p className="text-xs font-semibold tabular-nums text-foreground">
             4.9{' '}
             <span className="font-normal text-muted-foreground">
@@ -43,7 +43,7 @@ export function HomeLiveSatisfactionStrip({
           <p className="text-[11px] text-muted-foreground">
             From post-session buyer feedback on hosted lots.
           </p>
-        </div>
+        </div> */}
       </div>
       <p className="shrink-0 text-[11px] text-muted-foreground sm:text-right">
         <span className="font-semibold tabular-nums text-foreground">
