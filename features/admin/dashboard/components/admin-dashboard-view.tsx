@@ -26,8 +26,8 @@ export function AdminDashboardView({
 }: AdminDashboardViewProps) {
   const auctionSeries = [
     { label: 'Live', count: stats.liveAuctions },
-    { label: 'Upcoming', count: stats.upcomingAuctions },
-    { label: 'Ended', count: stats.endedAuctions },
+    { label: 'Soon', count: stats.upcomingAuctions },
+    { label: 'Closed', count: stats.endedAuctions },
   ];
 
   const userRoleSeries = [

@@ -15,6 +15,7 @@ export enum AuthProvider {
 
 export enum UserStatus {
   ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
   BLOCKED = 'BLOCKED',
   PENDING = 'PENDING',
 }

@@ -23,6 +23,9 @@ import useUserStore from '@/store/user.store';
 const BLOCKED_MESSAGE =
   'Your account has been blocked. Please contact support for assistance.';
 
+const SUSPENDED_MESSAGE =
+  'Your account has been suspended. Please contact support for assistance.';
+
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit, errors, onSubmit, isSubmitting } = useLogin();
@@ -32,10 +35,13 @@ const LoginForm = () => {
   const errorParam = params.get('error');
 
   const isBlockedError = errorParam === 'blocked';
+  const isSuspendedError = errorParam === 'suspended';
 
   const errorDisplayMessage = isBlockedError
     ? BLOCKED_MESSAGE
-    : (errorParam ?? '');
+    : isSuspendedError
+      ? SUSPENDED_MESSAGE
+      : (errorParam ?? '');
 
   useEffect(() => {
     if (isBlockedError) {
@@ -43,6 +49,13 @@ const LoginForm = () => {
       toast.error(BLOCKED_MESSAGE, { duration: 5000 });
     }
   }, [isBlockedError, setUser]);
+
+  useEffect(() => {
+    if (isSuspendedError) {
+      setUser(null);
+      toast.error(SUSPENDED_MESSAGE, { duration: 5000 });
+    }
+  }, [isSuspendedError, setUser]);
 
   return (
     <Card className="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-3xl shadow-xl overflow-hidden fade-in relative z-10">

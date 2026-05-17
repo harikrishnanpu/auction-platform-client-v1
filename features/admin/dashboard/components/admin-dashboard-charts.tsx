@@ -217,11 +217,7 @@ export function AdminDashboardCharts({
 }: AdminDashboardChartsProps) {
   return (
     <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
-      <Panel
-        kicker="Marketplace"
-        title="Auction pipeline"
-        description="Live, upcoming, and ended volumes — same buckets as the public browse experience."
-      >
+      <Panel kicker="Auctions" title="" description="Live, soon, and closed">
         <HorizontalBars
           data={auctionSeries}
           config={auctionConfig}
@@ -229,9 +225,9 @@ export function AdminDashboardCharts({
         />
       </Panel>
       <Panel
-        kicker="Directory"
-        title="Roles on the platform"
-        description="How many accounts carry buyer, seller, or admin roles (membership can overlap)."
+        kicker="Accounts"
+        title="Roles"
+        description="Buyers, sellers, and admins"
       >
         <RolePie
           data={userRoleSeries}
