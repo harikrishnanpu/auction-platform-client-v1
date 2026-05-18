@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 
-import { Device } from 'mediasoup-client';
 import { env } from '@/env';
 import type { IAuctionDto } from '@/types/auction.type';
 import type {
@@ -21,9 +20,6 @@ import type {
   IAuctionRoomAutoBidConfig,
   AuctionJoinedEvent,
   SocketControlAck,
-  LiveCapabilitiesAck,
-  LiveTransportAck,
-  LiveConsumeAck,
   RemoteStreamItem,
   IAuctionRoomMetrics,
   IAuctionRoomCharts,
@@ -33,7 +29,7 @@ import {
   AUCTION_SOCKET_EVENTS,
   type AuctionSocketControlEvent,
 } from './socket.events';
-import type { Producer, Transport, Consumer } from 'mediasoup-client/types';
+import { AuctionLiveMediasoupHandler } from './auction-live-mediasoup.handler';
 
 export function useAuctionRoomSocket({
   auctionId,
@@ -45,11 +41,7 @@ export function useAuctionRoomSocket({
   initialAuction?: IAuctionDto;
 }) {
   const socketRef = useRef<Socket | null>(null);
-  const deviceRef = useRef<Device | null>(null);
-  const transportRef = useRef<Transport | null>(null);
-
-  const producerRef = useRef<Producer[]>([]);
-  const consumerRef = useRef<Map<string, Consumer>>(new Map());
+  const liveHandlerRef = useRef<AuctionLiveMediasoupHandler | null>(null);
 
   const [snapshot, setSnapshot] = useState<IAuctionRoomSnapshot | null>(
     initialAuction
@@ -87,184 +79,17 @@ export function useAuctionRoomSocket({
 
   const roomId = useMemo(() => `auction:${auctionId}`, [auctionId]);
 
-  const handleGetCapabilities = async (
-    socket: Socket,
-    roomId: string,
-    role: 'host' | 'viewer'
-  ) => {
-    socket.emit(
-      AUCTION_SOCKET_EVENTS.LIVE_AUCTION_GET_CAPABILITIES,
-      { auctionId },
-      async (raw: { success: boolean; data: LiveCapabilitiesAck }) => {
-        const device = new Device();
-
-        const { success, data } = raw;
-
-        if (!success) {
-          return;
-        }
-
-        await device.load({ routerRtpCapabilities: data.rtpCapabilities });
-
-        deviceRef.current = device;
-        await handleCreateTransport(socket, roomId, role, data.producerIds);
-      }
-    );
-  };
-
-  const handleCreateTransport = async (
-    socket: Socket,
-    roomId: string,
-    role: 'host' | 'viewer',
-    producerIds: string[]
-  ) => {
-    socket.emit(
-      AUCTION_SOCKET_EVENTS.LIVE_AUCTION_CREATE_TRANSPORT,
-      { auctionId },
-      async (params: { success: boolean; data: LiveTransportAck }) => {
-        if (!params || !params.success || !params.data) {
-          setError('Failed to create transport');
-          return;
-        }
-
-        const device = deviceRef.current!;
-        const transport =
-          role === 'host'
-            ? device.createSendTransport(params.data)
-            : device.createRecvTransport(params.data);
-
-        transportRef.current = transport;
-
-        transport.on('connect', ({ dtlsParameters }, callback) => {
-          socket.emit(
-            AUCTION_SOCKET_EVENTS.LIVE_AUCTION_CONNECT_TRANSPORT,
-            { auctionId, dtlsParameters },
-            (params: { success: boolean; error?: string }) => {
-              if (!params?.success) return;
-              callback();
-            }
-          );
-        });
-
-        if (role === 'host') {
-          await handleProduce(socket, roomId, transport);
-        } else {
-          await handleConsume(socket, roomId, producerIds);
-        }
-      }
-    );
-  };
-
-  const handleProduce = async (
-    socket: Socket,
-    roomId: string,
-    transport: Transport
-  ) => {
-    transport.on('produce', ({ kind, rtpParameters }, callback) => {
-      socket.emit(
-        AUCTION_SOCKET_EVENTS.LIVE_AUCTION_PRODUCE,
-        { auctionId, kind, rtpParameters },
-        (ack: { success: boolean; data?: { id: string } }) => {
-          if (!ack || !ack.success || !ack.data) return;
-          callback({ id: ack.data.id });
-        }
-      );
+  const createLiveHandler = (socket: Socket) => {
+    const handler = new AuctionLiveMediasoupHandler(socket, auctionId, {
+      onError: setError,
+      onLocalStream: setLocalStream,
+      onRemoteStreams: setRemoteStreams,
+      onLocalAudioEnabled: setIsLocalAudioEnabled,
+      onLocalVideoEnabled: setIsLocalVideoEnabled,
     });
-
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-
-    setLocalStream(stream);
-    setIsLocalAudioEnabled(
-      stream.getAudioTracks().some((track) => track.enabled)
-    );
-    setIsLocalVideoEnabled(
-      stream.getVideoTracks().some((track) => track.enabled)
-    );
-
-    for (const track of stream.getTracks()) {
-      await transport.produce({ track });
-    }
+    liveHandlerRef.current = handler;
+    return handler;
   };
-
-  const handleConsume = async (
-    socket: Socket,
-    roomId: string,
-    producerIds: string[]
-  ) => {
-    for (const producerId of producerIds) {
-      await consumeStream(socket, roomId, producerId);
-    }
-
-    socket.on(
-      AUCTION_SOCKET_EVENTS.LIVE_AUCTION_NEW_PRODUCER,
-      async ({ producerId }: { producerId: string; kind: string }) => {
-        await consumeStream(socket, roomId, producerId);
-      }
-    );
-  };
-
-  const consumeStream = async (
-    socket: Socket,
-    roomId: string,
-    producerId: string
-  ) =>
-    new Promise<void>((resolve) => {
-      const device = deviceRef.current!;
-      const transport = transportRef.current!;
-
-      if (consumerRef.current.has(producerId)) {
-        resolve();
-        return;
-      }
-
-      socket.emit(
-        AUCTION_SOCKET_EVENTS.LIVE_AUCTION_CONSUME,
-        {
-          auctionId,
-          producerId,
-          rtpCapabilities: device.rtpCapabilities,
-        },
-        async (params: { success: boolean; data: LiveConsumeAck }) => {
-          if (!params || !params.success || !params.data) {
-            resolve();
-            return;
-          }
-
-          const consumer = await transport.consume({
-            id: params.data.id,
-            producerId: params.data.producerId,
-            kind: params.data.kind,
-            rtpParameters: params.data.rtpParameters,
-          });
-          consumerRef.current.set(producerId, consumer);
-
-          setRemoteStreams((prev) => [
-            ...prev.filter(
-              (item) => item.producerId !== params.data.producerId
-            ),
-            {
-              producerId: params.data.producerId,
-              stream: new MediaStream([consumer.track]),
-              kind: params.data.kind,
-            },
-          ]);
-
-          socket.emit(
-            AUCTION_SOCKET_EVENTS.LIVE_AUCTION_RESUME_CONSUMER,
-            {
-              auctionId,
-              consumerId: params.data.id,
-            },
-            () => {
-              resolve();
-            }
-          );
-        }
-      );
-    });
 
   useEffect(() => {
     if (!auctionId) return;
@@ -274,7 +99,7 @@ export function useAuctionRoomSocket({
     const socket = io(socketBaseUrl, {
       withCredentials: true,
       path: '/socket.io',
-      transports: ['polling'],
+      transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 500,
@@ -294,6 +119,13 @@ export function useAuctionRoomSocket({
     });
 
     socket.on(
+      AUCTION_SOCKET_EVENTS.LIVE_AUCTION_NEW_PRODUCER,
+      ({ producerId }: { producerId: string }) => {
+        void liveHandlerRef.current?.onNewProducer(producerId);
+      }
+    );
+
+    socket.on(
       AUCTION_SOCKET_EVENTS.JOINED,
       async (joined: AuctionJoinedEvent) => {
         const {
@@ -306,11 +138,20 @@ export function useAuctionRoomSocket({
         setIsHostProducer(isProducer);
 
         if (isLiveAuction) {
-          await handleGetCapabilities(
-            socket,
-            roomId,
-            isProducer ? 'host' : 'viewer'
-          );
+          try {
+            const handler = createLiveHandler(socket);
+            if (isProducer) {
+              await handler.startHost();
+            } else {
+              await handler.startViewer();
+            }
+          } catch (liveError) {
+            const message =
+              liveError instanceof Error
+                ? liveError.message
+                : 'Failed to start live stream';
+            setError(message);
+          }
         }
 
         setSnapshot(room);
@@ -344,11 +185,7 @@ export function useAuctionRoomSocket({
     socket.on(
       AUCTION_SOCKET_EVENTS.LIVE_AUCTION_PRODUCER_CLOSED,
       (payload: { producerId: string }) => {
-        consumerRef.current.get(payload.producerId)?.close();
-        consumerRef.current.delete(payload.producerId);
-        setRemoteStreams((prev) =>
-          prev.filter((item) => item.producerId !== payload.producerId)
-        );
+        liveHandlerRef.current?.onProducerClosed(payload.producerId);
       }
     );
 
@@ -537,23 +374,14 @@ export function useAuctionRoomSocket({
       }
     );
 
-    const consumers = consumerRef.current;
-
     return () => {
+      socket.off(AUCTION_SOCKET_EVENTS.LIVE_AUCTION_NEW_PRODUCER);
+      liveHandlerRef.current?.destroy();
+      liveHandlerRef.current = null;
       socket.disconnect();
-      producerRef.current.forEach((producer) => producer.close());
-      producerRef.current = [];
-      consumers.forEach((consumer) => consumer.close());
-      consumers.clear();
-      setRemoteStreams([]);
-      transportRef.current?.close();
-      transportRef.current = null;
-      setLocalStream(null);
-      setIsLocalAudioEnabled(true);
-      setIsLocalVideoEnabled(true);
+      socketRef.current = null;
       setIsLiveAuction(false);
       setIsHostProducer(false);
-      socketRef.current = null;
       setConnectionState('disconnected');
       setRoomReady(false);
       setChatMessages([]);
@@ -873,27 +701,11 @@ export function useAuctionRoomSocket({
   }
 
   function toggleLocalAudio(): boolean {
-    if (!localStream) return false;
-    const audioTracks = localStream.getAudioTracks();
-    if (audioTracks.length === 0) return false;
-    const nextEnabled = !audioTracks.some((track) => track.enabled);
-    audioTracks.forEach((track) => {
-      track.enabled = nextEnabled;
-    });
-    setIsLocalAudioEnabled(nextEnabled);
-    return nextEnabled;
+    return liveHandlerRef.current?.toggleLocalAudio() ?? false;
   }
 
   function toggleLocalVideo(): boolean {
-    if (!localStream) return false;
-    const videoTracks = localStream.getVideoTracks();
-    if (videoTracks.length === 0) return false;
-    const nextEnabled = !videoTracks.some((track) => track.enabled);
-    videoTracks.forEach((track) => {
-      track.enabled = nextEnabled;
-    });
-    setIsLocalVideoEnabled(nextEnabled);
-    return nextEnabled;
+    return liveHandlerRef.current?.toggleLocalVideo() ?? false;
   }
 
   return {

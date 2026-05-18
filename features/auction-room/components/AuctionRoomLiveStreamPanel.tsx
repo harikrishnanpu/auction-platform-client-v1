@@ -22,11 +22,28 @@ function StreamVideo({ stream, muted = false, title }: StreamVideoProps) {
   const ref = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
-    ref.current.srcObject = stream;
-    ref.current.play().catch(() => {
-      console.log('autoplay failed');
+    const video = ref.current;
+    if (!video) return;
+
+    video.srcObject = stream;
+
+    const tryPlay = () => {
+      void video.play().catch(() => undefined);
+    };
+
+    tryPlay();
+
+    const tracks = stream.getVideoTracks();
+    tracks.forEach((track) => {
+      track.addEventListener('unmute', tryPlay);
     });
+
+    return () => {
+      tracks.forEach((track) => {
+        track.removeEventListener('unmute', tryPlay);
+      });
+      video.srcObject = null;
+    };
   }, [stream]);
 
   return (
@@ -39,7 +56,7 @@ function StreamVideo({ stream, muted = false, title }: StreamVideoProps) {
         autoPlay
         playsInline
         muted={muted}
-        className="aspect-video h-auto min-h-[160px] w-full bg-black object-cover sm:min-h-[180px]"
+        className="aspect-video h-auto min-h-[160px] w-full bg-black object-contain sm:min-h-[180px]"
       />
     </div>
   );
@@ -173,6 +190,12 @@ export function AuctionRoomLiveStreamPanel({
               muted
               title="Your stream (host)"
             />
+          ) : null}
+
+          {videoStreams.length === 0 && !isHostProducer ? (
+            <p className="col-span-full rounded-[8px] border border-dashed border-border/80 px-3 py-6 text-center text-xs text-muted-foreground">
+              Waiting for host video…
+            </p>
           ) : null}
 
           {videoStreams.map((item) => (

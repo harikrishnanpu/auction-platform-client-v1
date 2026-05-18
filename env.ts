@@ -18,6 +18,9 @@ export const env = createEnv({
         const trimmed = value.trim();
         return trimmed;
       }),
+    ENABLE_COOKIE_DOMAIN: z
+      .enum(['true', 'false'])
+      .transform((value) => value === 'true'),
   },
   client: {
     NEXT_PUBLIC_API_URL: z.url(),
@@ -34,5 +37,6 @@ export const env = createEnv({
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+    ENABLE_COOKIE_DOMAIN: process.env.ENABLE_COOKIE_DOMAIN,
   },
 });
