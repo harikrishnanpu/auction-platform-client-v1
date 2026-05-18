@@ -23,7 +23,7 @@ export const setAuthCookies = (
     sameSite: env.COOKIE_SAME_SITE,
     path: '/',
     maxAge: env.AUTH_ACCESS_TOKEN_MAX_AGE,
-    domain: env.COOKIE_DOMAIN,
+    ...(env.ENABLE_COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
   });
 
   cookieStore.set({
@@ -34,7 +34,7 @@ export const setAuthCookies = (
     sameSite: env.COOKIE_SAME_SITE,
     path: '/',
     maxAge: env.AUTH_REFRESH_TOKEN_MAX_AGE,
-    domain: env.COOKIE_DOMAIN,
+    ...(env.ENABLE_COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
   });
 };
 
@@ -45,7 +45,7 @@ export const clearAuthCookies = (cookieStore: ReadonlyRequestCookies): void => {
     secure: env.COOKIE_SECURE,
     sameSite: env.COOKIE_SAME_SITE,
     path: '/',
-    domain: env.COOKIE_DOMAIN,
+    ...(env.ENABLE_COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
   });
 
   cookieStore.delete({
@@ -54,6 +54,6 @@ export const clearAuthCookies = (cookieStore: ReadonlyRequestCookies): void => {
     secure: env.COOKIE_SECURE,
     sameSite: env.COOKIE_SAME_SITE,
     path: '/',
-    domain: env.COOKIE_DOMAIN,
+    ...(env.ENABLE_COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
   });
 };
