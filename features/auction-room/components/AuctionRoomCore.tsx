@@ -481,6 +481,8 @@ export function AuctionRoomCore({
           soldSummary={soldSummaryDisplay}
           canReportAuction={canReportAuction}
           onReportAuction={() => setReportAuctionOpen(true)}
+          currentUserId={user?.id}
+          onReportParticipant={handleReportParticipant}
           onAuctionStatusOverride={setAuctionStatusOverride}
           payFallbackPublic={payFallbackPublic}
           verifyFallbackPublicAuctionPayment={

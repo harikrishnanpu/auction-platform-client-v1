@@ -46,6 +46,25 @@ export function isAnyAuctionRoomPath(pathname: string): boolean {
   return isSellerAuctionRoomPath(pathname) || isUserAuctionRoomPath(pathname);
 }
 
+export function getAuctionRoomHeaderMeta(pathname: string): {
+  title: string;
+  subtitle: string;
+} | null {
+  if (isSellerAuctionRoomPath(pathname)) {
+    return {
+      title: 'Auction Room',
+      subtitle: 'Host, monitor bids, and manage this auction.',
+    };
+  }
+  if (isUserAuctionRoomPath(pathname)) {
+    return {
+      title: 'Auction Room',
+      subtitle: 'Place bids, follow the action, and chat with participants.',
+    };
+  }
+  return null;
+}
+
 export const APP_BRAND = 'Hammer Down';
 
 /** User / home sidebar — wallet, payments, auctions (no seller tools). */
@@ -63,7 +82,6 @@ export const USER_QUICK_ACTIONS: AppNavItem[] = [
   { href: '/profile/subscription', label: 'Plans & Refer', icon: Sparkles },
 ];
 
-/** User live auction room sidebar. */
 export const USER_ROOM_NAV: UserRoomNavItem[] = [
   {
     id: 'all-auctions',
@@ -116,7 +134,6 @@ export const SELLER_QUICK_ACTIONS: AppNavItem[] = [
   { href: '/seller/auctions', label: 'Manage Auctions', icon: Gavel },
 ];
 
-/** Live auction room sidebar. */
 export const SELLER_ROOM_NAV: SellerRoomNavItem[] = [
   {
     id: 'dashboard',
@@ -231,12 +248,14 @@ export function isHomeArea(pathname: string): boolean {
   return !pathname.startsWith('/seller');
 }
 
+/** Seller dashboard and tools — any route under `/seller`. */
 export function isSellerArea(pathname: string): boolean {
-  return (
-    pathname.startsWith('/seller') &&
-    pathname !== '/seller/landing' &&
-    !pathname.startsWith('/seller/kyc')
-  );
+  return pathname.startsWith('/seller');
+}
+
+/** User home, browse, profile, and bidder auction room (not seller dashboard). */
+export function isUserHomeArea(pathname: string): boolean {
+  return !pathname.startsWith('/seller');
 }
 
 export function isUserRoomNavActive(

@@ -1,27 +1,24 @@
 'use client';
 
-import Image from 'next/image';
-import { useMemo, useState } from 'react';
-import { Mic, MicOff, Radio, Send, Users, Video, VideoOff } from 'lucide-react';
+import { useState } from 'react';
+import { Send, Users } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { formatAuctionDateTime } from '@/utils/auction-utils';
 import type {
   IAuctionRoomChatMessage,
   IAuctionRoomParticipant,
 } from '@/types/auctionRoom.types';
 
+import { AuctionRoomParticipantsTab } from '../AuctionRoomParticipantsTab';
 import { UserAuctionRoomChatFeed } from '../user-room/UserAuctionRoomChatFeed';
-import { getUserInitials } from './seller-room-helpers';
 import { srCard } from './seller-room-ui';
 
 type TabId = 'chat' | 'participants';
 
 type SellerAuctionRoomLiveSidebarProps = {
   sellerId?: string | null;
-  sellerName: string;
   heroImageUrl?: string | null;
   messages: IAuctionRoomChatMessage[];
   draft: string;
@@ -29,35 +26,12 @@ type SellerAuctionRoomLiveSidebarProps = {
   onSend: () => void;
   canInteract: boolean;
   participants: IAuctionRoomParticipant[];
-  watchingCount: number;
   currentLeadUserId?: string | null;
-  isLocalAudioEnabled: boolean;
-  isLocalVideoEnabled: boolean;
-  isHostProducer: boolean;
   className?: string;
 };
 
-function AudioWaveform({ active }: { active: boolean }) {
-  const bars = [3, 5, 8, 4, 7, 5, 9, 4, 6, 3];
-  return (
-    <div className="flex h-6 items-end justify-center gap-0.5" aria-hidden>
-      {bars.map((h, i) => (
-        <span
-          key={i}
-          className={cn(
-            'w-0.5 rounded-full bg-brand-500 transition-all',
-            active && 'animate-pulse'
-          )}
-          style={{ height: `${h * 2}px`, animationDelay: `${i * 60}ms` }}
-        />
-      ))}
-    </div>
-  );
-}
-
 export function SellerAuctionRoomLiveSidebar({
   sellerId,
-  sellerName,
   heroImageUrl,
   messages,
   draft,
@@ -65,26 +39,11 @@ export function SellerAuctionRoomLiveSidebar({
   onSend,
   canInteract,
   participants,
-  watchingCount,
   currentLeadUserId,
-  isLocalAudioEnabled,
-  isLocalVideoEnabled,
-  isHostProducer,
   className,
 }: SellerAuctionRoomLiveSidebarProps) {
   const [tab, setTab] = useState<TabId>('chat');
-  const hasAudio = isHostProducer && isLocalAudioEnabled;
-  const hasVideo = isHostProducer && isLocalVideoEnabled;
   const participantCount = participants.length;
-
-  const sortedParticipants = useMemo(
-    () =>
-      [...participants].sort(
-        (a, b) =>
-          new Date(a.joinedAt).getTime() - new Date(b.joinedAt).getTime()
-      ),
-    [participants]
-  );
 
   const trimmed = draft.trim();
   const canSend = trimmed.length > 0 && canInteract;
@@ -98,83 +57,7 @@ export function SellerAuctionRoomLiveSidebar({
         className
       )}
     >
-      <div className="border-b border-border p-3.5">
-        <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Your Broadcast
-        </p>
-        <div className="flex items-start gap-3">
-          <div className="relative size-11 shrink-0 overflow-hidden rounded-full bg-brand-100">
-            {heroImageUrl ? (
-              <Image
-                src={heroImageUrl}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="44px"
-              />
-            ) : (
-              <span className="flex size-full items-center justify-center text-sm font-bold text-brand-700">
-                {getUserInitials(sellerName)}
-              </span>
-            )}
-            <span
-              className={cn(
-                'absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-card',
-                isHostProducer ? 'bg-emerald-500' : 'bg-muted-foreground'
-              )}
-            />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold">{sellerName}</p>
-            <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-              <Radio className="size-3" />
-              {isHostProducer ? 'Broadcasting live' : 'Preparing stream'}
-            </p>
-            <div className="mt-2 flex items-center gap-1.5">
-              <span
-                className={cn(
-                  'flex size-8 items-center justify-center rounded-lg border',
-                  hasAudio
-                    ? 'border-brand-200 bg-brand-50 text-brand-600'
-                    : 'border-border bg-muted/40 text-muted-foreground'
-                )}
-                title={hasAudio ? 'Microphone on' : 'Microphone off'}
-              >
-                {hasAudio ? (
-                  <Mic className="size-3.5" />
-                ) : (
-                  <MicOff className="size-3.5" />
-                )}
-              </span>
-              <span
-                className={cn(
-                  'flex size-8 items-center justify-center rounded-lg border',
-                  hasVideo
-                    ? 'border-brand-200 bg-brand-50 text-brand-600'
-                    : 'border-border bg-muted/40 text-muted-foreground'
-                )}
-                title={hasVideo ? 'Camera on' : 'Camera off'}
-              >
-                {hasVideo ? (
-                  <Video className="size-3.5" />
-                ) : (
-                  <VideoOff className="size-3.5" />
-                )}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="mt-3 rounded-lg border border-border/80 bg-muted/30 px-3 py-2">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] font-medium text-muted-foreground">
-              {hasAudio ? 'Audio is ON' : 'Audio is OFF'}
-            </p>
-            <AudioWaveform active={hasAudio} />
-          </div>
-        </div>
-      </div>
-
-      <div className="flex border-b border-border">
+      <div className="flex shrink-0 border-b border-border">
         <button
           type="button"
           onClick={() => setTab('chat')}
@@ -211,40 +94,17 @@ export function SellerAuctionRoomLiveSidebar({
             heroImageUrl={heroImageUrl}
           />
         ) : (
-          <ul className="absolute inset-0 overflow-y-auto overscroll-y-contain px-3 py-2 touch-pan-y [-webkit-overflow-scrolling:touch]">
-            {sortedParticipants.length === 0 ? (
-              <li className="py-8 text-center text-xs text-muted-foreground">
-                No participants yet
-              </li>
-            ) : (
-              sortedParticipants.map((p) => (
-                <li
-                  key={p.id}
-                  className="flex items-center gap-2.5 border-b border-border/60 py-2.5 last:border-0"
-                >
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-700">
-                    {getUserInitials(p.userName)}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-medium">{p.userName}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      Joined {formatAuctionDateTime(p.joinedAt)}
-                    </p>
-                  </div>
-                  {p.userId === sellerId ? (
-                    <span className="shrink-0 rounded-full bg-brand-600 px-1.5 py-0.5 text-[9px] font-semibold text-white">
-                      You
-                    </span>
-                  ) : null}
-                </li>
-              ))
-            )}
-          </ul>
+          <AuctionRoomParticipantsTab
+            participants={participants}
+            hostUserId={sellerId}
+            hostBadge="You"
+            hostIsSelf
+          />
         )}
       </div>
 
       {tab === 'chat' ? (
-        <footer className="border-t border-border p-3">
+        <footer className="shrink-0 border-t border-border p-3">
           <div className="flex gap-2">
             <Input
               value={draft}

@@ -13,6 +13,7 @@ import useUserStore from '@/store/user.store';
 import { AuthProvider } from '@/types/user.type';
 import { getUserAvatarUrl } from '@/utils/auction-utils';
 
+import { useAuctionRoomMenu } from './auction-room-menu-context';
 import { isSellerArea } from './config/app-nav';
 
 interface DashboardHeaderProps {
@@ -210,6 +211,8 @@ export function DashboardHeader({
   const firstName = user?.name?.split(' ')[0] ?? 'there';
   const userInitials = user?.name ? user.name.slice(0, 2).toUpperCase() : 'HD';
   const isSeller = isSellerArea(pathname);
+  const auctionRoomMenuOpen = useAuctionRoomMenu();
+  const handleMenuOpen = onMenuOpen ?? auctionRoomMenuOpen ?? undefined;
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -266,14 +269,16 @@ export function DashboardHeader({
       {/* Mobile layout */}
       <div className="flex flex-col gap-4 lg:hidden">
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onMenuOpen}
-            className="-ml-1 p-1 text-foreground"
-            aria-label="Open menu"
-          >
-            <Menu className="size-6" strokeWidth={2} />
-          </button>
+          {handleMenuOpen ? (
+            <button
+              type="button"
+              onClick={handleMenuOpen}
+              className="-ml-1 p-1 text-foreground"
+              aria-label="Open menu"
+            >
+              <Menu className="size-6" strokeWidth={2} />
+            </button>
+          ) : null}
           <p className="text-sm font-medium text-muted-foreground">
             Hi, {firstName}!
           </p>
