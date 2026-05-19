@@ -80,7 +80,7 @@ export function UserAuctionRoomLiveSidebar({
   const [tab, setTab] = useState<TabId>('chat');
   const hasAudio = remoteStreams.some((s) => s.kind === 'audio');
   const hasVideo = remoteStreams.some((s) => s.kind === 'video');
-  const participantCount = Math.max(participants.length, watchingCount);
+  const participantCount = participants.length;
 
   const sortedParticipants = useMemo(
     () =>

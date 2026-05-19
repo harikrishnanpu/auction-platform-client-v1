@@ -357,7 +357,7 @@ export function AuctionRoomCore({
   const watchingCount =
     roomMetrics?.watchingNow != null && roomMetrics.watchingNow >= 0
       ? roomMetrics.watchingNow
-      : participants.length;
+      : 0;
   const bidCount =
     roomMetrics?.totalBidCount != null && roomMetrics.totalBidCount >= 0
       ? roomMetrics.totalBidCount

@@ -75,7 +75,7 @@ export function SellerAuctionRoomLiveSidebar({
   const [tab, setTab] = useState<TabId>('chat');
   const hasAudio = isHostProducer && isLocalAudioEnabled;
   const hasVideo = isHostProducer && isLocalVideoEnabled;
-  const participantCount = Math.max(participants.length, watchingCount);
+  const participantCount = participants.length;
 
   const sortedParticipants = useMemo(
     () =>
