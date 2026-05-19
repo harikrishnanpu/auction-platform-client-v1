@@ -13,11 +13,11 @@ export function InfoGroup({
 }) {
   return (
     <div className={`space-y-1 ${fullWidth ? 'col-span-full' : ''}`}>
-      <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
+      <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
         {icon} {label}
       </div>
       <div
-        className={`text-base font-medium text-foreground pl-6 ${mono ? 'font-mono text-sm bg-muted/50 inline-block px-1.5 py-0.5 rounded' : ''}`}
+        className={`pl-5 text-[13px] font-medium text-foreground ${mono ? 'inline-block rounded bg-muted/50 px-1.5 py-0.5 font-mono text-xs' : ''}`}
       >
         {value}
       </div>

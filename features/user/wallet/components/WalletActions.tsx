@@ -1,9 +1,11 @@
 'use client';
 
 import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { appCard } from '@/lib/app-design';
+
 import { WalletAmountDialog } from './WalletAmountDialog';
 import type { IUserWallet } from '../types/wallet.types';
 
@@ -33,20 +35,18 @@ export function WalletActions({
   };
 
   return (
-    <Card className="border-border/60 bg-card/50">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">Actions</CardTitle>
-      </CardHeader>
-      <CardContent className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+    <div className={appCard()}>
+      <h2 className="app-section-title mb-4">Quick actions</h2>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <WalletAmountDialog
           title="Add Amount"
           description="Enter amount to add. Razorpay checkout will open."
           actionLabel="Continue to Payment"
           onSubmit={handleAddAmount}
           trigger={
-            <Button type="button" className="w-full">
-              <ArrowDownToLine className="h-4 w-4" />
-              Add Amount
+            <Button type="button" className="w-full rounded-full">
+              <ArrowDownToLine className="size-3.5" />
+              Add amount
             </Button>
           }
         />
@@ -56,13 +56,17 @@ export function WalletActions({
           actionLabel="Withdraw"
           onSubmit={handleWithdrawAmount}
           trigger={
-            <Button type="button" variant="outline" className="w-full">
-              <ArrowUpFromLine className="h-4 w-4" />
-              Withdraw Amount
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full rounded-full"
+            >
+              <ArrowUpFromLine className="size-3.5" />
+              Withdraw
             </Button>
           }
         />
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

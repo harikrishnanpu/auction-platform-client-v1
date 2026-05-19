@@ -41,8 +41,9 @@ export interface AuctionCardProps {
 type PillVariant = 'live' | 'upcoming' | 'ended' | 'paused' | 'neutral';
 
 const PILL_STYLES: Record<PillVariant, string> = {
-  live: 'bg-destructive/90 text-destructive-foreground ring-destructive/30',
-  upcoming: 'bg-primary/15 text-primary ring-primary/20',
+  live: 'bg-brand-600 text-white ring-brand-600/30',
+  upcoming:
+    'bg-brand-50 text-brand-700 ring-brand-200 dark:bg-brand-950/50 dark:text-brand-300',
   ended: 'bg-muted text-muted-foreground ring-border',
   paused: 'bg-amber-500/90 text-white ring-amber-300/30',
   neutral: 'bg-muted text-foreground ring-border',
@@ -127,8 +128,8 @@ function MetaRow({
     <div
       className={cn(
         'flex min-w-0 max-w-[50%] items-center gap-1 text-[11px] font-medium tabular-nums',
-        accent === 'live' && 'text-destructive',
-        accent === 'upcoming' && 'text-primary',
+        accent === 'live' && 'text-red-500',
+        accent === 'upcoming' && 'text-brand-600',
         accent === 'muted' && 'text-muted-foreground',
         className
       )}
@@ -160,7 +161,7 @@ function CardCTA({
         className={cn(
           'flex w-full items-center justify-center gap-1 font-semibold',
           btn,
-          'bg-primary text-primary-foreground shadow-sm transition-opacity hover:opacity-90',
+          'rounded-full bg-brand-600 text-white shadow-sm transition-colors hover:bg-brand-700',
           'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
         )}
       >
@@ -259,9 +260,9 @@ export function AuctionCard({
   return (
     <div
       className={cn(
-        'group relative flex h-full flex-col overflow-hidden rounded-lg border border-border/70 bg-card',
+        'group relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm',
         'transition-[border-color,box-shadow] duration-200',
-        'hover:border-foreground/15 hover:shadow-sm',
+        'hover:border-brand-600/25 hover:shadow-md',
         display.isClosed && 'opacity-85',
         compact && 'rounded-md',
         className
@@ -335,7 +336,7 @@ export function AuctionCard({
         >
           <h3
             className={cn(
-              'line-clamp-2 font-semibold leading-snug text-foreground transition-colors group-hover:text-primary',
+              'line-clamp-2 font-semibold leading-snug text-foreground transition-colors group-hover:text-brand-600',
               compact ? 'text-[11px] leading-tight' : 'text-[13px]'
             )}
           >
@@ -370,8 +371,8 @@ export function AuctionCard({
             <p
               className={cn(
                 'truncate font-bold tabular-nums leading-tight',
-                compact ? 'text-sm' : 'text-[15px]',
-                display.isLive ? 'text-primary' : 'text-foreground'
+                compact ? 'text-sm' : 'text-sm',
+                display.isLive ? 'text-brand-600' : 'text-foreground'
               )}
             >
               {formatAuctionPrice(priceValue)}

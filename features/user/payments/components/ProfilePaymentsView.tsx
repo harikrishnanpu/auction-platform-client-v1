@@ -1,8 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { CreditCard } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+
 import { Spinner } from '@/components/ui/spinner';
 import {
   Select,
@@ -12,13 +11,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PaginationControls } from '@/features/user/notifications/components/PaginationControls';
-import { useUserPayments } from '../hooks/use-user-payments';
-import { PaymentsList } from './PaymentsList';
-import { PaymentStatusModal } from './PaymentStatusModal';
+import {
+  ProfilePageCard,
+  ProfilePageShell,
+} from '@/features/user/profile/components/profile-page-shell';
 import {
   loadRazorpayScript,
   type RazorpayPaymentResponse,
 } from '@/lib/razorpay';
+
+import { useUserPayments } from '../hooks/use-user-payments';
+import { PaymentsList } from './PaymentsList';
+import { PaymentStatusModal } from './PaymentStatusModal';
 import type { PaymentStatus } from '../types/payments.types';
 
 export function ProfilePaymentsView() {
@@ -134,67 +138,54 @@ export function ProfilePaymentsView() {
   };
 
   return (
-    <section className="space-y-5">
-      <div className="space-y-1">
-        <h1 className="flex items-center gap-2 text-lg font-semibold sm:text-xl">
-          <CreditCard className="h-5 w-5" />
-          Payments
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          View pending, paid, and declined auction payments with due dates and
-          phase.
-        </p>
-      </div>
+    <ProfilePageShell>
+      <ProfilePageCard>
+        <div className="mb-4 flex justify-end">
+          <Select
+            value={status}
+            onValueChange={(value) => {
+              setPage(1);
+              setStatus(value as PaymentStatus | 'ALL');
+            }}
+          >
+            <SelectTrigger className="h-8 w-[160px] rounded-lg text-xs">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="PENDING">Pending</SelectItem>
+              <SelectItem value="COMPLETED">Paid</SelectItem>
+              <SelectItem value="DECLINED">Declined</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-      <Card className="border-border/60 bg-card/50">
-        <CardContent className="space-y-4 p-4 sm:p-6">
-          <div className="flex justify-end">
-            <Select
-              value={status}
-              onValueChange={(value) => {
-                setPage(1);
-                setStatus(value as PaymentStatus | 'ALL');
-              }}
-            >
-              <SelectTrigger className="h-9 w-[170px] rounded-lg">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All</SelectItem>
-                <SelectItem value="PENDING">Pending</SelectItem>
-                <SelectItem value="COMPLETED">Paid</SelectItem>
-                <SelectItem value="DECLINED">Declined</SelectItem>
-              </SelectContent>
-            </Select>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Spinner />
           </div>
-
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Spinner />
-            </div>
-          ) : error ? (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-              {error}
-            </div>
-          ) : (
-            <>
-              <PaymentsList
-                items={data?.items ?? []}
-                payingPaymentId={payingPaymentId}
-                decliningPaymentId={decliningPaymentId}
-                onPayNow={onPayNow}
-                onDecline={onDecline}
-              />
-              <PaginationControls
-                page={data?.page ?? page}
-                totalPages={totalPages}
-                onPrev={() => setPage((p) => Math.max(1, p - 1))}
-                onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
-              />
-            </>
-          )}
-        </CardContent>
-      </Card>
+        ) : error ? (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-[13px] text-destructive">
+            {error}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <PaymentsList
+              items={data?.items ?? []}
+              payingPaymentId={payingPaymentId}
+              decliningPaymentId={decliningPaymentId}
+              onPayNow={onPayNow}
+              onDecline={onDecline}
+            />
+            <PaginationControls
+              page={data?.page ?? page}
+              totalPages={totalPages}
+              onPrev={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+            />
+          </div>
+        )}
+      </ProfilePageCard>
 
       <PaymentStatusModal
         open={modal.open}
@@ -202,6 +193,6 @@ export function ProfilePaymentsView() {
         description={modal.description}
         onClose={() => setModal((prev) => ({ ...prev, open: false }))}
       />
-    </section>
+    </ProfilePageShell>
   );
 }

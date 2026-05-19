@@ -64,6 +64,7 @@ export const API_ENDPOINTS = {
     getLatestAuctions: '/auction/auctions',
     getBrowseAuctions: '/auction/auctions',
     getUserHomeAuctionFeed: '/auction/home-feed',
+    getAuctionBids: (id: string) => `/auction/${id}/bids`,
   },
 
   admin: {

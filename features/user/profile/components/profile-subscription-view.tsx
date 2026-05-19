@@ -1,15 +1,12 @@
 'use client';
 
-import { Crown } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+
+import { appCard } from '@/lib/app-design';
 import type { IPublicSubscriptionPlan } from '@/types/user-subscription.type';
+import { ProfilePageShell } from '@/features/user/profile/components/profile-page-shell';
+
 import { useSubscriptionCheckout } from '../hooks/use-subscription-checkout';
 import { SubscriptionPlanCard } from './subscription-plan-card';
 
@@ -38,26 +35,14 @@ export function ProfileSubscriptionView({
   }, [initialError]);
 
   return (
-    <section className="space-y-6">
-      <header className="space-y-2">
-        <h1 className="flex items-center gap-2 text-xl font-semibold sm:text-2xl">
-          <Crown className="h-5 w-5" />
-          Subscription
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Pick the best plan for your bidding needs.
-        </p>
-      </header>
-
+    <ProfilePageShell className="lg:max-w-5xl">
       {plans.length === 0 ? (
-        <Card className="border-border/60">
-          <CardHeader>
-            <CardTitle>Subscription plans</CardTitle>
-            <CardDescription>
-              No plans are available right now. Please check again later.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <div className={appCard()}>
+          <h2 className="app-section-title">Subscription plans</h2>
+          <p className="mt-2 text-[13px] text-muted-foreground">
+            No plans are available right now. Please check again later.
+          </p>
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {plans.map((plan) => {
@@ -89,6 +74,6 @@ export function ProfileSubscriptionView({
           })}
         </div>
       )}
-    </section>
+    </ProfilePageShell>
   );
 }

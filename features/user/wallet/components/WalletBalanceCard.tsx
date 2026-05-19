@@ -1,5 +1,6 @@
 import { Wallet } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import { appCard } from '@/lib/app-design';
 import type { IUserWallet } from '../types/wallet.types';
 import { formatWalletCurrency } from '../utils/format-wallet';
 
@@ -7,31 +8,28 @@ export function WalletBalanceCard({ wallet }: { wallet: IUserWallet }) {
   const totalBalance = wallet.mainBalance + wallet.heldBalance;
 
   return (
-    <Card className="border-border/60 bg-card/50">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Wallet className="h-4 w-4" />
-          Wallet Balance
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-2xl font-semibold sm:text-3xl">
-          {formatWalletCurrency(totalBalance, wallet.currency)}
-        </p>
-        <div className="space-y-1 text-sm text-muted-foreground">
-          <p>
-            Main Balance:{' '}
+    <div className={appCard()}>
+      <h2 className="app-section-title mb-4 flex items-center gap-2">
+        <Wallet className="size-4 text-brand-600" />
+        Wallet balance
+      </h2>
+      <p className="app-stat-value">
+        {formatWalletCurrency(totalBalance, wallet.currency)}
+      </p>
+      <div className="mt-4 space-y-1.5 rounded-lg bg-muted/40 p-3 text-[13px] text-muted-foreground">
+        <p>
+          Main balance:{' '}
+          <span className="font-medium text-foreground">
             {formatWalletCurrency(wallet.mainBalance, wallet.currency)}
-          </p>
-          <p>
-            Held Balance:{' '}
+          </span>
+        </p>
+        <p>
+          Held balance:{' '}
+          <span className="font-medium text-foreground">
             {formatWalletCurrency(wallet.heldBalance, wallet.currency)}
-          </p>
-          <p className="font-medium text-foreground/90">
-            Total: {formatWalletCurrency(totalBalance, wallet.currency)}
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+          </span>
+        </p>
+      </div>
+    </div>
   );
 }

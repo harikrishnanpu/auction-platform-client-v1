@@ -44,13 +44,15 @@ export function UserAuctionsCards({
     return (
       <div
         className={cn(
-          'flex flex-col items-center justify-center rounded-lg border border-dashed border-border/50 bg-muted/20 px-3 py-8 text-center',
+          'flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 px-6 py-14 text-center',
           className
         )}
       >
-        <p className="text-sm font-medium text-foreground">No auctions yet</p>
-        <p className="mt-1 max-w-xs text-[11px] text-muted-foreground">
-          Try adjusting your filters.
+        <p className="text-base font-semibold text-foreground">
+          No auctions found
+        </p>
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+          Try adjusting your filters or search term.
         </p>
         {emptyAction ? <div className="mt-4">{emptyAction}</div> : null}
       </div>

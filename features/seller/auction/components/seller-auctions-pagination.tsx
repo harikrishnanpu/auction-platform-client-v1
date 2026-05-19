@@ -16,6 +16,7 @@ interface SellerAuctionsPaginationProps {
   className?: string;
   /** panel: full-width bar with border. minimal-end: plain, right-aligned (browse). */
   variant?: SellerAuctionsPaginationVariant;
+  hidePageLabel?: boolean;
 }
 
 export function SellerAuctionsPagination({
@@ -26,6 +27,7 @@ export function SellerAuctionsPagination({
   onNext,
   className,
   variant = 'panel',
+  hidePageLabel = false,
 }: SellerAuctionsPaginationProps) {
   const canGoPrev = currentPage > 1 && !loading;
   const canGoNext = currentPage < totalPages && !loading;
@@ -34,7 +36,7 @@ export function SellerAuctionsPagination({
     <Button
       variant="outline"
       size="sm"
-      className="h-7 rounded-md px-2 text-[11px]"
+      className="h-9 rounded-full px-3 text-xs"
       disabled={!canGoPrev}
       onClick={onPrev}
     >
@@ -47,7 +49,7 @@ export function SellerAuctionsPagination({
     <Button
       variant="outline"
       size="sm"
-      className="h-7 rounded-md px-2 text-[11px]"
+      className="h-9 rounded-full px-3 text-xs"
       disabled={!canGoNext}
       onClick={onNext}
     >
@@ -57,7 +59,7 @@ export function SellerAuctionsPagination({
   );
 
   const pageLabel = (
-    <span className="tabular-nums text-[11px] text-muted-foreground">
+    <span className="tabular-nums text-sm text-muted-foreground">
       Page <span className="font-medium text-foreground">{currentPage}</span> of{' '}
       <span className="font-medium text-foreground">{totalPages}</span>
     </span>
@@ -66,12 +68,10 @@ export function SellerAuctionsPagination({
   if (variant === 'minimal-end') {
     return (
       <div className={cn('flex justify-end', className)}>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          {pageLabel}
-          <div className="flex items-center gap-1">
-            {prevBtn}
-            {nextBtn}
-          </div>
+        <div className="flex items-center gap-2">
+          {!hidePageLabel ? pageLabel : null}
+          {prevBtn}
+          {nextBtn}
         </div>
       </div>
     );
