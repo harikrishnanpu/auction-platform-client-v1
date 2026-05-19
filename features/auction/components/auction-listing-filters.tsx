@@ -62,6 +62,10 @@ export function AuctionListingFilters({
 }: AuctionListingFiltersProps) {
   const statusVal = values.status ?? 'ALL';
   const showStatus = Boolean(statusOptions && statusOptions.length > 0);
+  const pillActive =
+    'border-brand-600 bg-brand-600 text-white shadow-sm hover:bg-brand-700';
+  const pillInactive =
+    'border-transparent bg-muted/40 text-muted-foreground hover:border-border/80 hover:bg-muted/60 hover:text-foreground';
 
   return (
     <section className={cn('border-b border-border/60 pb-5', className)}>
@@ -69,8 +73,8 @@ export function AuctionListingFilters({
         <div
           className={cn(
             'flex min-h-10 min-w-0 flex-1 overflow-hidden rounded-xl border border-border/80 bg-card',
-            'shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-[box-shadow,border-color]',
-            'focus-within:border-ring/40 focus-within:ring-2 focus-within:ring-ring/20'
+            'shadow-sm transition-[box-shadow,border-color]',
+            'focus-within:border-brand-600/40 focus-within:ring-2 focus-within:ring-brand-600/20'
           )}
         >
           <Select
@@ -113,7 +117,7 @@ export function AuctionListingFilters({
         <Button
           type="button"
           variant="outline"
-          className="h-10 shrink-0 gap-2 rounded-xl border-border/80 px-4 text-sm font-medium"
+          className="h-10 shrink-0 gap-2 rounded-full border-border/80 px-4 text-sm font-medium"
           onClick={onReset}
         >
           <RotateCcw className="size-4" />
@@ -141,9 +145,7 @@ export function AuctionListingFilters({
                   onClick={() => onPatch({ status: o.value })}
                   className={cn(
                     'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                    active
-                      ? 'border-border bg-muted text-foreground'
-                      : 'border-transparent bg-muted/30 text-muted-foreground hover:border-border/80 hover:bg-muted/50 hover:text-foreground'
+                    active ? pillActive : pillInactive
                   )}
                 >
                   {o.label}
@@ -167,9 +169,7 @@ export function AuctionListingFilters({
               onClick={() => onPatch({ auctionType: o.value })}
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                active
-                  ? 'border-border bg-muted text-foreground'
-                  : 'border-transparent bg-muted/30 text-muted-foreground hover:border-border/80 hover:bg-muted/50 hover:text-foreground'
+                active ? pillActive : pillInactive
               )}
             >
               {o.label}
@@ -207,7 +207,7 @@ export function AuctionListingFilters({
             className={cn(
               'border-r border-border/60 px-3 transition-colors',
               values.order === 'asc'
-                ? 'bg-muted text-foreground'
+                ? 'bg-brand-600 text-white'
                 : 'bg-background text-muted-foreground hover:bg-muted/50'
             )}
           >
@@ -219,7 +219,7 @@ export function AuctionListingFilters({
             className={cn(
               'px-3 transition-colors',
               values.order === 'desc'
-                ? 'bg-muted text-foreground'
+                ? 'bg-brand-600 text-white'
                 : 'bg-background text-muted-foreground hover:bg-muted/50'
             )}
           >
@@ -240,9 +240,7 @@ export function AuctionListingFilters({
                 onClick={() => onPatch({ limit: n })}
                 className={cn(
                   'inline-flex h-9 min-w-9 items-center justify-center rounded-full border px-2.5 text-xs font-medium tabular-nums transition-colors',
-                  active
-                    ? 'border-border bg-muted text-foreground'
-                    : 'border-transparent bg-muted/30 text-muted-foreground hover:border-border/80 hover:bg-muted/50 hover:text-foreground'
+                  active ? pillActive : pillInactive
                 )}
               >
                 {n}

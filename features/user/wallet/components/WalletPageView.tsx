@@ -1,16 +1,21 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
 import { useState } from 'react';
-import { WalletBalanceCard } from './WalletBalanceCard';
-import { WalletActions } from './WalletActions';
-import { useUserWallet } from '../hooks/use-user-wallet';
+
+import { Spinner } from '@/components/ui/spinner';
+import {
+  ProfilePageCard,
+  ProfilePageShell,
+} from '@/features/user/profile/components/profile-page-shell';
 import {
   loadRazorpayScript,
   type RazorpayPaymentResponse,
 } from '../utils/razorpay';
+
+import { WalletBalanceCard } from './WalletBalanceCard';
+import { WalletActions } from './WalletActions';
 import { WalletPaymentStatusModal } from './WalletPaymentStatusModal';
+import { useUserWallet } from '../hooks/use-user-wallet';
 
 export function WalletPageView() {
   const [paymentStatusModal, setPaymentStatusModal] = useState<{
@@ -96,38 +101,40 @@ export function WalletPageView() {
 
   if (loading) {
     return (
-      <Card className="border-border/60 bg-card/50">
-        <CardContent className="flex items-center justify-center py-12">
-          <Spinner />
-        </CardContent>
-      </Card>
+      <ProfilePageShell>
+        <ProfilePageCard>
+          <div className="flex items-center justify-center py-12">
+            <Spinner />
+          </div>
+        </ProfilePageCard>
+      </ProfilePageShell>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-        {error}
-      </div>
+      <ProfilePageShell>
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-[13px] text-destructive">
+          {error}
+        </div>
+      </ProfilePageShell>
     );
   }
 
   if (!wallet) {
     return (
-      <div className="rounded-lg border border-border/70 bg-muted/20 px-4 py-6 text-sm text-muted-foreground">
-        Wallet data is unavailable.
-      </div>
+      <ProfilePageShell>
+        <ProfilePageCard>
+          <p className="text-[13px] text-muted-foreground">
+            Wallet data is unavailable.
+          </p>
+        </ProfilePageCard>
+      </ProfilePageShell>
     );
   }
 
   return (
-    <section className="space-y-4">
-      <div className="space-y-1">
-        <h1 className="text-lg font-semibold sm:text-xl">Wallet</h1>
-        <p className="text-sm text-muted-foreground">
-          View your current wallet balance and upcoming actions.
-        </p>
-      </div>
+    <ProfilePageShell>
       <WalletBalanceCard wallet={wallet} />
       <WalletActions
         wallet={wallet}
@@ -145,6 +152,6 @@ export function WalletPageView() {
           }))
         }
       />
-    </section>
+    </ProfilePageShell>
   );
 }

@@ -52,6 +52,7 @@ export interface UpdateAuctionDraftInput {
 
 export interface IAuctionDto {
   id: string;
+  auctionNumber?: string;
   sellerId: string;
   auctionType: AuctionType;
   status: AuctionStatus;

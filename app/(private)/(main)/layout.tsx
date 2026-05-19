@@ -1,4 +1,4 @@
-import { DashboardHeader } from '@/components/layout/navbars/navbar';
+import { AppDashboardShell } from '@/components/layout/app-dashboard-shell';
 import { UserAssistantChat } from '@/components/assistant/user-assistant-chat';
 
 export default function MainLayout({
@@ -7,9 +7,8 @@ export default function MainLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="bg-app-shell min-h-screen font-sans text-foreground transition-colors duration-300">
-      <DashboardHeader />
-      <main className="flex-1">{children}</main>
+    <div className="min-h-screen font-sans text-foreground transition-colors duration-300">
+      <AppDashboardShell>{children}</AppDashboardShell>
       <UserAssistantChat />
     </div>
   );

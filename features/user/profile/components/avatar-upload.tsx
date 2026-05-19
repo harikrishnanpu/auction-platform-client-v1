@@ -1,25 +1,54 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { Camera, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { AuthProvider, IUser as User } from '@/types/user.type';
-import { getErrorMessage } from '@/utils/get-app-error';
+
 import {
   getAvatarUploadUrlAction,
   updateAvatarAction,
   uploadAvatarAction,
 } from '@/actions/user/profile.actions';
+import { cn } from '@/lib/utils';
+import { AuthProvider, type IUser as User } from '@/types/user.type';
+import { getErrorMessage } from '@/utils/get-app-error';
+import { getUserAvatarUrl } from '@/utils/auction-utils';
 
 interface AvatarUploadProps {
   user: User;
   onUploadSuccess: (user: User) => void;
+  size?: 'md' | 'lg';
 }
 
-export function AvatarUpload({ user, onUploadSuccess }: AvatarUploadProps) {
+const SIZE_CLASSES = {
+  md: {
+    box: 'h-24 w-24',
+    img: 96,
+    icon: 'h-6 w-6',
+    initials: 'text-lg',
+  },
+  lg: {
+    box: 'h-28 w-28 sm:h-32 sm:w-32',
+    img: 128,
+    icon: 'h-7 w-7',
+    initials: 'text-xl',
+  },
+} as const;
+
+export function AvatarUpload({
+  user,
+  onUploadSuccess,
+  size = 'lg',
+}: AvatarUploadProps) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dims = SIZE_CLASSES[size];
+
+  const avatarSrc =
+    user.avatar_url && user.authProvider === AuthProvider.LOCAL
+      ? getUserAvatarUrl(user.avatar_url)
+      : user.avatar_url;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -51,10 +80,6 @@ export function AvatarUpload({ user, onUploadSuccess }: AvatarUploadProps) {
 
       const { uploadUrl, fileKey } = response.data;
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('fileKey', fileKey);
-
       const uploadResponse = await uploadAvatarAction(uploadUrl, file);
 
       if (!uploadResponse.success) {
@@ -65,14 +90,13 @@ export function AvatarUpload({ user, onUploadSuccess }: AvatarUploadProps) {
       const updateResponse = await updateAvatarAction(fileKey);
 
       if (!updateResponse.success || !updateResponse.data) {
-        console.log('ERROR IN UPDATE AVATAR', updateResponse);
         toast.error(updateResponse.error || 'Failed to update avatar');
         return;
       }
 
       onUploadSuccess(updateResponse.data.user);
+      toast.success('Profile photo updated');
     } catch (error: unknown) {
-      console.log('ERROR IN AVATAR UPLOAD', error);
       toast.error(getErrorMessage(error) || 'Failed to upload avatar');
     } finally {
       setUploading(false);
@@ -82,44 +106,47 @@ export function AvatarUpload({ user, onUploadSuccess }: AvatarUploadProps) {
 
   return (
     <div
-      className="relative group cursor-pointer inline-block"
+      className="group relative inline-block shrink-0 cursor-pointer"
       onClick={() => !uploading && fileInputRef.current?.click()}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (!uploading) fileInputRef.current?.click();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label="Upload profile photo"
     >
-      <div className="h-32 w-32 overflow-hidden rounded-full border-4 border-background shadow-xl ring-4 ring-primary/10 transition-all duration-300 group-hover:ring-primary/30">
+      <div
+        className={cn(
+          'overflow-hidden rounded-full border-4 border-background shadow-md ring-2 ring-brand-100 transition-all group-hover:ring-brand-300 dark:ring-brand-900/50',
+          dims.box
+        )}
+      >
         {uploading ? (
-          <div className="h-full w-full flex items-center justify-center bg-muted">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="flex h-full w-full items-center justify-center bg-muted">
+            <Loader2 className="size-7 animate-spin text-brand-600" />
           </div>
-        ) : user.avatar_url ? (
-          user?.authProvider == AuthProvider.LOCAL ? (
-            <Image
-              className="rounded-full"
-              src={`https://hammer-down-auction-platform.s3.ap-south-1.amazonaws.com/${user?.avatar_url}`}
-              alt="avatar_url"
-              width={128}
-              height={128}
-            />
-          ) : (
-            <Image
-              className="rounded-full"
-              src={user?.avatar_url}
-              alt="avatar_url"
-              width={128}
-              height={128}
-            />
-          )
+        ) : avatarSrc ? (
+          <Image
+            className="h-full w-full object-cover"
+            src={avatarSrc}
+            alt=""
+            width={dims.img}
+            height={dims.img}
+          />
         ) : (
-          <div className="h-full w-full flex items-center justify-center bg-gray-200 text-muted-foreground font-medium">
-            <span className="text-2xl font-bold text-gray-600">
-              {user.name?.slice(0, 2)?.toUpperCase()}
+          <div className="flex h-full w-full items-center justify-center bg-brand-50 font-bold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
+            <span className={dims.initials}>
+              {user.name?.slice(0, 2)?.toUpperCase() ?? 'HD'}
             </span>
           </div>
         )}
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-all duration-300 group-hover:opacity-100">
-        <Camera className="text-white h-8 w-8 drop-shadow-md" />
-        <span className="sr-only">Upload Avatar</span>
+      <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/45 opacity-0 transition-opacity group-hover:opacity-100">
+        <Camera className={cn('text-white drop-shadow-md', dims.icon)} />
       </div>
 
       <input

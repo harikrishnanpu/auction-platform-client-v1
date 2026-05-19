@@ -57,6 +57,8 @@ import {
   AuctionRoomAnalyticsKpis,
 } from './AuctionRoomCenterAnalytics';
 import { AuctionRoomListingHeader } from './AuctionRoomListingHeader';
+import { SellerAuctionRoomLayout } from './seller-room/SellerAuctionRoomLayout';
+import { UserAuctionRoomLayout } from './user-room/UserAuctionRoomLayout';
 
 import { arCardCanvas, arContainer, arPage } from '../lib/auction-room-design';
 
@@ -352,6 +354,147 @@ export function AuctionRoomCore({
     [user?.id, auction]
   );
 
+  const watchingCount =
+    roomMetrics?.watchingNow != null && roomMetrics.watchingNow >= 0
+      ? roomMetrics.watchingNow
+      : participants.length;
+  const bidCount =
+    roomMetrics?.totalBidCount != null && roomMetrics.totalBidCount >= 0
+      ? roomMetrics.totalBidCount
+      : liveFeed.length;
+  const extensionsUsed = roomMetrics?.extensionsUsed ?? 0;
+
+  const userRoomModals = (
+    <>
+      <AuctionPlaceBidTermsModal
+        open={placeBidTermsOpen}
+        onOpenChange={setPlaceBidTermsOpen}
+        depositAmount={participationDeposit}
+        walletMain={walletMain}
+        walletCurrency={walletCurrency}
+        canInteract={canInteract}
+        lockBusy={lockParticipantBusy}
+        onLockAmount={() => void handleLockParticipation()}
+      />
+
+      <AuctionResultModal
+        open={resultModalOpen}
+        outcome={resultOutcome}
+        title={auction?.title ?? 'Auction'}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsResultModalDismissed(true);
+          }
+        }}
+      />
+
+      <AuctionFraudReportDialog
+        open={reportAuctionOpen}
+        onOpenChange={setReportAuctionOpen}
+        title="Report this auction"
+        description="This will send a fraud report against the auction seller."
+        submitLabel="Submit auction report"
+        onSubmit={handleReportAuction}
+      />
+    </>
+  );
+
+  if (mode === 'SELLER') {
+    return (
+      <SellerAuctionRoomLayout
+        auctionId={auctionId}
+        auction={auction}
+        auctionStatusStr={auctionStatusStr}
+        endCountdown={endCountdown}
+        isAuctionActive={isAuctionActive}
+        isAuctionEnded={isAuctionEnded}
+        isLiveRoom={isLiveRoom}
+        currentBid={currentBid}
+        nextBidMin={nextBidMin}
+        liveFeed={liveFeed}
+        participants={participants}
+        chatMessages={chatMessages}
+        chatDraft={chatDraft}
+        onChatDraftChange={setChatDraft}
+        onSendChat={sendChat}
+        canInteract={canInteract}
+        connectionState={connectionState}
+        roomReady={roomReady}
+        error={error}
+        actionBusy={actionBusy}
+        actionError={actionError}
+        onPause={handlePause}
+        onResume={handleResume}
+        onEnd={handleEnd}
+        allowSendPublicNotification={allowSendPublicNotification}
+        onAuctionStatusOverride={setAuctionStatusOverride}
+        onSendFallbackPublicNotification={sendFallbackPublicNotification}
+        onMarkAuctionFailed={markAuctionFailed}
+        soldSummary={soldSummaryDisplay}
+        watchingCount={watchingCount}
+        bidCount={bidCount}
+        localStream={localStream}
+        isHostProducer={isHostProducer}
+        isLocalAudioEnabled={isLocalAudioEnabled}
+        isLocalVideoEnabled={isLocalVideoEnabled}
+        onToggleLocalAudio={toggleLocalAudio}
+        onToggleLocalVideo={toggleLocalVideo}
+      />
+    );
+  }
+
+  if (mode === 'USER') {
+    return (
+      <>
+        {userRoomModals}
+        <UserAuctionRoomLayout
+          auctionId={auctionId}
+          auction={auction}
+          auctionStatusStr={auctionStatusStr}
+          endCountdown={endCountdown}
+          isAuctionActive={isAuctionActive}
+          isAuctionEnded={isAuctionEnded}
+          isLiveRoom={isLiveRoom}
+          isSealedRoom={isSealedRoom}
+          currentBid={currentBid}
+          nextBidMin={nextBidMin}
+          liveFeed={liveFeed}
+          participants={participants}
+          chatMessages={chatMessages}
+          chatDraft={chatDraft}
+          onChatDraftChange={setChatDraft}
+          onSendChat={sendChat}
+          canInteract={canInteract}
+          connectionState={connectionState}
+          roomReady={roomReady}
+          error={error}
+          userBidStanding={userBidStanding}
+          watchingCount={watchingCount}
+          bidCount={bidCount}
+          extensionsUsed={extensionsUsed}
+          cooldownRemainingSeconds={cooldownRemainingSeconds}
+          isAutoBidActive={Boolean(autoBidConfig?.isActive)}
+          autoBidConfig={autoBidConfig}
+          onPlaceBid={handlePlaceBid}
+          setAutoBidConfig={setAutoBidConfig}
+          disableAutoBidConfig={disableAutoBidConfig}
+          soldSummary={soldSummaryDisplay}
+          canReportAuction={canReportAuction}
+          onReportAuction={() => setReportAuctionOpen(true)}
+          onAuctionStatusOverride={setAuctionStatusOverride}
+          payFallbackPublic={payFallbackPublic}
+          verifyFallbackPublicAuctionPayment={
+            verifyFallbackPublicAuctionPayment
+          }
+          onDeclineFallbackPublic={declineFallbackPublic}
+          remoteStreams={remoteStreams}
+          localStream={localStream}
+          isHostProducer={isHostProducer}
+        />
+      </>
+    );
+  }
+
   return (
     <div className={arPage('relative')}>
       <AuctionPlaceBidTermsModal
@@ -468,7 +611,7 @@ export function AuctionRoomCore({
                 isAuctionActive={isAuctionActive}
                 canInteract={canInteract}
                 isAutoBidActive={Boolean(autoBidConfig?.isActive)}
-                showPlaceBid={mode === 'USER'}
+                showPlaceBid={false}
                 cooldownRemainingSeconds={cooldownRemainingSeconds}
                 onPlaceBid={handlePlaceBid}
               />
@@ -480,10 +623,6 @@ export function AuctionRoomCore({
                 isLiveRoom={isLiveRoom}
                 currentUserId={user?.id}
               />
-
-              {mode === 'USER' ? (
-                <AuctionRoomYourPosition standing={userBidStanding} />
-              ) : null}
 
               {auctionStatusStr === 'SOLD' && soldSummaryDisplay ? (
                 <AuctionSoldSummaryCard
@@ -498,18 +637,6 @@ export function AuctionRoomCore({
                 canReport={canReportParticipants}
                 onReportUser={handleReportParticipant}
               />
-
-              {mode === 'USER' && !isSealedRoom ? (
-                <AuctionRoomAutoBidPanel
-                  config={autoBidConfig}
-                  nextBidMin={nextBidMin}
-                  canInteract={canInteract}
-                  isAuctionActive={isAuctionActive}
-                  isLiveAuction={isLiveRoom}
-                  onEnable={setAutoBidConfig}
-                  onDisable={disableAutoBidConfig}
-                />
-              ) : null}
 
               {canControlAuction ? (
                 <AuctionRoomSellerPanel
@@ -540,23 +667,6 @@ export function AuctionRoomCore({
                 <FallbackPublicParticipantStatsCard
                   pending={fallbackPublicParticipantStats.pending}
                   rejected={fallbackPublicParticipantStats.rejected}
-                />
-              ) : null}
-
-              {mode === 'USER' &&
-              auctionStatusStr === 'FALLBACK_PUBLIC_NOTIFICATION' &&
-              auction ? (
-                <AuctionRoomFallbackPublicNotificationPanel
-                  auctionId={auctionId}
-                  auctionTitle={auction.title}
-                  startPrice={auction.startPrice}
-                  canInteract={canInteract}
-                  onStatusUpdated={setAuctionStatusOverride}
-                  payFallbackPublic={payFallbackPublic}
-                  verifyFallbackPublicAuctionPayment={
-                    verifyFallbackPublicAuctionPayment
-                  }
-                  onDecline={declineFallbackPublic}
                 />
               ) : null}
 

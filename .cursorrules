@@ -1,0 +1,67 @@
+# Architecture Rules — TypeScript
+
+## Folder structure
+Every feature lives in src/features/<featureName>/
+  components/   — .tsx only
+  hooks/        — useXxx.ts only
+  actions/      — xxxActions.ts only
+  services/     — xxxService.ts only
+  types/        — xxx.types.ts (feature-specific types)
+
+Shared reusable UI → src/components/
+Shared hooks     → src/hooks/
+Global types     → src/types/
+Constants        → src/constants/
+
+## Layer rules (never skip, never reverse)
+
+### Component (.tsx)
+- Returns JSX only
+- Props must have an explicit interface: interface AuctionCardProps { ... }
+- Calls hooks for data and callbacks
+- NEVER imports a service or action directly
+- NEVER contains useState/useEffect for data fetching
+- NEVER uses `any` — type every prop
+
+### Hook (useXxx.ts)
+- Owns state: useState, useEffect, useReducer
+- Calls action functions, not services
+- Has explicit return type: const useAuctions = (): UseAuctionsReturn => {}
+- Returns { data, isLoading, error, handlers }
+- NEVER renders JSX
+- NEVER imports a service directly
+- One hook = one concern
+
+### Action (xxxActions.ts)
+- Plain async function, no React
+- Has typed params and return: async function fetchAuctions(): Promise<Auction[]>
+- Calls service functions, returns typed data or throws
+- Contains business/transform logic
+- NEVER imports useState/useEffect/any hook
+- NEVER touches the DOM
+
+### Service (xxxService.ts)
+- HTTP calls only (fetch or axios)
+- Returns typed raw response: Promise<ApiResponse<Auction[]>>
+- No business logic, no state
+- One file per API domain (auctionService, userService, walletService)
+
+## TypeScript rules
+- No `any` anywhere — use `unknown` and narrow it
+- No type assertions (`as SomeType`) unless absolutely unavoidable
+- All API response shapes must have an interface in xxx.types.ts
+- Enums for fixed sets of values (AuctionStatus, BidStatus)
+- Use type for unions, interface for object shapes
+- All async functions must have explicit return types
+
+## Code style rules
+- No assumptions — receive data via props or hook, never derive from global
+- Simple over clever — if a function is hard to name, split it
+- No magic values — use typed constants (const MAX_BID = 1_000_000)
+- No inline fetch inside components or hooks
+- Reusable components must have zero feature-specific imports
+- Export types alongside the file they belong to
+
+## Data flow (one direction only)
+Component → Hook → Action → Service → API
+No skipping layers. No reverse imports.
