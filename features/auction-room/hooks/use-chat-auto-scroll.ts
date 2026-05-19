@@ -14,9 +14,9 @@ export function useChatAutoScroll(
   messageCount: number,
   scrollRef: RefObject<HTMLDivElement | null>
 ) {
-  const endRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
   const prevCountRef = useRef(messageCount);
+  const userScrolledRef = useRef(false);
   const [showJumpToBottom, setShowJumpToBottom] = useState(false);
   const [unreadWhileScrolledUp, setUnreadWhileScrolledUp] = useState(0);
 
@@ -30,11 +30,8 @@ export function useChatAutoScroll(
   const scrollToBottom = useCallback(
     (behavior: ScrollBehavior = 'smooth') => {
       const el = scrollRef.current;
-      if (el) {
-        el.scrollTo({ top: el.scrollHeight, behavior });
-      } else {
-        endRef.current?.scrollIntoView({ behavior, block: 'end' });
-      }
+      if (!el) return;
+      el.scrollTo({ top: el.scrollHeight, behavior });
       isNearBottomRef.current = true;
       setShowJumpToBottom(false);
       setUnreadWhileScrolledUp(0);
@@ -43,6 +40,7 @@ export function useChatAutoScroll(
   );
 
   const onScroll = useCallback(() => {
+    userScrolledRef.current = true;
     const near = checkNearBottom();
     isNearBottomRef.current = near;
     if (near) {
@@ -70,14 +68,12 @@ export function useChatAutoScroll(
   }, [messageCount, scrollToBottom]);
 
   useEffect(() => {
-    if (messageCount > 0) {
-      requestAnimationFrame(() => scrollToBottom('auto'));
-    }
+    if (messageCount === 0) return;
+    requestAnimationFrame(() => scrollToBottom('auto'));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- initial layout only
   }, []);
 
   return {
-    endRef,
     showJumpToBottom,
     unreadWhileScrolledUp,
     onScroll,

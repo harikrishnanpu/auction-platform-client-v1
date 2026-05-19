@@ -98,12 +98,12 @@ export function UserAuctionRoomLiveSidebar({
     <aside
       className={cn(
         urCard(
-          'flex min-h-[min(480px,62vh)] flex-col p-0 min-[1320px]:sticky min-[1320px]:top-3 min-[1320px]:max-h-[calc(100dvh-5.5rem)] min-[1320px]:min-h-[calc(100dvh-5.5rem)]'
+          'flex h-[min(480px,62vh)] max-h-[min(480px,62vh)] flex-col overflow-hidden p-0 min-[1320px]:sticky min-[1320px]:top-3 min-[1320px]:h-[calc(100dvh-5.5rem)] min-[1320px]:max-h-[calc(100dvh-5.5rem)]'
         ),
         className
       )}
     >
-      <div className="border-b border-border p-3.5">
+      <div className="shrink-0 border-b border-border p-3.5">
         <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           Auction Host
         </p>
@@ -174,7 +174,7 @@ export function UserAuctionRoomLiveSidebar({
         </div>
       </div>
 
-      <div className="flex border-b border-border">
+      <div className="flex shrink-0 border-b border-border">
         <button
           type="button"
           onClick={() => setTab('chat')}
@@ -202,17 +202,16 @@ export function UserAuctionRoomLiveSidebar({
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden">
+      <div className="relative min-h-0 flex-1 overflow-hidden">
         {tab === 'chat' ? (
           <UserAuctionRoomChatFeed
             messages={messages}
             hostUserId={sellerId}
             currentLeadUserId={currentLeadUserId}
             heroImageUrl={heroImageUrl}
-            className="h-full"
           />
         ) : (
-          <ul className="h-full overflow-y-auto px-3 py-2">
+          <ul className="absolute inset-0 overflow-y-auto overscroll-y-contain px-3 py-2 touch-pan-y [-webkit-overflow-scrolling:touch]">
             {sortedParticipants.length === 0 ? (
               <li className="py-8 text-center text-xs text-muted-foreground">
                 No participants yet
