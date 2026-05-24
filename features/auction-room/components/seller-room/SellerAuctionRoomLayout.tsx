@@ -496,25 +496,6 @@ export function SellerAuctionRoomLayout({
                     <ExternalLink className="size-4" />
                   </Link>
                 </section>
-
-                <section className={srCard()}>
-                  <div className="flex items-center gap-2">
-                    <HeartPulse className="size-4 text-emerald-600" />
-                    <h2 className={srSectionTitle()}>Everything looks good</h2>
-                  </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Auction health
-                  </p>
-                  <div className="mt-4 space-y-1">
-                    <HealthRow
-                      label="Internet Connection"
-                      status={connectionOk ? 'Stable' : 'Connecting…'}
-                    />
-                    <HealthRow label="Live Stream" status={streamStatus} />
-                    <HealthRow label="Bids Sync" status="Synced" />
-                    <HealthRow label="Notifications" status="Active" />
-                  </div>
-                </section>
               </div>
 
               {/* Middle column */}

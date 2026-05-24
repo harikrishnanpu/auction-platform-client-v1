@@ -26,6 +26,9 @@ export const ASSISTANT_HEAD_IMAGES = [
   '/assist-head2.png',
 ] as const;
 
+export const AI_AGENT_NOT_IN_PLAN_MESSAGE =
+  'AI assistant is not included in your current subscription plan. Upgrade your plan to use chat.';
+
 export type AssistantChatMessage = {
   id: string;
   role: 'user' | 'assistant';
