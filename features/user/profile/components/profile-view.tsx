@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { InfoGroup } from '@/components/ui/info-group/InfoGroup';
+import { InfoGroup } from '@/components/info-group/InfoGroup';
 import useUserStore from '@/store/user.store';
 import { useProfileModalStore } from '@/store/profile-modal.store';
 
@@ -103,18 +103,18 @@ export function ProfileView() {
           >
             Change password
           </Button>
-          <Button asChild variant="outline" className="rounded-full">
-            <Link href="/profile/subscription">
+          <Link href="/profile/subscription" className="inline-block">
+            <Button variant="outline" className="rounded-full">
               <Crown className="size-3.5" />
               Manage subscription
-            </Link>
-          </Button>
-          <Button asChild variant="outline" className="rounded-full">
-            <Link href="/profile/wallet">
+            </Button>
+          </Link>
+          <Link href="/profile/wallet" className="inline-block">
+            <Button variant="outline" className="rounded-full">
               <Wallet className="size-3.5" />
               Open wallet
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
       </ProfilePageCard>
     </ProfilePageShell>

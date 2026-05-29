@@ -22,8 +22,6 @@ export function useAuctionRoomMenu() {
   return useContext(AuctionRoomMenuContext);
 }
 
-/** @deprecated */
 export const SellerRoomMenuProvider = AuctionRoomMenuProvider;
 
-/** @deprecated */
 export const useSellerRoomMenu = useAuctionRoomMenu;

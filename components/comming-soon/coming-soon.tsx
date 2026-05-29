@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-
 import { Button } from '@/components/ui/button';
 
 export function ComingSoon({
@@ -19,7 +18,7 @@ export function ComingSoon({
         <div className="text-2xl font-extrabold text-foreground">{title}</div>
         <div className="text-sm text-muted-foreground">{description}</div>
         <div className="pt-2 flex justify-center">
-          <Button asChild variant="outline">
+          <Button variant="outline">
             <Link href={homeHref}>Go back</Link>
           </Button>
         </div>

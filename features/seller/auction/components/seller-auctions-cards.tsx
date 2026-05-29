@@ -93,8 +93,8 @@ export function SellerAuctionsEmptyCta({
   label: string;
 }) {
   return (
-    <Button asChild className="rounded-xl">
-      <Link href={href}>{label}</Link>
-    </Button>
+    <Link href={href} className="inline-block">
+      <Button className="rounded-xl">{label}</Button>
+    </Link>
   );
 }

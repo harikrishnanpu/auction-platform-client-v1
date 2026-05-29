@@ -2,9 +2,17 @@ import { Loader, CheckCircle, CircleDot, Circle, Headset } from 'lucide-react';
 
 interface KycStatusProps {
   status?: string;
+  completedAt?: string;
+  reviewAt?: string;
+  approvedAt?: string;
 }
 
-export function KycStatus({ status = 'INITIAL' }: KycStatusProps) {
+export function KycStatus({
+  status = 'INITIAL',
+  completedAt,
+  reviewAt,
+  approvedAt,
+}: KycStatusProps) {
   return (
     <div className="space-y-6">
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-border">
@@ -100,7 +108,7 @@ export function KycStatus({ status = 'INITIAL' }: KycStatusProps) {
                 Email Verification
               </p>
               <p className="text-xs text-muted-foreground">
-                Completed on Oct 12, 2023
+                Completed on {completedAt}
               </p>
             </div>
           </div>
@@ -113,7 +121,7 @@ export function KycStatus({ status = 'INITIAL' }: KycStatusProps) {
                 Phone Verification
               </p>
               <p className="text-xs text-muted-foreground">
-                Completed on Oct 12, 2023
+                Completed on {completedAt}
               </p>
             </div>
           </div>
@@ -125,7 +133,9 @@ export function KycStatus({ status = 'INITIAL' }: KycStatusProps) {
               <p className="text-sm font-medium text-foreground">
                 Document Verification
               </p>
-              <p className="text-xs text-muted-foreground">Pending Review</p>
+              <p className="text-xs text-muted-foreground">
+                Pending Review on {reviewAt}
+              </p>
             </div>
           </div>
           <div className="flex items-start gap-3 opacity-50">

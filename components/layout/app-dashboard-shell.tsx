@@ -10,9 +10,9 @@ import {
   isAnyAuctionRoomPath,
   isSellerArea,
 } from './config/app-nav';
-import { AppSidebar } from './app-sidebar';
-import { DashboardHeader } from './dashboard-header';
-import { AuctionRoomMenuProvider } from './auction-room-menu-context';
+import { AppSidebar } from './sidebar/app-sidebar';
+import { DashboardHeader } from './headers/dashboard-header';
+import { AuctionRoomMenuProvider } from './contexts/auction-room-menu-context';
 
 interface AppDashboardShellProps {
   children: ReactNode;

@@ -18,7 +18,7 @@ import {
   SUPPORT_NAV,
   USER_NAV,
   USER_QUICK_ACTIONS,
-} from './config/app-nav';
+} from '../config/app-nav';
 
 interface AppSidebarProps {
   mobileOpen: boolean;

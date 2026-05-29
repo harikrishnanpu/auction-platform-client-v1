@@ -1,3 +1,4 @@
+import { APP_BRAND } from '@/components/layout/config/app-nav';
 import AuthNavbar from '@/components/layout/navbars/AuthNavbar';
 import TestimonialCard from '@/components/marketing/TestimonialCard';
 import LoginForm from '@/features/auth/components/login/login-form';
@@ -19,7 +20,7 @@ export default function LoginPage() {
       </main>
 
       <footer className="py-6 text-center text-xs text-gray-400 dark:text-gray-600">
-        © 2024 Hammr.Down Inc. All rights reserved.
+        © {new Date().getFullYear()} {APP_BRAND} Inc. All rights reserved.
       </footer>
 
       <style>{`

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { KycStatusEnum } from '@/types/kyc.type';
-import { SiteFooter } from '@/components/layout/site-footer';
+import { SiteFooter } from '@/components/layout/footers/site-footer';
 
 import { HeroSection } from './hero-section';
 import { BenefitsSection } from './benefits-section';

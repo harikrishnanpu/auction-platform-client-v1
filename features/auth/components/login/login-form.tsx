@@ -4,7 +4,7 @@ import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useLogin } from '../../hooks/useLogin';
 import { useState, useEffect } from 'react';
-import { SiginWithGoogleButton } from '@/components/ui/buttons/google-signin';
+import { SiginWithGoogleButton } from '@/components/buttons/google-signin';
 import { useSearchParams } from 'next/navigation';
 import {
   Card,

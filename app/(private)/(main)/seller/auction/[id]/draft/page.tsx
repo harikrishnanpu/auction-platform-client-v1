@@ -8,7 +8,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { SellerAuctionDetailView } from '@/features/seller/auction/components/seller-auction-detail-view';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
 
 export default async function SellerAuctionDraftPage({
   params,
@@ -50,7 +49,7 @@ export default async function SellerAuctionDraftPage({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline" size="sm">
+            <Button variant="outline" size="sm">
               <Link href={`/seller/auction/${id}/edit`}>Edit</Link>
             </Button>
 

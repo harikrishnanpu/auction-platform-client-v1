@@ -67,7 +67,6 @@ export function getAuctionRoomHeaderMeta(pathname: string): {
 
 export const APP_BRAND = 'Hammer Down';
 
-/** User / home sidebar — wallet, payments, auctions (no seller tools). */
 export const USER_NAV: AppNavItem[] = [
   { href: '/home', label: 'Home', icon: Home },
   { href: '/auctions', label: 'All Auctions', icon: LayoutGrid },
@@ -120,7 +119,6 @@ export const USER_ROOM_QUICK_ACTIONS: AppNavItem[] = [
   { href: '/profile', label: 'Contact Us', icon: Mail },
 ];
 
-/** Seller area sidebar (dashboard, auctions, payments, etc.). */
 export const SELLER_NAV: AppNavItem[] = [
   { href: '/seller/dashboard', label: 'Dashboard', icon: Store },
   { href: '/seller/auctions', label: 'Auctions', icon: Gavel },
@@ -168,10 +166,8 @@ export const SUPPORT_NAV: AppNavItem[] = [
   { href: '/profile', label: 'Contact Us', icon: Mail },
 ];
 
-/** @deprecated Use USER_NAV */
 export const MAIN_NAV = USER_NAV;
 
-/** @deprecated Use USER_QUICK_ACTIONS */
 export const QUICK_ACTIONS = USER_QUICK_ACTIONS;
 
 export function isUserNavActive(pathname: string, href: string): boolean {

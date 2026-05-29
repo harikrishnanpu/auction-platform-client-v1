@@ -40,9 +40,11 @@ export function HomeEmptyState({
         </p>
       ) : null}
       {actionHref && actionLabel ? (
-        <Button asChild size="sm" className="mt-4 rounded-lg">
-          <Link href={actionHref}>{actionLabel}</Link>
-        </Button>
+        <Link href={actionHref} className="inline-block mt-4">
+          <Button size="sm" className="rounded-lg">
+            {actionLabel}
+          </Button>
+        </Link>
       ) : null}
     </div>
   );

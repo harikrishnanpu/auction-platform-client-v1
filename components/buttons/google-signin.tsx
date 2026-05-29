@@ -1,11 +1,14 @@
 export function SiginWithGoogleButton({
   handleClick,
+  disabled = false,
 }: {
   handleClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       onClick={handleClick}
+      disabled={disabled}
       type="button"
       className="w-full inline-flex justify-center items-center py-2.5 px-4 border border-input rounded-xl shadow-sm bg-background/50 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors cursor-pointer"
     >

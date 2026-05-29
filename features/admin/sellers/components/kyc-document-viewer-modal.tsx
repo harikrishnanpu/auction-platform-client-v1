@@ -51,17 +51,17 @@ export function KycDocumentViewerModal({
                 Loaded securely via admin session.
               </DialogDescription>
             </div>
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="gap-2 shrink-0"
+            <a
+              href={src}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block shrink-0"
             >
-              <a href={src} target="_blank" rel="noreferrer">
+              <Button variant="outline" size="sm" className="gap-2">
                 <ExternalLink className="size-4" />
                 Open
-              </a>
-            </Button>
+              </Button>
+            </a>
           </div>
         </DialogHeader>
 

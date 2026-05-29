@@ -158,7 +158,6 @@ export function HomeUpdatesBanner({ className }: { className?: string }) {
                   </div>
                   <div className="shrink-0 sm:pb-0.5">
                     <Button
-                      asChild
                       size="sm"
                       className="h-9 rounded-lg px-4 text-xs font-semibold shadow-sm"
                     >

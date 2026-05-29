@@ -37,6 +37,7 @@ export default async function RootLayout({
     const q = user.error === 'ACCOUNT_SUSPENDED' ? 'suspended' : 'blocked';
     redirect(`/login?error=${q}`);
   }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body

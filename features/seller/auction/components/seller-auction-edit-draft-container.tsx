@@ -301,12 +301,15 @@ export function SellerAuctionEditDraftContainer({
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Button variant="outline" asChild className="h-8 text-xs">
-            <Link href={`/seller/auction/${auction.id}/draft`}>
+          <Link
+            href={`/seller/auction/${auction.id}/draft`}
+            className="inline-block"
+          >
+            <Button variant="outline" className="h-8 text-xs">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to draft
-            </Link>
-          </Button>
+            </Button>
+          </Link>
 
           <h1 className="mt-3 text-2xl font-bold tracking-tight">
             Editing {typeLabel} draft

@@ -1,6 +1,6 @@
 import LandingNavbar from '@/components/layout/navbars/LandingNavbar';
 import { HeroSection } from '@/features/landing/components/HeroSection';
-import { SolutionSection } from '@/features/landing/components/SolutionSection';
+import { SpecialitiesSection } from '@/features/landing/components/SpecialitiesSection';
 import { FeaturesSection } from '@/features/landing/components/FeaturesSection';
 import { CTASection } from '@/features/landing/components/CTASection';
 import { WhyUsSection } from '@/features/landing/components/WhyUsSection';
@@ -18,8 +18,8 @@ export default function LandingPage() {
           {/* Hero Section */}
           <HeroSection />
 
-          {/* Solutions Section */}
-          <SolutionSection />
+          {/* Specialities Section */}
+          <SpecialitiesSection />
 
           {/* Features Section */}
           <FeaturesSection />

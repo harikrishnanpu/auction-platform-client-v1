@@ -59,12 +59,12 @@ export function CreateAuctionContainer({
           </div>
           <AuctionTypeSelector onSelect={handleSelectType} />
           <div className="mt-6">
-            <Button variant="outline" asChild>
-              <Link href="/seller/dashboard">
+            <Link href="/seller/dashboard" className="inline-block">
+              <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to dashboard
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
         </main>
       </div>
@@ -77,15 +77,15 @@ export function CreateAuctionContainer({
     <div className="flex min-h-[calc(100dvh-4rem)] w-full min-w-0 flex-col bg-transparent font-sans antialiased">
       <main className="mx-auto w-full max-w-3xl grow px-4 py-8 sm:px-6">
         <div className="mb-8">
-          <Button variant="ghost" size="sm" asChild>
-            <Link
-              href="/seller/auction/create"
-              className="text-muted-foreground"
-            >
+          <Link
+            href="/seller/auction/create"
+            className="text-muted-foreground inline-block"
+          >
+            <Button variant="ghost" size="sm">
               <ArrowLeft className="mr-1 h-4 w-4" />
               Change type
-            </Link>
-          </Button>
+            </Button>
+          </Link>
           <h1 className="mb-2 mt-2 text-3xl font-bold text-foreground">
             Creating {typeLabel} auction
           </h1>
@@ -361,9 +361,11 @@ export function CreateAuctionContainer({
                     </>
                   )}
                 </Button>
-                <Button type="button" variant="outline" asChild>
-                  <Link href="/seller/dashboard">Cancel</Link>
-                </Button>
+                <Link href="/seller/dashboard" className="inline-block">
+                  <Button type="button" variant="outline">
+                    Cancel
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>

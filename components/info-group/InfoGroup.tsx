@@ -12,7 +12,10 @@ export function InfoGroup({
   mono?: boolean;
 }) {
   return (
-    <div className={`space-y-1 ${fullWidth ? 'col-span-full' : ''}`}>
+    <div
+      data-testid="info-group"
+      className={`space-y-1 ${fullWidth ? 'col-span-full' : ''}`}
+    >
       <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
         {icon} {label}
       </div>

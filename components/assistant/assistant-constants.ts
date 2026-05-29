@@ -1,4 +1,3 @@
-/** Visual state for the mascot — maps to assistant PNGs in /public */
 export type AssistantMood = 'greeting' | 'ready' | 'thinking' | 'chatOpen';
 
 export const ASSISTANT_IMAGES: Record<AssistantMood, string> = {

@@ -95,23 +95,18 @@ export function HomeHero({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button asChild size="sm" className="h-8 rounded-md">
-            <Link href="/auctions">
+          <Link href="/auctions" className="inline-block">
+            <Button size="sm" className="h-8 rounded-md">
               Explore
               <ArrowRight className="size-3.5" />
-            </Link>
-          </Button>
-          <Button
-            asChild
-            size="sm"
-            variant="outline"
-            className="h-8 rounded-md"
-          >
-            <Link href="/profile">
+            </Button>
+          </Link>
+          <Link href="/profile" className="inline-block">
+            <Button size="sm" variant="outline" className="h-8 rounded-md">
               <User2 className="size-3.5" />
               Profile
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
