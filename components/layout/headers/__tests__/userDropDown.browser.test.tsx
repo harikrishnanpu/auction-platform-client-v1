@@ -1,5 +1,3 @@
-// UserDropdown.test.tsx
-
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { UserDropdown } from '../user-dropdown';
 import { AuthProvider } from '@/types/user.type';
@@ -10,13 +8,25 @@ const mockUseUserStore = vi.fn();
 const mockGetUserAvatarUrl = vi.fn();
 
 vi.mock('@/store/user.store', () => ({
-  _esModule: true,
+  __esModule: true,
   default: () => mockUseUserStore(),
 }));
 
 vi.mock('@/utils/auction-utils', () => ({
-  _esModule: true,
+  __esModule: true,
   getUserAvatarUrl: (...args: unknown[]) => mockGetUserAvatarUrl(...args),
+}));
+
+vi.mock('next/image', () => ({
+  __esModule: true,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img {...props} />
+  ),
+}));
+
+vi.mock('lucide-react', () => ({
+  __esModule: true,
+  ChevronDown: () => <svg />,
 }));
 
 describe('UserDropdown', () => {
@@ -55,7 +65,7 @@ describe('UserDropdown', () => {
 
     const { getByText } = await render(<UserDropdown />);
 
-    await expect.element(getByText('JO')).toBeInTheDocument();
+    await expect.element(getByText('JO', { exact: true })).toBeInTheDocument();
   });
 
   it('should render local avatar using getUserAvatarUrl', async () => {
@@ -66,14 +76,15 @@ describe('UserDropdown', () => {
     mockUseUserStore.mockReturnValue({
       user: {
         name: 'John Doe',
-        avatar_url: 'avatar.jpg',
+        avatar_url:
+          'https://testingbot.com/free-online-tools/random-avatar/300',
         authProvider: AuthProvider.LOCAL,
       },
     });
 
-    const { getByRole } = await render(<UserDropdown />);
+    const { getByTestId } = await render(<UserDropdown />);
 
-    const image = getByRole('img');
+    const image = getByTestId('user-avatar');
 
     await expect(mockGetUserAvatarUrl).toHaveBeenCalledWith(
       'https://testingbot.com/free-online-tools/random-avatar/300'
@@ -99,11 +110,13 @@ describe('UserDropdown', () => {
 
     const image = getByTestId('user-avatar');
 
-    expect(image).toHaveAttribute('src', 'https://google.com/avatar.jpg');
+    await expect
+      .element(image)
+      .toHaveAttribute('src', 'https://google.com/avatar.jpg');
     expect(mockGetUserAvatarUrl).not.toHaveBeenCalled();
   });
 
-  it('opens dropdown when button is clicked', async () => {
+  it('should opens dropdown when button is clicked', async () => {
     mockUseUserStore.mockReturnValue({
       user: {
         name: 'John Doe',
@@ -114,22 +127,20 @@ describe('UserDropdown', () => {
 
     await userEvent.click(getByTestId('user-dropdown-button'));
 
-    await expect
-      .element(getByTestId('profile-settings-link'))
-      .toBeInTheDocument();
+    await expect.element(getByTestId('profile-settings-link')).toBeVisible();
     await expect
       .element(getByTestId('utility-actions-wallet-link'))
-      .toBeInTheDocument();
+      .toBeVisible();
   });
 
-  it('closes dropdown when clicking outside', async () => {
+  it('should closes dropdown when clicking outside', async () => {
     mockUseUserStore.mockReturnValue({
       user: {
         name: 'John Doe',
       },
     });
 
-    const { getByTestId, queryByTestId } = await render(
+    const { getByTestId } = await render(
       <div>
         <UserDropdown />
         <div data-testid="outside">outside</div>
@@ -138,23 +149,23 @@ describe('UserDropdown', () => {
 
     await userEvent.click(getByTestId('user-dropdown-button'));
 
-    await expect
-      .element(getByTestId('profile-settings-link'))
-      .toBeInTheDocument();
+    await expect.element(getByTestId('profile-settings-link')).toBeVisible();
 
     await userEvent.click(getByTestId('outside'));
 
-    await expect.element(queryByTestId('profile-settings-link')).toBeNull();
+    await expect
+      .element(getByTestId('profile-settings-link'))
+      .not.toBeInTheDocument();
   });
 
-  it('closes dropdown when profile link is clicked', async () => {
+  it('should closes dropdown when profile link is clicked', async () => {
     mockUseUserStore.mockReturnValue({
       user: {
         name: 'John Doe',
       },
     });
 
-    const { getByTestId, queryByTestId } = await render(<UserDropdown />);
+    const { getByTestId } = await render(<UserDropdown />);
 
     await userEvent.click(getByTestId('user-dropdown-button'));
 
@@ -163,26 +174,28 @@ describe('UserDropdown', () => {
     await userEvent.click(profileLink);
 
     await expect
-      .element(queryByTestId('profile-settings-link'))
+      .element(getByTestId('profile-settings-link'))
       .not.toBeInTheDocument();
   });
 
   it('should falls back to Account when name is missing', async () => {
     mockUseUserStore.mockReturnValue({
       user: {
-        name: '',
+        name: undefined,
       },
     });
 
-    const { getByText } = await render(<UserDropdown />);
+    const { getByTestId } = await render(<UserDropdown />);
 
-    await expect.element(getByText('Account')).toBeInTheDocument();
+    await expect
+      .element(getByTestId('user-first-name'))
+      .toHaveTextContent('Account');
   });
 
   it('should falls back to HD initials when name is missing', async () => {
     mockUseUserStore.mockReturnValue({
       user: {
-        name: '',
+        name: undefined,
         avatar_url: null,
       },
     });

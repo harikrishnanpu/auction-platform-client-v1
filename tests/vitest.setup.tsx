@@ -7,18 +7,27 @@ vi.mock('next/link', () => ({
   default: ({
     href,
     children,
+    onClick,
     ...props
   }: AnchorHTMLAttributes<HTMLAnchorElement> & {
     href: string;
     children?: ReactNode;
   }) => (
-    <a href={href} {...props}>
+    <a
+      href={href}
+      onClick={(e) => {
+        e.preventDefault();
+        if (onClick) onClick(e);
+      }}
+      {...props}
+    >
       {children}
     </a>
   ),
 }));
 
 vi.mock('next/image', () => ({
+  __esModule: true,
   default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
     <img {...props} />
   ),

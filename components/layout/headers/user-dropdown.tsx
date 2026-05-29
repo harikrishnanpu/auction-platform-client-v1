@@ -64,7 +64,10 @@ export function UserDropdown() {
         <div className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-brand-100 text-[11px] font-bold text-brand-700">
           {avatarNode}
         </div>
-        <span className="max-w-[72px] truncate text-[13px] font-semibold sm:max-w-[100px]">
+        <span
+          data-testid="user-first-name"
+          className="max-w-[72px] truncate text-[13px] font-semibold sm:max-w-[100px]"
+        >
           {userFirstName}
         </span>
         <ChevronDown className="size-4 shrink-0 text-muted-foreground" />

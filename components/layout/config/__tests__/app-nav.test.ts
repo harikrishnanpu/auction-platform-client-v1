@@ -9,7 +9,7 @@ import {
   isHomeArea,
   isSellerArea,
   isUserHomeArea,
-} from './app-nav';
+} from '../app-nav';
 
 describe('app-nav navigation utilities', () => {
   describe('isSellerAuctionRoomPath', () => {

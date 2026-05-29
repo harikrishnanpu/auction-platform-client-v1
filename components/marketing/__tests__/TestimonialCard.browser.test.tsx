@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { TestimonialCard } from './TestimonialCard';
+import { TestimonialCard } from '../TestimonialCard';
 
 describe('TestimonialCard', () => {
   it('renders testimonial text and author correctly', async () => {
