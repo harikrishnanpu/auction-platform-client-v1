@@ -1,5 +1,5 @@
 import { render } from 'vitest-browser-react';
-import { ComingSoon } from './coming-soon';
+import { ComingSoon } from '../coming-soon';
 import { describe, expect, it } from 'vitest';
 
 describe('ComingSoon', () => {

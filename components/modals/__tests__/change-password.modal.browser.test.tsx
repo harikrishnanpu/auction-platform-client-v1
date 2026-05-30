@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { ChangePasswordModal } from '../change-password.modal';
-import { AuthProvider, UserInfo } from '@/types/user.type';
+import { AuthProvider, UserInfo, UserStatus } from '@/types/user.type';
 
 vi.mock('@/actions/user/profile.actions', () => ({
   __esModule: true,
@@ -22,9 +22,12 @@ describe('ChangePasswordModal', () => {
     id: 'user-123',
     name: 'John Doe',
     email: 'john@example.com',
-    avatar_url: null,
+    avatar_url: undefined,
     authProvider: AuthProvider.LOCAL,
     roles: [],
+    isVerified: true,
+    isProfileCompleted: true,
+    status: UserStatus.ACTIVE,
   };
 
   beforeEach(() => {

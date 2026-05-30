@@ -1,5 +1,5 @@
 import { render } from 'vitest-browser-react';
-import { AuthFormCard } from './authFormCard';
+import { AuthFormCard } from '../authFormCard';
 import { describe, expect, it } from 'vitest';
 
 describe('AuthFormCard', () => {

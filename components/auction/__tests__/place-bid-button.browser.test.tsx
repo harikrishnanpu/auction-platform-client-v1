@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render } from 'vitest-browser-react';
-import { PlaceBidButton } from './place-bid-button';
+import { PlaceBidButton } from '../place-bid-button';
 
 describe('PlaceBidButton', () => {
   it("should render with 'Place bid' label by default in idle state", async () => {

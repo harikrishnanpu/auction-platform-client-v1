@@ -1,5 +1,5 @@
 import { it } from 'vitest';
-import { InfoGroup } from './InfoGroup';
+import { InfoGroup } from '../InfoGroup';
 import { describe } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { expect } from 'vitest';

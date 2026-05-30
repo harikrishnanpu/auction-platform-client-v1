@@ -1,4 +1,4 @@
-import { KycStatus } from './kyc-status';
+import { KycStatus } from '../kyc-status';
 import { describe, it } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { expect } from 'vitest';
