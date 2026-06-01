@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from 'vitest';
 import RegisterPage from '@/app/(public)/(auth)/register/page';
 import { render } from 'vitest-browser-react';
 
-// Mock router replace and navigation hooks
 vi.mock('next/navigation', () => ({
   __esModule: true,
   useRouter: () => ({
@@ -15,7 +14,6 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/register',
 }));
 
-// Mock Server Actions
 vi.mock('@/actions/auth/auth.actions', () => ({
   __esModule: true,
   registerAction: vi.fn(),
@@ -27,7 +25,6 @@ describe('RegisterPage Browser Test', () => {
       <RegisterPage />
     );
 
-    // Resolve duplicate title match by checking the first match
     await expect
       .element(getByText('Create Account').first())
       .toBeInTheDocument();

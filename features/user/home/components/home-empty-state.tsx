@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { appEmptyState } from '@/lib/app-design';
 import { cn } from '@/lib/utils';
 
 export interface HomeEmptyStateProps {
@@ -22,14 +23,9 @@ export function HomeEmptyState({
   className,
 }: HomeEmptyStateProps) {
   return (
-    <div
-      className={cn(
-        'flex flex-col items-center justify-center rounded-xl border border-dashed border-border/70 bg-muted/10 px-5 py-7 text-center',
-        className
-      )}
-    >
+    <div className={cn(appEmptyState(), 'px-5 py-7', className)}>
       {Icon ? (
-        <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-muted/60 text-muted-foreground">
+        <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-[var(--surface-inset)] text-muted-foreground">
           <Icon className="size-5" />
         </div>
       ) : null}
@@ -40,8 +36,8 @@ export function HomeEmptyState({
         </p>
       ) : null}
       {actionHref && actionLabel ? (
-        <Link href={actionHref} className="inline-block mt-4">
-          <Button size="sm" className="rounded-lg">
+        <Link href={actionHref} className="mt-4 inline-block">
+          <Button size="sm" className="rounded-full">
             {actionLabel}
           </Button>
         </Link>

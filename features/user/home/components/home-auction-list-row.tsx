@@ -2,10 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { MoreVertical } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { cn } from '@/lib/utils';
+import { appListRow } from '@/lib/app-design';
 import type { IAuctionDto } from '@/types/auction.type';
 import {
   formatAuctionPrice,
@@ -44,71 +44,68 @@ export function HomeAuctionListRow({
   const timePrefix = variant === 'live' ? 'Time Left' : 'Ends In';
   const showLiveRed =
     variant === 'live' && isLiveTimeHighlight(auction.endAt, 'live');
-  const showSealedAccent =
-    variant === 'sealed' &&
-    timeLabel !== 'Ended' &&
-    !timeLabel.includes('Ended');
+  const ended = timeLabel === 'Ended';
 
   return (
     <Link
       href={`/auction/${auction.id}`}
-      className="group flex items-center gap-2.5 rounded-lg border border-transparent p-1.5 transition-colors hover:border-border hover:bg-muted/30"
+      className={cn(
+        appListRow(),
+        'group flex items-center gap-4 px-1 py-3.5 sm:px-2'
+      )}
     >
-      <div className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+      <div className="relative size-14 shrink-0 overflow-hidden rounded-2xl bg-muted shadow-[var(--surface-shadow-sm)] ring-1 ring-[var(--surface-ring)]">
         {thumb ? (
           <Image
             src={thumb}
             alt=""
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="56px"
           />
         ) : (
-          <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
+          <div className="flex size-full items-center justify-center text-xs font-medium text-muted-foreground">
             Lot
           </div>
         )}
       </div>
+
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] font-semibold text-foreground group-hover:text-brand-600">
+        <p className="truncate text-sm font-semibold text-foreground group-hover:text-primary">
           {auction.title}
         </p>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          Current Bid · {formatAuctionPrice(auction.startPrice)}
+        <p className="mt-1 text-xs text-muted-foreground">
+          Current Bid ·{' '}
+          <span className="font-semibold text-foreground">
+            {formatAuctionPrice(auction.startPrice)}
+          </span>
         </p>
-        <p className="mt-1 text-xs">
-          <span className="text-muted-foreground">{timePrefix} · </span>
+      </div>
+
+      <div className="flex shrink-0 flex-col items-end gap-1.5 text-right">
+        <p className="text-[11px] text-muted-foreground">
+          {timePrefix} ·{' '}
           <span
             className={cn(
-              'font-semibold tabular-nums',
+              'font-bold tabular-nums',
               showLiveRed && 'text-red-500',
-              showSealedAccent && 'text-brand-600 dark:text-brand-400',
-              timeLabel === 'Ended' && 'text-muted-foreground'
+              variant === 'sealed' && !ended && 'text-primary',
+              ended && 'text-muted-foreground'
             )}
           >
             {timeLabel}
           </span>
         </p>
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
         {variant === 'live' ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-600 dark:bg-brand-950/50 dark:text-brand-400">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-600 dark:bg-brand-950/50 dark:text-brand-400">
             <span className="size-1.5 animate-pulse rounded-full bg-brand-600" />
             Live
           </span>
         ) : (
-          <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-600 dark:bg-violet-950/40 dark:text-violet-400">
+          <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-600 dark:bg-brand-950/50 dark:text-brand-400">
             {getAuctionTypeLabel(auction.auctionType)}
           </span>
         )}
-        <button
-          type="button"
-          className="hidden rounded-lg p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 sm:block"
-          onClick={(e) => e.preventDefault()}
-          aria-label="More options"
-        >
-          <MoreVertical className="size-4" />
-        </button>
       </div>
     </Link>
   );

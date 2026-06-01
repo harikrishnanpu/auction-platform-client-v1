@@ -5,6 +5,7 @@ import {
   CardHeader,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { appAuctionCard } from '@/lib/app-design';
 import { cn } from '@/lib/utils';
 
 export function AuctionCardSkeleton({
@@ -17,8 +18,8 @@ export function AuctionCardSkeleton({
   return (
     <Card
       className={cn(
-        'flex h-full min-w-0 flex-col gap-0 overflow-hidden border border-border/50 bg-card p-0 py-0 shadow-none',
-        compact ? 'rounded-md' : 'rounded-2xl border-l-2 border-l-muted',
+        appAuctionCard('gap-0 p-0 py-0 shadow-none hover:translate-y-0'),
+        compact && 'rounded-xl',
         className
       )}
     >
@@ -57,7 +58,7 @@ export function AuctionCardSkeleton({
       </CardContent>
       <CardFooter
         className={cn(
-          'mt-auto border-t border-border/35 py-1.5',
+          'mt-auto border-t border-[var(--surface-ring)] py-1.5',
           compact ? 'px-2' : 'px-2.5'
         )}
       >

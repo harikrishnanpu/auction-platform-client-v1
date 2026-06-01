@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 
+import { appCard, appIconBadge } from '@/lib/app-design';
 import { cn } from '@/lib/utils';
 
 interface SellerMetricCardProps {
@@ -18,12 +19,7 @@ export function SellerMetricCard({
   className,
 }: SellerMetricCardProps) {
   return (
-    <div
-      className={cn(
-        'rounded-xl border border-border bg-muted/25 p-5',
-        className
-      )}
-    >
+    <div className={cn(appCard(), className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
           <p className="text-sm font-medium text-muted-foreground">{label}</p>
@@ -34,9 +30,9 @@ export function SellerMetricCard({
             <p className="text-xs text-muted-foreground">{hint}</p>
           ) : null}
         </div>
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-background">
-          <Icon className="size-5 text-foreground" aria-hidden />
-        </div>
+        <span className={appIconBadge('size-10 shrink-0 rounded-xl')}>
+          <Icon className="size-5" aria-hidden />
+        </span>
       </div>
     </div>
   );

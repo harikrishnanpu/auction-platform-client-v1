@@ -2,14 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LogOut, Sparkles, X, type LucideIcon } from 'lucide-react';
+import { LogOut, X, type LucideIcon } from 'lucide-react';
 
 import { logoutAction } from '@/actions/auth/auth.actions';
 import { cn } from '@/lib/utils';
 import useUserStore from '@/store/user.store';
 
 import {
-  APP_BRAND,
   isSellerArea,
   isSellerNavActive,
   isUserNavActive,
@@ -19,6 +18,7 @@ import {
   USER_NAV,
   USER_QUICK_ACTIONS,
 } from '../config/app-nav';
+import { Logo } from '../logo/Logo';
 
 interface AppSidebarProps {
   mobileOpen: boolean;
@@ -43,10 +43,10 @@ function NavLink({
       href={href}
       onClick={onNavigate}
       className={cn(
-        'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors',
+        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-colors',
         active
-          ? 'bg-brand-50 text-brand-600 dark:bg-brand-950/50 dark:text-brand-400'
-          : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+          ? 'bg-[var(--surface-nav-active)] text-primary shadow-[var(--surface-shadow-sm)]'
+          : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
       )}
     >
       <Icon
@@ -77,18 +77,13 @@ function SidebarBody({
   const isNavActive = isSeller ? isSellerNavActive : isUserNavActive;
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto px-3 py-4 sm:px-4 sm:py-5">
+    <div className="flex h-full min-h-0 flex-col overflow-y-auto px-3 py-5 sm:px-4 sm:py-5">
       <Link
         href={brandHref}
         onClick={onNavigate}
-        className="mb-4 flex shrink-0 items-center gap-2 px-1"
+        className="mb-5 flex shrink-0 items-center gap-2 px-1"
       >
-        <span className="flex size-8 items-center justify-center rounded-lg bg-brand-600 text-white shadow-sm">
-          <Sparkles className="size-4" aria-hidden />
-        </span>
-        <span className="text-base font-bold tracking-tight text-foreground">
-          {APP_BRAND}
-        </span>
+        <Logo />
       </Link>
 
       <nav className="space-y-4" aria-label="Main navigation">
@@ -195,7 +190,7 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
         />
       </aside>
 
-      <aside className="hidden lg:flex lg:w-[240px] lg:shrink-0 lg:flex-col lg:border-r lg:border-border lg:bg-card xl:w-[252px]">
+      <aside className="hidden lg:flex lg:w-[248px] lg:shrink-0 lg:flex-col lg:border-r lg:border-border/60 lg:bg-card xl:w-[260px]">
         <SidebarBody pathname={pathname} onLogout={handleLogout} />
       </aside>
     </>

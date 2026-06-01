@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { ArrowRight, type LucideIcon } from 'lucide-react';
 
+import { appCard } from '@/lib/app-design';
 import { cn } from '@/lib/utils';
 
 export interface HomeSectionProps {
@@ -24,33 +25,25 @@ export function HomeSection({
   children,
 }: HomeSectionProps) {
   return (
-    <section className={cn('space-y-3', className)}>
-      <div className="flex items-end justify-between gap-3">
+    <section className={cn(appCard(), className)}>
+      <div className="mb-5 flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="flex items-center gap-1.5 text-base font-semibold tracking-tight text-foreground">
-            {Icon ? (
-              <Icon className="size-4 text-muted-foreground" aria-hidden />
-            ) : null}
+          <h2 className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-foreground">
+            {Icon ? <Icon className="size-4 text-primary" aria-hidden /> : null}
             {title}
           </h2>
           {description ? (
-            <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground">
-              {description}
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
           ) : null}
         </div>
 
         {linkHref ? (
           <Link
             href={linkHref}
-            className={cn(
-              'inline-flex shrink-0 items-center gap-1 rounded-[8px] px-2 py-1',
-              'text-[11px] font-semibold text-foreground transition-colors',
-              'hover:bg-muted/80'
-            )}
+            className="app-link inline-flex shrink-0 items-center gap-1"
           >
             {linkLabel}
-            <ArrowRight className="size-3" />
+            <ArrowRight className="size-3.5" />
           </Link>
         ) : null}
       </div>

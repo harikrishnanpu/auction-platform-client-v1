@@ -43,14 +43,12 @@ const LoginForm = () => {
       setUser(null);
       toast.error(LOGIN_MESSAGES.BLOCKED, { duration: 5000 });
     }
-  }, [isBlockedError, setUser]);
 
-  useEffect(() => {
     if (isSuspendedError) {
       setUser(null);
       toast.error(LOGIN_MESSAGES.SUSPENDED, { duration: 5000 });
     }
-  }, [isSuspendedError, setUser]);
+  }, [isBlockedError, isSuspendedError, setUser]);
 
   return (
     <Card className="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-3xl shadow-xl overflow-hidden fade-in relative z-10">
@@ -74,6 +72,7 @@ const LoginForm = () => {
                 <Mail className="text-gray-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors w-5 h-5" />
               </div>
               <Input
+                data-testid="login-form-email-input"
                 {...register('email')}
                 type="email"
                 placeholder={LOGIN_UI.EMAIL_PLACEHOLDER}
@@ -104,12 +103,14 @@ const LoginForm = () => {
                 <Lock className="text-gray-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors w-5 h-5" />
               </div>
               <Input
+                data-testid="login-form-password-input"
                 {...register('password')}
                 type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 className="block w-full pl-11 pr-12 py-6 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all outline-none shadow-sm"
               />
               <button
+                data-testid="login-form-password-toggle-button"
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
@@ -131,6 +132,7 @@ const LoginForm = () => {
           )}
 
           <Button
+            data-testid="login-form-submit-button"
             type="submit"
             disabled={isSubmitting}
             className="w-full bg-black hover:bg-[#333333] dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black font-semibold py-6 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg flex items-center justify-center gap-2 mt-4 disabled:opacity-70 disabled:cursor-not-allowed group"
@@ -162,6 +164,7 @@ const LoginForm = () => {
 
         <div className="grid grid-cols-1 gap-4 mb-2">
           <SiginWithGoogleButton
+            testId="login-form-google-button"
             handleClick={() => {
               const backendUrl = process.env.NEXT_PUBLIC_API_URL;
               window.location.href = `${backendUrl}/auth/google?callBack=login`;
@@ -174,6 +177,7 @@ const LoginForm = () => {
         <p className="text-sm text-gray-600 dark:text-gray-400">
           {LOGIN_UI.NO_ACCOUNT}{' '}
           <Link
+            data-testid="login-form-register-link"
             href="/register"
             className="font-bold text-black dark:text-white hover:underline transition-all hover:text-blue-600 dark:hover:text-blue-400"
           >

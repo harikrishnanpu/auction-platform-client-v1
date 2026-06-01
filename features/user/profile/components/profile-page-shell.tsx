@@ -13,7 +13,7 @@ export function ProfilePageShell({
   return (
     <div
       className={cn(
-        'mx-auto w-full max-w-3xl space-y-5 pb-12 pt-2 lg:max-w-4xl',
+        'mx-auto w-full max-w-3xl space-y-6 pb-12 pt-2 lg:max-w-4xl',
         className
       )}
     >
@@ -36,8 +36,8 @@ export function ProfilePageCard({
   return (
     <div className={appCard(className)}>
       {title ? (
-        <h2 className="app-section-title mb-4 flex items-center gap-2">
-          {Icon ? <Icon className="size-4 text-brand-600" /> : null}
+        <h2 className="app-section-title mb-5 flex items-center gap-2">
+          {Icon ? <Icon className="size-4 text-primary" /> : null}
           {title}
         </h2>
       ) : null}

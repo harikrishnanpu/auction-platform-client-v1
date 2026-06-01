@@ -9,14 +9,14 @@ interface HomeSellerPillProps {
 
 export function HomeSellerPill({ isSeller }: HomeSellerPillProps) {
   return (
-    <div className="inline-flex w-full max-w-[240px] shrink-0 rounded-full border border-border bg-muted/40 p-0.5 lg:w-auto">
+    <div className="inline-flex w-full max-w-[248px] shrink-0 rounded-full border border-border/60 bg-muted/30 p-1 shadow-[var(--surface-shadow-sm)] lg:w-auto">
       <Link
         data-testid="home-seller-pill-home"
         href="/home"
         className={cn(
-          'flex-1 rounded-full px-4 py-1.5 text-center text-[13px] font-semibold transition-colors lg:flex-none lg:px-5',
+          'flex-1 rounded-full px-5 py-2 text-center text-[13px] font-semibold transition-all lg:flex-none',
           !isSeller
-            ? 'bg-brand-600 text-white shadow-sm'
+            ? 'bg-primary text-primary-foreground shadow-sm'
             : 'text-muted-foreground hover:text-foreground'
         )}
       >
@@ -26,9 +26,9 @@ export function HomeSellerPill({ isSeller }: HomeSellerPillProps) {
         data-testid="home-seller-pill-seller"
         href="/seller/dashboard"
         className={cn(
-          'flex-1 rounded-full px-4 py-1.5 text-center text-[13px] font-semibold transition-colors lg:flex-none lg:px-5',
+          'flex-1 rounded-full px-5 py-2 text-center text-[13px] font-semibold transition-all lg:flex-none',
           isSeller
-            ? 'bg-brand-600 text-white shadow-sm'
+            ? 'bg-primary text-primary-foreground shadow-sm'
             : 'text-muted-foreground hover:text-foreground'
         )}
       >

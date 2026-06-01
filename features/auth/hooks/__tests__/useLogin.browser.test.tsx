@@ -26,7 +26,6 @@ vi.mock('@/actions/auth/auth.actions', () => ({
   loginAction: (...args: unknown[]) => mockLoginAction(...args),
 }));
 
-// Test helper component to invoke and expose hook capabilities
 const TestLoginComponent = () => {
   const { register, onSubmit, isSubmitting, errors } = useLogin();
   return (

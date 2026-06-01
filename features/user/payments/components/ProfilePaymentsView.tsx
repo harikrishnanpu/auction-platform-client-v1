@@ -1,8 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
-import { Spinner } from '@/components/ui/spinner';
+import {
+  createPaymentOrderAction,
+  declinePaymentAction,
+  verifyPaymentAction,
+} from '@/actions/user/payments.actions';
 import {
   Select,
   SelectContent,
@@ -20,14 +26,26 @@ import {
   type RazorpayPaymentResponse,
 } from '@/lib/razorpay';
 
-import { useUserPayments } from '../hooks/use-user-payments';
 import { PaymentsList } from './PaymentsList';
 import { PaymentStatusModal } from './PaymentStatusModal';
-import type { PaymentStatus } from '../types/payments.types';
+import type { IUserPaymentsPage, PaymentStatus } from '../types/payments.types';
 
-export function ProfilePaymentsView() {
-  const [page, setPage] = useState(1);
-  const [status, setStatus] = useState<PaymentStatus | 'ALL'>('ALL');
+type ProfilePaymentsViewProps = {
+  page: number;
+  limit: number;
+  status: PaymentStatus | 'ALL';
+  data: IUserPaymentsPage | null;
+  error: string | null;
+};
+
+export function ProfilePaymentsView({
+  page,
+  status,
+  data,
+  error,
+}: ProfilePaymentsViewProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [payingPaymentId, setPayingPaymentId] = useState<string | null>(null);
   const [decliningPaymentId, setDecliningPaymentId] = useState<string | null>(
     null
@@ -38,21 +56,19 @@ export function ProfilePaymentsView() {
     description: '',
   });
 
-  const {
-    data,
-    loading,
-    error,
-    createPaymentOrder,
-    verifyPayment,
-    declinePayment,
-    refresh,
-  } = useUserPayments({
-    page,
-    limit: 10,
-    status,
-  });
+  const totalPages = data?.totalPages ?? 1;
 
-  const totalPages = useMemo(() => data?.totalPages ?? 1, [data?.totalPages]);
+  const refresh = () => router.refresh();
+
+  function navigate(nextPage: number, nextStatus: PaymentStatus | 'ALL') {
+    const q = new URLSearchParams();
+    if (nextPage > 1) q.set('page', String(nextPage));
+    if (nextStatus !== 'ALL') q.set('status', nextStatus);
+    const query = q.toString();
+    startTransition(() => {
+      router.push(query ? `/profile/payments?${query}` : '/profile/payments');
+    });
+  }
 
   const showModal = (title: string, description: string) => {
     setModal({ open: true, title, description });
@@ -61,7 +77,12 @@ export function ProfilePaymentsView() {
   const onPayNow = async (paymentId: string) => {
     try {
       setPayingPaymentId(paymentId);
-      const order = await createPaymentOrder(paymentId);
+      const orderRes = await createPaymentOrderAction({ paymentId });
+      if (!orderRes.success || !orderRes.data) {
+        showModal('Payment Error', orderRes.error ?? 'Unable to start payment');
+        return;
+      }
+      const order = orderRes.data;
       const loaded = await loadRazorpayScript();
 
       if (!loaded || !window.Razorpay) {
@@ -82,17 +103,19 @@ export function ProfilePaymentsView() {
           void (async () => {
             const r = response as RazorpayPaymentResponse;
             try {
-              await verifyPayment({
+              const verifyRes = await verifyPaymentAction({
                 paymentId: order.paymentId,
                 orderId: r.razorpay_order_id,
                 gatewayPaymentId: r.razorpay_payment_id,
                 signature: r.razorpay_signature,
               });
+              if (!verifyRes.success)
+                throw new Error(verifyRes.error ?? undefined);
               showModal(
                 'Payment Successful',
                 'Payment completed successfully.'
               );
-              await refresh();
+              refresh();
             } catch {
               showModal(
                 'Verification Failed',
@@ -122,11 +145,13 @@ export function ProfilePaymentsView() {
   const onDecline = async (paymentId: string) => {
     try {
       setDecliningPaymentId(paymentId);
-      await declinePayment(paymentId);
+      const res = await declinePaymentAction({ paymentId });
+      if (!res.success) throw new Error(res.error ?? undefined);
       showModal(
         'Payment declined',
         'This payment obligation has been declined.'
       );
+      refresh();
     } catch {
       showModal(
         'Decline failed',
@@ -144,8 +169,7 @@ export function ProfilePaymentsView() {
           <Select
             value={status}
             onValueChange={(value) => {
-              setPage(1);
-              setStatus(value as PaymentStatus | 'ALL');
+              navigate(1, value as PaymentStatus | 'ALL');
             }}
           >
             <SelectTrigger className="h-8 w-[160px] rounded-lg text-xs">
@@ -160,10 +184,10 @@ export function ProfilePaymentsView() {
           </Select>
         </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Spinner />
-          </div>
+        {isPending ? (
+          <p className="py-12 text-center text-[13px] text-muted-foreground">
+            Loading…
+          </p>
         ) : error ? (
           <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-[13px] text-destructive">
             {error}
@@ -180,8 +204,8 @@ export function ProfilePaymentsView() {
             <PaginationControls
               page={data?.page ?? page}
               totalPages={totalPages}
-              onPrev={() => setPage((p) => Math.max(1, p - 1))}
-              onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+              onPrev={() => navigate(Math.max(1, page - 1), status)}
+              onNext={() => navigate(Math.min(totalPages, page + 1), status)}
             />
           </div>
         )}

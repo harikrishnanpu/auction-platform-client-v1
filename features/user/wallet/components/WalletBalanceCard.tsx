@@ -1,6 +1,7 @@
 import { Wallet } from 'lucide-react';
 
-import { appCard } from '@/lib/app-design';
+import { appCard, appInset } from '@/lib/app-design';
+import { cn } from '@/lib/utils';
 import type { IUserWallet } from '../types/wallet.types';
 import { formatWalletCurrency } from '../utils/format-wallet';
 
@@ -9,14 +10,19 @@ export function WalletBalanceCard({ wallet }: { wallet: IUserWallet }) {
 
   return (
     <div className={appCard()}>
-      <h2 className="app-section-title mb-4 flex items-center gap-2">
-        <Wallet className="size-4 text-brand-600" />
+      <h2 className="app-section-title mb-5 flex items-center gap-2">
+        <Wallet className="size-4 text-primary" />
         Wallet balance
       </h2>
       <p className="app-stat-value">
         {formatWalletCurrency(totalBalance, wallet.currency)}
       </p>
-      <div className="mt-4 space-y-1.5 rounded-lg bg-muted/40 p-3 text-[13px] text-muted-foreground">
+      <div
+        className={cn(
+          appInset(),
+          'mt-4 space-y-1.5 text-[13px] text-muted-foreground'
+        )}
+      >
         <p>
           Main balance:{' '}
           <span className="font-medium text-foreground">

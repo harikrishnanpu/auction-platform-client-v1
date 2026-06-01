@@ -8,8 +8,6 @@ export const apiFetch = async <T>(
   cookies?: ReadonlyRequestCookies | null,
   cache?: RequestCache
 ): Promise<ApiResponse<T>> => {
-  console.log('OPTIONS', options);
-
   try {
     const response = await fetch(url, {
       method: 'GET',

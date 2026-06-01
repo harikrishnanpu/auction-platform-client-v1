@@ -1,12 +1,15 @@
 export function SiginWithGoogleButton({
   handleClick,
   disabled = false,
+  testId,
 }: {
   handleClick: () => void;
   disabled?: boolean;
+  testId?: string;
 }) {
   return (
     <button
+      data-testid={testId}
       onClick={handleClick}
       disabled={disabled}
       type="button"

@@ -10,6 +10,7 @@ import {
 import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
+import { appAuctionCard } from '@/lib/app-design';
 import type { IAuctionDto } from '@/types/auction.type';
 import { formatAuctionPrice, getAuctionAssetUrl } from '@/utils/auction-utils';
 
@@ -41,12 +42,11 @@ export interface AuctionCardProps {
 type PillVariant = 'live' | 'upcoming' | 'ended' | 'paused' | 'neutral';
 
 const PILL_STYLES: Record<PillVariant, string> = {
-  live: 'bg-brand-600 text-white ring-brand-600/30',
-  upcoming:
-    'bg-brand-50 text-brand-700 ring-brand-200 dark:bg-brand-950/50 dark:text-brand-300',
-  ended: 'bg-muted text-muted-foreground ring-border',
+  live: 'bg-primary text-primary-foreground ring-primary/30',
+  upcoming: 'bg-[var(--surface-icon)] text-primary ring-[var(--surface-ring)]',
+  ended: 'bg-muted text-muted-foreground ring-[var(--surface-ring)]',
   paused: 'bg-amber-500/90 text-white ring-amber-300/30',
-  neutral: 'bg-muted text-foreground ring-border',
+  neutral: 'bg-muted text-foreground ring-[var(--surface-ring)]',
 };
 
 function StatusPill({
@@ -129,7 +129,7 @@ function MetaRow({
       className={cn(
         'flex min-w-0 max-w-[50%] items-center gap-1 text-[11px] font-medium tabular-nums',
         accent === 'live' && 'text-red-500',
-        accent === 'upcoming' && 'text-brand-600',
+        accent === 'upcoming' && 'text-primary',
         accent === 'muted' && 'text-muted-foreground',
         className
       )}
@@ -161,7 +161,7 @@ function CardCTA({
         className={cn(
           'flex w-full items-center justify-center gap-1 font-semibold',
           btn,
-          'rounded-full bg-brand-600 text-white shadow-sm transition-colors hover:bg-brand-700',
+          'rounded-full bg-primary text-primary-foreground shadow-[var(--surface-shadow)] transition-colors hover:bg-primary/90',
           'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
         )}
       >
@@ -175,9 +175,9 @@ function CardCTA({
       <Link
         href={href}
         className={cn(
-          'flex w-full items-center justify-center gap-1 border border-border font-semibold',
+          'flex w-full items-center justify-center gap-1 font-semibold ring-1 ring-[var(--surface-ring)]',
           btn,
-          'bg-background text-foreground transition-colors hover:bg-muted/80'
+          'bg-card text-foreground transition-colors hover:bg-[var(--surface-inset)]'
         )}
       >
         <Bell className="size-3" aria-hidden />
@@ -189,7 +189,7 @@ function CardCTA({
     <Link
       href={href}
       className={cn(
-        'flex w-full items-center justify-center gap-1 border border-border bg-muted/50 font-semibold text-muted-foreground',
+        'flex w-full items-center justify-center gap-1 font-semibold ring-1 ring-[var(--surface-ring)] bg-[var(--surface-inset)] text-muted-foreground',
         compact
           ? 'py-1.5 text-[11px] rounded-md'
           : 'py-1.5 text-[12px] rounded-md',
@@ -260,11 +260,9 @@ export function AuctionCard({
   return (
     <div
       className={cn(
-        'group relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm',
-        'transition-[border-color,box-shadow] duration-200',
-        'hover:border-brand-600/25 hover:shadow-md',
+        appAuctionCard(),
         display.isClosed && 'opacity-85',
-        compact && 'rounded-md',
+        compact && 'rounded-xl',
         className
       )}
     >
@@ -336,7 +334,7 @@ export function AuctionCard({
         >
           <h3
             className={cn(
-              'line-clamp-2 font-semibold leading-snug text-foreground transition-colors group-hover:text-brand-600',
+              'line-clamp-2 font-semibold leading-snug text-foreground transition-colors group-hover:text-primary',
               compact ? 'text-[11px] leading-tight' : 'text-[13px]'
             )}
           >
@@ -372,7 +370,7 @@ export function AuctionCard({
               className={cn(
                 'truncate font-bold tabular-nums leading-tight',
                 compact ? 'text-sm' : 'text-sm',
-                display.isLive ? 'text-brand-600' : 'text-foreground'
+                display.isLive ? 'text-primary' : 'text-foreground'
               )}
             >
               {formatAuctionPrice(priceValue)}

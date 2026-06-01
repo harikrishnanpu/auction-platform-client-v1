@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Mail,
   MapPin,
@@ -11,12 +11,8 @@ import {
   Ban,
   ShieldAlert,
 } from 'lucide-react';
-import {
-  blockUserAction,
-  getAdminUserAction,
-} from '@/actions/admin/admin.actions';
+import { blockUserAction } from '@/actions/admin/admin.actions';
 import { ADMIN_USER_MESSAGES } from '@/constants/admin/messages.constants';
-import { useAsyncEffect } from '@/hooks/use-async-effect';
 import { toast } from 'sonner';
 import { UserInfo, UserRole, UserStatus } from '@/types/user.type';
 import useUserStore from '@/store/user.store';
@@ -27,39 +23,24 @@ import {
 } from './user-detail-badges';
 import { UserBlockConfirmDialog } from './user-block-confirm-dialog';
 
-export function UserDetailView() {
-  const params = useParams();
+type UserDetailViewProps = {
+  user: UserInfo | null;
+  error: string | null;
+};
+
+export function UserDetailView({
+  user: initialUser,
+  error: loadError,
+}: UserDetailViewProps) {
   const router = useRouter();
-  const userId = params.id as string | undefined;
   const currentUserId = useUserStore((s) => s.user?.id);
-  const [user, setUser] = useState<UserInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [user, setUser] = useState(initialUser);
   const [confirmBlock, setConfirmBlock] = useState<{
     id: string;
     name: string;
     block: boolean;
   } | null>(null);
   const [blocking, setBlocking] = useState(false);
-
-  const fetchUser = useCallback(async (id: string) => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await getAdminUserAction(id);
-      if (!res.success) throw new Error(res.error);
-      setUser(res.data);
-    } catch {
-      setError('Failed to load user details.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useAsyncEffect(() => {
-    if (!userId) return;
-    void fetchUser(userId);
-  }, [userId, fetchUser]);
 
   const handleBlockConfirm = async () => {
     if (!confirmBlock) return;
@@ -93,25 +74,17 @@ export function UserDetailView() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-gray-300 border-t-gray-900 dark:border-t-white animate-spin" />
-      </div>
-    );
-  }
-
-  if (error) {
+  if (loadError) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4">
         <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500">
           <ShieldAlert size={24} />
         </div>
-        <p className="text-sm font-medium text-foreground">{error}</p>
+        <p className="text-sm font-medium text-foreground">{loadError}</p>
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => userId && fetchUser(userId)}
+            onClick={() => router.refresh()}
             className="text-sm px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition"
           >
             Retry

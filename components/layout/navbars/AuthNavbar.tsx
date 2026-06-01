@@ -9,6 +9,7 @@ function AuthNavbar() {
       <Logo />
       <div className="flex items-center gap-4">
         <Link
+          data-testid="auth-navbar-back-to-home"
           href="/"
           className="text-sm font-medium text-muted-foreground hover:text-foreground transition hidden sm:inline-flex items-center gap-1 group"
         >

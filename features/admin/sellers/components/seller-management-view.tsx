@@ -1,16 +1,12 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useMemo, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { SellerTable } from './seller-table';
-import {
-  blockUserAction,
-  getAllSellersAction,
-} from '@/actions/admin/admin.actions';
+import { blockUserAction } from '@/actions/admin/admin.actions';
 import { SellerInfo } from '@/services/admin/admin.service';
-import { IgetllSellersParams } from '@/types/admin.type';
-import { UserStatus } from '@/types/user.type';
 import { ADMIN_USER_MESSAGES } from '@/constants/admin/messages.constants';
-import { useAsyncEffect } from '@/hooks/use-async-effect';
+import { buildAdminSellerListSearchParams } from '@/lib/admin-search-params';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import {
@@ -25,40 +21,39 @@ import { SearchInput } from '@/components/ui/search-input';
 
 const LIMIT_OPTIONS = [5, 10, 20, 50] as const;
 
-export function SellerManagementView() {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+type SellerManagementViewProps = {
+  page: number;
+  limit: number;
+  pendingOnly: boolean;
+  sellers: SellerInfo[];
+  totalPages: number;
+  totalSellers: number;
+  error: string | null;
+};
+
+export function SellerManagementView({
+  page,
+  limit,
+  pendingOnly,
+  sellers,
+  totalPages,
+  totalSellers,
+  error,
+}: SellerManagementViewProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState('');
-  const [pendingOnly, setPendingOnly] = useState(false);
-  const [sellers, setSellers] = useState<SellerInfo[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalSellers, setTotalSellers] = useState(0);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: IgetllSellersParams = {
-        page,
-        limit,
-        ...(pendingOnly && { pendingOnly: true }),
-      };
-
-      const res = await getAllSellersAction(params);
-
-      if (res.success && res.data) {
-        setSellers(res.data.sellers ?? []);
-        setTotalPages(res.data.totalPages ?? 1);
-        setTotalSellers(res.data.total ?? 0);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [page, limit, pendingOnly]);
-
-  useAsyncEffect(() => {
-    void fetchData();
-  }, [fetchData]);
+  function navigate(next: {
+    page: number;
+    limit: number;
+    pendingOnly: boolean;
+  }) {
+    const query = buildAdminSellerListSearchParams(next);
+    startTransition(() => {
+      router.push(query ? `/admin/sellers?${query}` : '/admin/sellers');
+    });
+  }
 
   const filteredSellers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -70,29 +65,21 @@ export function SellerManagementView() {
   }, [sellers, search]);
 
   const handleLimitChange = (value: string) => {
-    setLimit(Number(value));
-    setPage(1);
+    navigate({ page: 1, limit: Number(value), pendingOnly });
   };
 
   const handlePendingOnlyChange = (checked: boolean) => {
-    setPendingOnly(checked);
-    setPage(1);
+    navigate({ page: 1, limit, pendingOnly: checked });
   };
 
   const handleBlockUser = async (id: string, block: boolean) => {
     const res = await blockUserAction(id, block);
 
     if (res.success) {
-      setSellers((prev) =>
-        prev.map((s) =>
-          s.id === id
-            ? { ...s, status: block ? UserStatus.BLOCKED : UserStatus.ACTIVE }
-            : s
-        )
-      );
       toast.success(
         block ? ADMIN_USER_MESSAGES.BLOCKED : ADMIN_USER_MESSAGES.UNBLOCKED
       );
+      router.refresh();
     } else {
       toast.error(res.error ?? ADMIN_USER_MESSAGES.STATUS_UPDATE_FAILED);
     }
@@ -164,12 +151,20 @@ export function SellerManagementView() {
         </span>
       </div>
 
+      {error ? (
+        <div className="mb-4 rounded-lg border border-destructive/25 bg-destructive/5 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      ) : null}
+
       <SellerTable
         sellers={filteredSellers}
-        loading={loading}
+        loading={isPending}
         page={page}
         totalPages={totalPages}
-        onPageChange={setPage}
+        onPageChange={(nextPage) =>
+          navigate({ page: nextPage, limit, pendingOnly })
+        }
         totalSellers={totalSellers}
         onBlockSeller={handleBlockUser}
       />

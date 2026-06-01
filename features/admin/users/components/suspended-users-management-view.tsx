@@ -1,49 +1,48 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import {
-  getSuspendedUsersAction,
-  getSuspensionTimelineAction,
-} from '@/actions/admin/report.actions';
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { getSuspensionTimelineAction } from '@/actions/admin/report.actions';
 import {
   ISuspendedUserItem,
   ISuspensionTimelineItem,
 } from '@/types/fraud-report.type';
 import { ADMIN_USER_MESSAGES } from '@/constants/admin/messages.constants';
-import { useAsyncEffect } from '@/hooks/use-async-effect';
+import { buildSuspendedUsersSearchParams } from '@/lib/admin-search-params';
 import { toast } from 'sonner';
 import { SuspendedUsersTable } from './suspended-users-table';
 import { SuspensionTimeline } from './suspension-timeline';
 
-export function SuspendedUsersManagementView() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const [users, setUsers] = useState<ISuspendedUserItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+type SuspendedUsersManagementViewProps = {
+  page: number;
+  search: string;
+  users: ISuspendedUserItem[];
+  total: number;
+  totalPages: number;
+  error: string | null;
+};
+
+export function SuspendedUsersManagementView({
+  page,
+  search,
+  users,
+  total,
+  totalPages,
+  error,
+}: SuspendedUsersManagementViewProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [timeline, setTimeline] = useState<ISuspensionTimelineItem[]>([]);
   const [timelineUserId, setTimelineUserId] = useState<string | null>(null);
 
-  const fetchSuspended = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await getSuspendedUsersAction({ page, limit: 10, search });
-      if (!res.success) {
-        toast.error(res.error ?? ADMIN_USER_MESSAGES.SUSPENDED_LOAD_FAILED);
-        return;
-      }
-      setUsers(res.data?.users ?? []);
-      setTotal(res.data?.total ?? 0);
-      setTotalPages(res.data?.totalPages ?? 1);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, search]);
-
-  useAsyncEffect(() => {
-    void fetchSuspended();
-  }, [fetchSuspended]);
+  function navigate(next: { page: number; search: string }) {
+    const query = buildSuspendedUsersSearchParams(next);
+    startTransition(() => {
+      router.push(
+        query ? `/admin/users/suspended?${query}` : '/admin/users/suspended'
+      );
+    });
+  }
 
   const openTimeline = async (userId: string) => {
     const res = await getSuspensionTimelineAction(userId);
@@ -65,10 +64,7 @@ export function SuspendedUsersManagementView() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <input
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
+            onChange={(e) => navigate({ search: e.target.value, page: 1 })}
             className="h-10 rounded-md border border-input bg-background px-3 text-sm"
             placeholder="Search by user name or email"
           />
@@ -77,13 +73,18 @@ export function SuspendedUsersManagementView() {
           </div>
         </div>
       </div>
+      {error ? (
+        <div className="mb-4 rounded-lg border border-destructive/25 bg-destructive/5 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      ) : null}
       <SuspendedUsersTable
         users={users}
-        loading={loading}
+        loading={isPending}
         page={page}
         totalPages={totalPages}
         total={total}
-        onPageChange={setPage}
+        onPageChange={(nextPage) => navigate({ page: nextPage, search })}
         onOpenTimeline={openTimeline}
       />
       {timelineUserId ? (

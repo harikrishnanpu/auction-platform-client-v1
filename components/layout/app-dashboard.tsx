@@ -74,7 +74,7 @@ function getHeaderMeta(pathname: string): {
   return getAuctionRoomHeaderMeta(pathname);
 }
 
-export function AppDashboardShell({ children }: AppDashboardShellProps) {
+export function AppDashboard({ children }: AppDashboardShellProps) {
   const pathname = usePathname() ?? '';
   const [mobileOpen, setMobileOpen] = useState(false);
   const headerMeta = getHeaderMeta(pathname);

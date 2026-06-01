@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -10,7 +10,6 @@ interface SearchInputProps {
   onChange: (value: string) => void;
   className?: string;
   debounceMs?: number;
-  /** Applied to the inner text field (e.g. borderless inside a split control). */
   inputClassName?: string;
 }
 
@@ -23,19 +22,45 @@ export function SearchInput({
   inputClassName,
 }: SearchInputProps) {
   const isControlled = controlledValue !== undefined;
-  const [internalValue, setInternalValue] = useState(
-    () => controlledValue ?? ''
-  );
-  const displayValue = isControlled ? controlledValue : internalValue;
+  const [internalValue, setInternalValue] = useState('');
+  const [pendingValue, setPendingValue] = useState<string | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const displayValue = isControlled
+    ? (pendingValue ?? controlledValue ?? '')
+    : internalValue;
 
   useEffect(() => {
-    const timer = setTimeout(() => onChange(displayValue), debounceMs);
-    return () => clearTimeout(timer);
-  }, [displayValue, debounceMs, onChange]);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  const emitChange = (next: string) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    if (debounceMs <= 0) {
+      onChange(next);
+      if (isControlled) setPendingValue(null);
+      return;
+    }
+
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null;
+      if (!isControlled || next !== controlledValue) {
+        onChange(next);
+      }
+      if (isControlled) setPendingValue(null);
+    }, debounceMs);
+  };
 
   const handleChange = (next: string) => {
-    if (isControlled) onChange(next);
-    else setInternalValue(next);
+    if (isControlled) {
+      setPendingValue(next);
+    } else {
+      setInternalValue(next);
+    }
+    emitChange(next);
   };
 
   return (
@@ -54,7 +79,7 @@ export function SearchInput({
           inputClassName
         )}
       />
-      {displayValue && (
+      {displayValue ? (
         <button
           type="button"
           onClick={() => handleChange('')}
@@ -63,7 +88,7 @@ export function SearchInput({
         >
           <X size={14} />
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

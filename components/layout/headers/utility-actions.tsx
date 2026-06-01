@@ -12,7 +12,7 @@ export function UtilityActions() {
       <Link
         data-testid="utility-actions-wallet-link"
         href="/profile/wallet"
-        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1.5 text-[13px] font-medium shadow-sm hover:bg-muted/50 sm:px-3"
+        className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-2 text-[13px] font-medium shadow-[var(--surface-shadow-sm)] hover:bg-muted/40 sm:px-3.5"
       >
         <Wallet className="size-3.5 shrink-0 text-brand-600" />
         <span className="text-foreground">Wallet</span>
@@ -20,7 +20,7 @@ export function UtilityActions() {
       <Link
         data-testid="utility-actions-plans-link"
         href="/profile/subscription"
-        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1.5 text-[13px] font-medium shadow-sm hover:bg-muted/50 sm:px-3"
+        className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-2 text-[13px] font-medium shadow-[var(--surface-shadow-sm)] hover:bg-muted/40 sm:px-3.5"
       >
         <Crown className="size-3.5 shrink-0 text-brand-600" />
         <span className="text-foreground">Plans</span>

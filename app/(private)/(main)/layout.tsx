@@ -1,4 +1,4 @@
-import { AppDashboardShell } from '@/components/layout/app-dashboard-shell';
+import { AppDashboard } from '@/components/layout/app-dashboard';
 import { UserAssistantChat } from '@/components/assistant/user-assistant-chat';
 
 export default function MainLayout({
@@ -8,7 +8,7 @@ export default function MainLayout({
 }>) {
   return (
     <div className="min-h-screen font-sans text-foreground transition-colors duration-300">
-      <AppDashboardShell>{children}</AppDashboardShell>
+      <AppDashboard>{children}</AppDashboard>
       <UserAssistantChat />
     </div>
   );

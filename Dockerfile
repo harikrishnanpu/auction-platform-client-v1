@@ -8,7 +8,6 @@ RUN npm ci
 
 COPY . .
 
-# Build-time public variables (browser)
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_SOCKET_URL
 
@@ -26,9 +25,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-
-# Runtime server-side variables
-ENV API_URL=http://backend:4000
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./

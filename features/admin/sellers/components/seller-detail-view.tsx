@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Mail,
   MapPin,
@@ -21,13 +21,11 @@ import {
 import Image from 'next/image';
 import {
   blockUserAction,
-  getAdminSellerAction,
   approveSellerKycAction,
   rejectSellerKycAction,
 } from '@/actions/admin/admin.actions';
 import { SellerInfo } from '@/services/admin/admin.service';
 import { ADMIN_SELLER_MESSAGES } from '@/constants/admin/messages.constants';
-import { useAsyncEffect } from '@/hooks/use-async-effect';
 import { toast } from 'sonner';
 import { AuthProvider, UserRole, UserStatus } from '@/types/user.type';
 import { KycStatusEnum } from '@/types/kyc.type';
@@ -128,12 +126,17 @@ function StatusBadge({ status }: { status: UserStatus }) {
   );
 }
 
-export function SellerDetailView() {
-  const params = useParams();
+type SellerDetailViewProps = {
+  seller: SellerInfo | null;
+  error: string | null;
+};
+
+export function SellerDetailView({
+  seller: initialSeller,
+  error: loadError,
+}: SellerDetailViewProps) {
   const router = useRouter();
-  const [seller, setSeller] = useState<SellerInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [seller, setSeller] = useState(initialSeller);
   const [confirmBlock, setConfirmBlock] = useState<{
     id: string;
     name: string;
@@ -145,25 +148,6 @@ export function SellerDetailView() {
   const [kycLoading, setKycLoading] = useState(false);
   const [docOpen, setDocOpen] = useState(false);
   const [activeDocId, setActiveDocId] = useState<string | null>(null);
-
-  const fetchSeller = useCallback(async (id: string) => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await getAdminSellerAction(id);
-      if (!res.success) throw new Error(res.error);
-      setSeller(res.data);
-    } catch {
-      setError('Failed to load seller details.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useAsyncEffect(() => {
-    if (!params.id) return;
-    void fetchSeller(params.id as string);
-  }, [params.id, fetchSeller]);
 
   const handleBlockConfirm = async () => {
     if (!confirmBlock) return;
@@ -263,29 +247,23 @@ export function SellerDetailView() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-gray-300 border-t-gray-900 dark:border-t-white animate-spin" />
-      </div>
-    );
-  }
-
-  if (error) {
+  if (loadError) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4">
         <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500">
           <ShieldAlert size={24} />
         </div>
-        <p className="text-sm font-medium text-foreground">{error}</p>
+        <p className="text-sm font-medium text-foreground">{loadError}</p>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => params.id && fetchSeller(params.id as string)}
+            type="button"
+            onClick={() => router.refresh()}
             className="text-sm px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition"
           >
             Retry
           </button>
           <button
+            type="button"
             onClick={() => router.back()}
             className="text-sm text-muted-foreground hover:text-foreground transition flex items-center gap-1"
           >

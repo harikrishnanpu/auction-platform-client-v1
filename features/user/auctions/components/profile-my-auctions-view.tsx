@@ -1,5 +1,7 @@
 'use client';
 
+import { useTransition } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { SlidersHorizontal } from 'lucide-react';
 
 import { PaginationControls } from '@/features/user/notifications/components/PaginationControls';
@@ -7,26 +9,63 @@ import {
   ProfilePageCard,
   ProfilePageShell,
 } from '@/features/user/profile/components/profile-page-shell';
+import {
+  applyMyAuctionsFilterUpdate,
+  buildMyAuctionsSearchParams,
+  MY_AUCTIONS_DEFAULT_FILTERS,
+} from '@/lib/listing-search-params';
+import type {
+  IGetMyAuctionsFilter,
+  IGetMyAuctionsResponse,
+} from '@/types/auction.type';
 
 import { MyAuctionsFilters } from './my-auctions-filters';
 import {
   UserAuctionsCards,
   UserAuctionsCardsSkeleton,
 } from './user-auctions-cards';
-import { useUserParticipatedAuctions } from '../hooks/use-user-participated-auctions';
 
-export function ProfileMyAuctionsView() {
-  const {
-    filters,
-    data,
-    loading,
-    error,
-    updateFilter,
-    resetFilters,
-    activeFilterCount,
-  } = useUserParticipatedAuctions();
+type ProfileMyAuctionsViewProps = {
+  filters: IGetMyAuctionsFilter;
+  data: IGetMyAuctionsResponse | null;
+  error: string | null;
+  activeFilterCount: number;
+};
 
+export function ProfileMyAuctionsView({
+  filters,
+  data,
+  error,
+  activeFilterCount,
+}: ProfileMyAuctionsViewProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
   const total = data?.total ?? 0;
+
+  function navigate(next: IGetMyAuctionsFilter) {
+    const query = buildMyAuctionsSearchParams(next);
+    if (
+      pathname === '/profile/my-auctions' &&
+      searchParams.toString() === query
+    ) {
+      return;
+    }
+
+    startTransition(() => {
+      router.push(
+        query ? `/profile/my-auctions?${query}` : '/profile/my-auctions'
+      );
+    });
+  }
+
+  function updateFilter<K extends keyof IGetMyAuctionsFilter>(
+    key: K,
+    value: IGetMyAuctionsFilter[K]
+  ) {
+    navigate(applyMyAuctionsFilterUpdate(filters, key, value));
+  }
 
   return (
     <ProfilePageShell className="lg:max-w-5xl">
@@ -34,12 +73,12 @@ export function ProfileMyAuctionsView() {
         <MyAuctionsFilters
           filters={filters}
           activeFilterCount={activeFilterCount}
-          onPatch={updateFilter}
-          onReset={resetFilters}
+          onPatch={(key, value) => updateFilter(key, value)}
+          onReset={() => navigate(MY_AUCTIONS_DEFAULT_FILTERS)}
         />
       </ProfilePageCard>
 
-      {!loading && !error && data ? (
+      {!isPending && !error && data ? (
         <p className="px-0.5 text-[13px] text-muted-foreground">
           {total === 0
             ? 'No auctions match your filters.'
@@ -47,7 +86,7 @@ export function ProfileMyAuctionsView() {
         </p>
       ) : null}
 
-      {loading ? (
+      {isPending ? (
         <UserAuctionsCardsSkeleton />
       ) : error ? (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-[13px] text-destructive">

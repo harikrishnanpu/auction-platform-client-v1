@@ -1,85 +1,62 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { UserStats } from './user-stats';
 import { UserFilters, UserFilterState, DEFAULT_FILTERS } from './user-filters';
-import { UserTable, User } from './user-table';
-import {
-  blockUserAction,
-  getAllUsersAction,
-} from '@/actions/admin/admin.actions';
-import { IgetllUsersParams } from '@/types/admin.type';
-import { UserStatus } from '@/types/user.type';
+import { UserTable } from './user-table';
+import { blockUserAction } from '@/actions/admin/admin.actions';
 import { ADMIN_USER_MESSAGES } from '@/constants/admin/messages.constants';
-import { useAsyncEffect } from '@/hooks/use-async-effect';
+import { buildAdminUserSearchParams } from '@/lib/admin-search-params';
 import { toast } from 'sonner';
 import useUserStore from '@/store/user.store';
+import { IUser } from '@/types/user.type';
 
-export function UserManagementView() {
+type UserManagementViewProps = {
+  filters: UserFilterState;
+  page: number;
+  users: IUser[];
+  totalPages: number;
+  totalUsers: number;
+  error: string | null;
+};
+
+export function UserManagementView({
+  filters,
+  page,
+  users,
+  totalPages,
+  totalUsers,
+  error,
+}: UserManagementViewProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const currentUserId = useUserStore((s) => s.user?.id);
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<UserFilterState>(DEFAULT_FILTERS);
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalUsers, setTotalUsers] = useState(0);
   const [stats] = useState<null>(null);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: IgetllUsersParams = {
-        page,
-        limit: filters.limit,
-        search: filters.search,
-        sort: filters.sort,
-        order: filters.order,
-        role: filters.role === 'all' ? 'ALL' : filters.role,
-        status: filters.status === 'all' ? 'ALL' : filters.status,
-        authProvider:
-          filters.authProvider === 'all' ? 'ALL' : filters.authProvider,
-      };
-
-      const res = await getAllUsersAction(params);
-
-      if (res.success) {
-        setUsers(res.data?.users || []);
-        setTotalPages(res.data?.totalPages || 1);
-        setTotalUsers(res.data?.total || 0);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [page, filters]);
-
-  useAsyncEffect(() => {
-    void fetchData();
-  }, [fetchData]);
+  function navigate(nextFilters: UserFilterState, nextPage: number) {
+    const query = buildAdminUserSearchParams(nextFilters, nextPage);
+    startTransition(() => {
+      router.push(query ? `/admin/users?${query}` : '/admin/users');
+    });
+  }
 
   const handleFiltersChange = (newFilters: UserFilterState) => {
-    setFilters(newFilters);
-    setPage(1);
+    navigate(newFilters, 1);
   };
 
   const handleResetFilters = () => {
-    setFilters(DEFAULT_FILTERS);
-    setPage(1);
+    navigate(DEFAULT_FILTERS, 1);
   };
 
   const handleBlockUser = async (id: string, block: boolean) => {
     const res = await blockUserAction(id, block);
 
     if (res.success) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === id
-            ? { ...u, status: block ? UserStatus.BLOCKED : UserStatus.ACTIVE }
-            : u
-        )
-      );
       toast.success(
         block ? ADMIN_USER_MESSAGES.BLOCKED : ADMIN_USER_MESSAGES.UNBLOCKED
       );
+      router.refresh();
     } else {
       toast.error(res.error ?? ADMIN_USER_MESSAGES.UPDATE_FAILED);
     }
@@ -105,12 +82,18 @@ export function UserManagementView() {
         totalUsers={totalUsers}
       />
 
+      {error ? (
+        <div className="mb-4 rounded-lg border border-destructive/25 bg-destructive/5 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      ) : null}
+
       <UserTable
         users={users}
-        loading={loading}
+        loading={isPending}
         page={page}
         totalPages={totalPages}
-        onPageChange={setPage}
+        onPageChange={(nextPage) => navigate(filters, nextPage)}
         totalUsers={totalUsers}
         onBlockUser={handleBlockUser}
         currentUserId={currentUserId}

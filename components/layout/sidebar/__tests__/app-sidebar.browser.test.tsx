@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render } from 'vitest-browser-react';
 import { AppSidebar } from '../app-sidebar';
+import { APP_BRAND } from '../../config/app-nav';
 
 const mockUseUserStore = vi.fn();
 const mockUsePathname = vi.fn();
@@ -33,12 +34,14 @@ describe('AppSidebar', () => {
     mockUseUserStore.mockReturnValue(vi.fn());
   });
 
+  const brandText = APP_BRAND;
+
   it('should render the AppSidebar component on desktop view', async () => {
     const { getByText } = await render(
       <AppSidebar mobileOpen={false} onMobileClose={vi.fn()} />
     );
 
-    const brand = getByText('Hammer Down').first();
+    const brand = getByText(brandText).first();
     await expect.element(brand).toBeInTheDocument();
   });
 });

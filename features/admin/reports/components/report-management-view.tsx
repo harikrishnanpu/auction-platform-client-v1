@@ -1,59 +1,47 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   markFraudReportUnderReviewAction,
   updateFraudReportAction,
-  getFraudReportsAction,
   reviewFraudReportAction,
 } from '@/actions/admin/report.actions';
 import { IFraudReport, FraudAdminDecision } from '@/types/fraud-report.type';
 import { ADMIN_REPORT_MESSAGES } from '@/constants/admin/messages.constants';
-import { useAsyncEffect } from '@/hooks/use-async-effect';
+import { buildReportSearchParams } from '@/lib/admin-search-params';
 import { toast } from 'sonner';
-import {
-  DEFAULT_REPORT_FILTERS,
-  ReportFilters,
-  ReportFilterState,
-} from './report-filters';
+import { ReportFilters, ReportFilterState } from './report-filters';
 import { ReportTable } from './report-table';
 
-export function ReportManagementView() {
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<ReportFilterState>(
-    DEFAULT_REPORT_FILTERS
-  );
-  const [reports, setReports] = useState<IFraudReport[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+type ReportManagementViewProps = {
+  filters: ReportFilterState;
+  page: number;
+  reports: IFraudReport[];
+  total: number;
+  totalPages: number;
+  error: string | null;
+};
 
-  const fetchReports = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await getFraudReportsAction({
-        page,
-        limit: filters.limit,
-        search: filters.search,
-        status: filters.status === 'ALL' ? undefined : filters.status,
-        sort: 'createdAt',
-        order: 'desc',
-      });
-      if (!res.success) {
-        toast.error(res.error ?? ADMIN_REPORT_MESSAGES.LOAD_FAILED);
-        return;
-      }
-      setReports(res.data?.reports ?? []);
-      setTotal(res.data?.total ?? 0);
-      setTotalPages(res.data?.totalPages ?? 1);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, filters]);
+export function ReportManagementView({
+  filters,
+  page,
+  reports,
+  total,
+  totalPages,
+  error,
+}: ReportManagementViewProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  useAsyncEffect(() => {
-    void fetchReports();
-  }, [fetchReports]);
+  function navigate(nextFilters: ReportFilterState, nextPage: number) {
+    const query = buildReportSearchParams(nextFilters, nextPage);
+    startTransition(() => {
+      router.push(query ? `/admin/reports?${query}` : '/admin/reports');
+    });
+  }
+
+  const refresh = () => router.refresh();
 
   const handleReview = async (
     reportId: string,
@@ -65,7 +53,7 @@ export function ReportManagementView() {
       return;
     }
     toast.success(ADMIN_REPORT_MESSAGES.REVIEWED);
-    await fetchReports();
+    refresh();
   };
 
   const handleMarkUnderReview = async (reportId: string) => {
@@ -75,7 +63,7 @@ export function ReportManagementView() {
       return;
     }
     toast.success(ADMIN_REPORT_MESSAGES.UNDER_REVIEW);
-    await fetchReports();
+    refresh();
   };
 
   const handleUpdateReport = async (
@@ -95,7 +83,7 @@ export function ReportManagementView() {
       return;
     }
     toast.success(ADMIN_REPORT_MESSAGES.UPDATED);
-    await fetchReports();
+    refresh();
   };
 
   return (
@@ -106,19 +94,21 @@ export function ReportManagementView() {
       </p>
       <ReportFilters
         filters={filters}
-        onChange={(next) => {
-          setFilters(next);
-          setPage(1);
-        }}
+        onChange={(next) => navigate(next, 1)}
         total={total}
       />
+      {error ? (
+        <div className="mb-4 rounded-lg border border-destructive/25 bg-destructive/5 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      ) : null}
       <ReportTable
         reports={reports}
-        loading={loading}
+        loading={isPending}
         page={page}
         totalPages={totalPages}
         total={total}
-        onPageChange={setPage}
+        onPageChange={(nextPage) => navigate(filters, nextPage)}
         onReview={handleReview}
         onMarkUnderReview={handleMarkUnderReview}
         onUpdateReport={handleUpdateReport}

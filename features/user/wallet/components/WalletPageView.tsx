@@ -1,8 +1,8 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { Spinner } from '@/components/ui/spinner';
 import {
   ProfilePageCard,
   ProfilePageShell,
@@ -11,13 +11,24 @@ import {
   loadRazorpayScript,
   type RazorpayPaymentResponse,
 } from '../utils/razorpay';
+import type { IUserWallet } from '../types/wallet.types';
 
 import { WalletBalanceCard } from './WalletBalanceCard';
 import { WalletActions } from './WalletActions';
 import { WalletPaymentStatusModal } from './WalletPaymentStatusModal';
-import { useUserWallet } from '../hooks/use-user-wallet';
+import {
+  createWalletTopupOrderAction,
+  verifyWalletTopupAction,
+  withdrawWalletAction,
+} from '@/actions/user/wallet.actions';
 
-export function WalletPageView() {
+type WalletPageViewProps = {
+  wallet: IUserWallet | null;
+  error: string | null;
+};
+
+export function WalletPageView({ wallet, error }: WalletPageViewProps) {
+  const router = useRouter();
   const [paymentStatusModal, setPaymentStatusModal] = useState<{
     open: boolean;
     title: string;
@@ -27,22 +38,25 @@ export function WalletPageView() {
     title: '',
     description: '',
   });
-  const {
-    wallet,
-    loading,
-    error,
-    createTopupOrder,
-    verifyTopup,
-    withdraw,
-    refresh,
-  } = useUserWallet();
 
   const showPaymentStatus = (title: string, description: string) => {
     setPaymentStatusModal({ open: true, title, description });
   };
 
+  const refresh = () => {
+    router.refresh();
+  };
+
   const onAddAmount = async (amount: number) => {
-    const order = await createTopupOrder(amount);
+    const orderRes = await createWalletTopupOrderAction({ amount });
+    if (!orderRes.success || !orderRes.data) {
+      showPaymentStatus(
+        'Payment Error',
+        orderRes.error ?? 'Could not start top-up'
+      );
+      return;
+    }
+    const order = orderRes.data;
     const loaded = await loadRazorpayScript();
 
     if (!loaded || !window.Razorpay) {
@@ -64,16 +78,17 @@ export function WalletPageView() {
         response: RazorpayPaymentResponse | Record<string, string>
       ) => {
         try {
-          await verifyTopup({
+          const verifyRes = await verifyWalletTopupAction({
             orderId: response.razorpay_order_id,
             paymentId: response.razorpay_payment_id,
             signature: response.razorpay_signature,
           });
+          if (!verifyRes.success) throw new Error(verifyRes.error ?? undefined);
           showPaymentStatus(
             'Payment Successful',
             'Your wallet has been credited successfully.'
           );
-          await refresh();
+          refresh();
         } catch {
           showPaymentStatus(
             'Verification Failed',
@@ -95,21 +110,13 @@ export function WalletPageView() {
   };
 
   const onWithdrawAmount = async (amount: number) => {
-    await withdraw(amount);
-    await refresh();
+    const res = await withdrawWalletAction({ amount });
+    if (!res.success) {
+      showPaymentStatus('Withdrawal Failed', res.error ?? 'Could not withdraw');
+      return;
+    }
+    refresh();
   };
-
-  if (loading) {
-    return (
-      <ProfilePageShell>
-        <ProfilePageCard>
-          <div className="flex items-center justify-center py-12">
-            <Spinner />
-          </div>
-        </ProfilePageCard>
-      </ProfilePageShell>
-    );
-  }
 
   if (error) {
     return (
