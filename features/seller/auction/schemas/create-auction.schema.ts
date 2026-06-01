@@ -1,17 +1,29 @@
 import { z } from 'zod';
+import { SELLER_AUCTION_VALIDATION } from '@/constants/seller/auction.constants';
 
-const nonNegativeInt = z.coerce.number().int('Must be a whole number').min(0);
+const nonNegativeInt = z.coerce
+  .number()
+  .int(SELLER_AUCTION_VALIDATION.WHOLE_NUMBER)
+  .min(0);
 
 export const createAuctionFormSchema = z
   .object({
-    title: z.string().trim().min(1, 'Title is required'),
+    title: z.string().trim().min(1, SELLER_AUCTION_VALIDATION.TITLE_REQUIRED),
     description: z.string().trim().default(''),
-    categoryId: z.string().trim().min(1, 'Category is required'),
-    condition: z.string().trim().min(1, 'Condition is required'),
-    startPrice: z.coerce.number().min(500, 'Start price must be 500 or more'),
+    categoryId: z
+      .string()
+      .trim()
+      .min(1, SELLER_AUCTION_VALIDATION.CATEGORY_REQUIRED),
+    condition: z
+      .string()
+      .trim()
+      .min(1, SELLER_AUCTION_VALIDATION.CONDITION_REQUIRED),
+    startPrice: z.coerce
+      .number()
+      .min(500, SELLER_AUCTION_VALIDATION.START_PRICE_MIN),
     minIncrement: z.coerce.number().min(0),
-    startAt: z.string().min(1, 'Start time is required'),
-    endAt: z.string().min(1, 'End time is required'),
+    startAt: z.string().min(1, SELLER_AUCTION_VALIDATION.START_TIME_REQUIRED),
+    endAt: z.string().min(1, SELLER_AUCTION_VALIDATION.END_TIME_REQUIRED),
     antiSnipSeconds: nonNegativeInt.default(60),
     maxExtensionCount: nonNegativeInt.default(3),
     bidCooldownSeconds: nonNegativeInt.default(10),
@@ -24,7 +36,10 @@ export const createAuctionFormSchema = z
       if (Number.isNaN(s.getTime()) || Number.isNaN(e.getTime())) return true;
       return e > s;
     },
-    { message: 'End time must be after start time', path: ['endAt'] }
+    {
+      message: SELLER_AUCTION_VALIDATION.END_AFTER_START,
+      path: ['endAt'],
+    }
   )
   .superRefine((data, ctx) => {
     const sealed = data.auctionType === 'SEALED';
@@ -40,7 +55,7 @@ export const createAuctionFormSchema = z
         if (!Number.isFinite(n) || !Number.isInteger(n) || n !== 0) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Must be 0 for sealed auctions',
+            message: SELLER_AUCTION_VALIDATION.SEALED_ZERO,
             path: [path],
           });
         }
@@ -49,7 +64,7 @@ export const createAuctionFormSchema = z
       if (Number(data.minIncrement) < 1) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Min increment must be 1 or more',
+          message: SELLER_AUCTION_VALIDATION.MIN_INCREMENT_MIN,
           path: ['minIncrement'],
         });
       }

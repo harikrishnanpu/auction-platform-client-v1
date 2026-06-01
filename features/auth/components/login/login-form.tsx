@@ -19,12 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import useUserStore from '@/store/user.store';
-
-const BLOCKED_MESSAGE =
-  'Your account has been blocked. Please contact support for assistance.';
-
-const SUSPENDED_MESSAGE =
-  'Your account has been suspended. Please contact support for assistance.';
+import { LOGIN_MESSAGES, LOGIN_UI } from '@/constants/auth/login.constants';
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -38,22 +33,22 @@ const LoginForm = () => {
   const isSuspendedError = errorParam === 'suspended';
 
   const errorDisplayMessage = isBlockedError
-    ? BLOCKED_MESSAGE
+    ? LOGIN_MESSAGES.BLOCKED
     : isSuspendedError
-      ? SUSPENDED_MESSAGE
+      ? LOGIN_MESSAGES.SUSPENDED
       : (errorParam ?? '');
 
   useEffect(() => {
     if (isBlockedError) {
       setUser(null);
-      toast.error(BLOCKED_MESSAGE, { duration: 5000 });
+      toast.error(LOGIN_MESSAGES.BLOCKED, { duration: 5000 });
     }
   }, [isBlockedError, setUser]);
 
   useEffect(() => {
     if (isSuspendedError) {
       setUser(null);
-      toast.error(SUSPENDED_MESSAGE, { duration: 5000 });
+      toast.error(LOGIN_MESSAGES.SUSPENDED, { duration: 5000 });
     }
   }, [isSuspendedError, setUser]);
 
@@ -61,10 +56,10 @@ const LoginForm = () => {
     <Card className="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-3xl shadow-xl overflow-hidden fade-in relative z-10">
       <CardHeader className="text-center pb-6 pt-8 md:pt-10">
         <CardTitle className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-          Welcome Back
+          {LOGIN_UI.TITLE}
         </CardTitle>
         <CardDescription className="text-sm text-gray-600 dark:text-gray-400">
-          Enter your credentials to access your account.
+          {LOGIN_UI.DESCRIPTION}
         </CardDescription>
       </CardHeader>
 
@@ -72,7 +67,7 @@ const LoginForm = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className="space-y-2">
             <Label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 ml-1">
-              Email
+              {LOGIN_UI.EMAIL_LABEL}
             </Label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -81,7 +76,7 @@ const LoginForm = () => {
               <Input
                 {...register('email')}
                 type="email"
-                placeholder="name@example.com"
+                placeholder={LOGIN_UI.EMAIL_PLACEHOLDER}
                 className="block w-full pl-11 pr-4 py-6 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all outline-none shadow-sm"
               />
             </div>
@@ -95,13 +90,13 @@ const LoginForm = () => {
           <div className="space-y-2">
             <div className="flex justify-between items-center ml-1">
               <Label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Password
+                {LOGIN_UI.PASSWORD_LABEL}
               </Label>
               <Link
                 href="/reset/password"
                 className="text-xs font-semibold text-black dark:text-white hover:underline transition-all"
               >
-                Forgot Password?
+                {LOGIN_UI.FORGOT_PASSWORD}
               </Link>
             </div>
             <div className="relative group">
@@ -144,7 +139,7 @@ const LoginForm = () => {
               <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin dark:border-black/30 dark:border-t-black"></span>
             ) : (
               <>
-                <span>Sign In</span>
+                <span>{LOGIN_UI.SIGN_IN}</span>
                 <ArrowRight
                   size={18}
                   className="group-hover:translate-x-1 transition-transform"
@@ -160,7 +155,7 @@ const LoginForm = () => {
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="px-3 bg-white dark:bg-slate-900 text-gray-500 dark:text-gray-400 rounded-lg font-medium text-xs uppercase tracking-wider">
-              Or continue with
+              {LOGIN_UI.OR_CONTINUE_WITH}
             </span>
           </div>
         </div>
@@ -177,12 +172,12 @@ const LoginForm = () => {
 
       <CardFooter className="px-8 md:px-10 pb-8 flex justify-center border-t border-gray-100 dark:border-gray-800/50 pt-6 mt-2">
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Don&apos;t have an account?{' '}
+          {LOGIN_UI.NO_ACCOUNT}{' '}
           <Link
             href="/register"
             className="font-bold text-black dark:text-white hover:underline transition-all hover:text-blue-600 dark:hover:text-blue-400"
           >
-            Create Account
+            {LOGIN_UI.CREATE_ACCOUNT}
           </Link>
         </p>
       </CardFooter>

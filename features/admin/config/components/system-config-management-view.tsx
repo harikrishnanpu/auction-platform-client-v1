@@ -4,6 +4,7 @@ import { updateSystemConfigAction } from '@/actions/admin/admin.actions';
 import { SystemConfigField } from '@/features/admin/config/components/system-config-field';
 import { ISystemConfig } from '@/types/system-config.type';
 import { useMemo, useState, useTransition } from 'react';
+import { ADMIN_CONFIG_MESSAGES } from '@/constants/admin/messages.constants';
 import { toast } from 'sonner';
 
 export function SystemConfigManagementView({
@@ -42,17 +43,17 @@ export function SystemConfigManagementView({
     const trimmedValue = configValue.trim();
 
     if (!trimmedKey) {
-      toast.error('Key is required');
+      toast.error(ADMIN_CONFIG_MESSAGES.KEY_REQUIRED);
       return;
     }
 
     if (!allowedKeys.includes(trimmedKey)) {
-      toast.error('Invalid system config key');
+      toast.error(ADMIN_CONFIG_MESSAGES.KEY_INVALID);
       return;
     }
 
     if (!trimmedValue) {
-      toast.error('Value is required');
+      toast.error(ADMIN_CONFIG_MESSAGES.VALUE_REQUIRED);
       return;
     }
 
@@ -101,7 +102,7 @@ export function SystemConfigManagementView({
       setSelectedKey(next.key);
       setDescription(next.description ?? '');
       setConfigValue(next.value ?? '');
-      toast.success('System config updated');
+      toast.success(ADMIN_CONFIG_MESSAGES.UPDATED);
     });
   };
 

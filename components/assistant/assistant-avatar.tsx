@@ -6,7 +6,7 @@ import {
   ASSISTANT_IMAGE_KEYS,
   ASSISTANT_IMAGES,
   type AssistantMood,
-} from './assistant-constants';
+} from '@/constants/assistant/assistant.constants';
 
 type AssistantAvatarProps = {
   mood: AssistantMood;

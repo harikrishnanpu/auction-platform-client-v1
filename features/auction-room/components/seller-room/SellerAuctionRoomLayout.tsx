@@ -22,6 +22,7 @@ import {
   TrendingUp,
   HeartPulse,
 } from 'lucide-react';
+import { AUCTION_ROOM_MESSAGES } from '@/constants/auction-room/constants';
 import { toast } from 'sonner';
 
 import type { IAuctionDto } from '@/types/auction.type';
@@ -656,7 +657,7 @@ export function SellerAuctionRoomLayout({
                           void navigator.clipboard?.writeText(
                             `${window.location.origin}/auction/${auctionId}`
                           );
-                          toast.success('Link copied to clipboard');
+                          toast.success(AUCTION_ROOM_MESSAGES.LINK_COPIED);
                         },
                       },
                       {
@@ -664,7 +665,9 @@ export function SellerAuctionRoomLayout({
                         label: 'Download Report',
                         icon: Download,
                         onClick: () =>
-                          toast.info('Report download coming soon'),
+                          toast.info(
+                            AUCTION_ROOM_MESSAGES.REPORT_DOWNLOAD_SOON
+                          ),
                       },
                     ].map((item) => {
                       const Icon = item.icon;

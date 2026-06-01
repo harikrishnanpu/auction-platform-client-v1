@@ -3,6 +3,7 @@
 import { createSubscriptionPlanAction } from '@/actions/admin/admin.actions';
 import { IAllowedSubscriptionFeatureMetadata } from '@/types/subscription.type';
 import { useState, useTransition } from 'react';
+import { ADMIN_SUBSCRIPTION_MESSAGES } from '@/constants/admin/messages.constants';
 import { toast } from 'sonner';
 import {
   SubscriptionPlanForm,
@@ -34,7 +35,7 @@ export function SubscriptionPlansView({
       }));
 
     if (payloadFeatures.length === 0) {
-      toast.error('Add at least one feature with a value');
+      toast.error(ADMIN_SUBSCRIPTION_MESSAGES.FEATURE_REQUIRED);
       return;
     }
 
@@ -42,11 +43,11 @@ export function SubscriptionPlansView({
     const durationDaysNum = Number(formValue.durationDays);
 
     if (!formValue.name.trim() || !formValue.description.trim()) {
-      toast.error('Plan name and description are required');
+      toast.error(ADMIN_SUBSCRIPTION_MESSAGES.PLAN_FIELDS_REQUIRED);
       return;
     }
     if (Number.isNaN(priceNum) || Number.isNaN(durationDaysNum)) {
-      toast.error('Plan amount and duration must be valid numbers');
+      toast.error(ADMIN_SUBSCRIPTION_MESSAGES.PLAN_NUMBERS_INVALID);
       return;
     }
 
@@ -61,7 +62,9 @@ export function SubscriptionPlansView({
       });
 
       if (!response.success || !response.data) {
-        toast.error(response.error ?? 'Failed to create plan');
+        toast.error(
+          response.error ?? ADMIN_SUBSCRIPTION_MESSAGES.CREATE_FAILED
+        );
         return;
       }
       setFormValue({
@@ -73,7 +76,7 @@ export function SubscriptionPlansView({
         isActive: true,
         features: [],
       });
-      toast.success('Subscription plan created');
+      toast.success(ADMIN_SUBSCRIPTION_MESSAGES.CREATED);
     });
   };
 

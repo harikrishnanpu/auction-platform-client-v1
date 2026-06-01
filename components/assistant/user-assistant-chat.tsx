@@ -17,7 +17,7 @@ import {
   ASSISTANT_MOOD_CYCLE,
   type AssistantChatMessage,
   type AssistantMood,
-} from './assistant-constants';
+} from '@/constants/assistant/assistant.constants';
 import { AssistantAvatar } from './assistant-avatar';
 import { useAssistantChatSocket } from '@/socket/useAssistantChatSocket';
 

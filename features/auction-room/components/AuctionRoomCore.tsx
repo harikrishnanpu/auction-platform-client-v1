@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AUCTION_ROOM_MESSAGES } from '@/constants/auction-room/constants';
 import { toast } from 'sonner';
 
 import { getWalletAction } from '@/actions/user/wallet.actions';
@@ -278,10 +279,10 @@ export function AuctionRoomCore({
     const res = await addAuctionParticipant();
     setLockParticipantBusy(false);
     if (!res.success) {
-      toast.error(res.error ?? 'Could not lock amount');
+      toast.error(res.error ?? AUCTION_ROOM_MESSAGES.LOCK_FAILED);
       return;
     }
-    toast.success('You can place bids now');
+    toast.success(AUCTION_ROOM_MESSAGES.CAN_BID_NOW);
     setPlaceBidTermsOpen(false);
   }, [addAuctionParticipant]);
 
@@ -317,10 +318,10 @@ export function AuctionRoomCore({
         reportedUserType: mode === 'SELLER' ? 'SELLER' : 'USER',
       });
       if (!res.success) {
-        toast.error(res.error ?? 'Failed to submit report');
+        toast.error(res.error ?? AUCTION_ROOM_MESSAGES.REPORT_FAILED);
         return;
       }
-      toast.success('Report submitted');
+      toast.success(AUCTION_ROOM_MESSAGES.REPORT_SUBMITTED);
     },
     [mode, user?.id]
   );
@@ -346,10 +347,10 @@ export function AuctionRoomCore({
         level: input.level,
       });
       if (!res.success) {
-        toast.error(res.error ?? 'Failed to submit report');
+        toast.error(res.error ?? AUCTION_ROOM_MESSAGES.REPORT_FAILED);
         return;
       }
-      toast.success('Auction report submitted');
+      toast.success(AUCTION_ROOM_MESSAGES.AUCTION_REPORT_SUBMITTED);
     },
     [user?.id, auction]
   );

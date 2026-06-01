@@ -1,7 +1,8 @@
 'use client';
 
 import { API_ENDPOINTS, buildApiUrl, buildQuery } from '@/apiInstance';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useAsyncEffect } from '@/hooks/use-async-effect';
 import type { IUserNotificationsPage } from '../types/notifications.types';
 
 type ApiEnvelope<T> = {
@@ -47,7 +48,7 @@ export function useUserNotificationsPage({
     }
   }, [page, limit]);
 
-  useEffect(() => {
+  useAsyncEffect(() => {
     void fetchPage();
   }, [fetchPage]);
 

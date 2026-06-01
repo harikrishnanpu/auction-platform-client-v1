@@ -1,5 +1,5 @@
 import { specialities } from '@/data/landing/specialities';
-import { ShieldCheck, Users, Zap, TrendingUp } from 'lucide-react';
+import { Users, Zap, TrendingUp } from 'lucide-react';
 
 export function WhyUsSection() {
   // Explicit tailwind class mappings for safety in compilation

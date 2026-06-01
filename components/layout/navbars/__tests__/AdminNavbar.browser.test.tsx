@@ -24,13 +24,6 @@ vi.mock('@/actions/auth/auth.actions', () => ({
   logoutAction: () => mockLogoutAction(),
 }));
 
-vi.mock('next/image', () => ({
-  __esModule: true,
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <img {...props} />
-  ),
-}));
-
 describe('AdminNavbar', () => {
   beforeEach(() => {
     vi.clearAllMocks();

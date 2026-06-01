@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { AUCTION_ROOM_VALIDATION } from '@/constants/auction-room/constants';
+import { COMMON_VALIDATION } from '@/constants/common/validation.constants';
 
 export type PlaceBidFormValues = {
   amount: string;
@@ -10,7 +12,7 @@ export function createPlaceBidSchema(minBid: number | null) {
       if (minBid == null) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Auction not ready',
+          message: AUCTION_ROOM_VALIDATION.NOT_READY,
         });
         return;
       }
@@ -18,7 +20,7 @@ export function createPlaceBidSchema(minBid: number | null) {
       if (!trimmed) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Enter a bid amount',
+          message: AUCTION_ROOM_VALIDATION.AMOUNT_REQUIRED,
         });
         return;
       }
@@ -26,14 +28,14 @@ export function createPlaceBidSchema(minBid: number | null) {
       if (!Number.isFinite(n)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Enter a valid number',
+          message: AUCTION_ROOM_VALIDATION.INVALID_NUMBER,
         });
         return;
       }
       if (n < minBid) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: `Bid must be at least ${minBid}`,
+          message: AUCTION_ROOM_VALIDATION.minBid(minBid),
         });
       }
     }),
@@ -47,5 +49,5 @@ export function validatePlaceBidAmount(
 ): true | string {
   const parsed = createPlaceBidSchema(minBid).safeParse({ amount: value });
   if (parsed.success) return true;
-  return parsed.error.issues[0]?.message ?? 'Invalid';
+  return parsed.error.issues[0]?.message ?? COMMON_VALIDATION.GENERIC_INVALID;
 }

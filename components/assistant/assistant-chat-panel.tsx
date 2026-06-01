@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 import { AssistantAvatar } from './assistant-avatar';
-import type { AssistantChatMessage } from './assistant-constants';
+import type { AssistantChatMessage } from '@/constants/assistant/assistant.constants';
 import { ChatMessageBubble } from './chat-message-bubble';
 
 type AssistantChatPanelProps = {

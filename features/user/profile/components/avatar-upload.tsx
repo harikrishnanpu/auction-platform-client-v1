@@ -3,6 +3,8 @@
 import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { Camera, Loader2 } from 'lucide-react';
+import { MEDIA_MESSAGES } from '@/constants/common/messages.constants';
+import { PROFILE_MESSAGES } from '@/constants/profile/constants';
 import { toast } from 'sonner';
 
 import {
@@ -56,12 +58,12 @@ export function AvatarUpload({
       if (!file) return;
 
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image size must be less than 5MB');
+        toast.error(MEDIA_MESSAGES.IMAGE_SIZE_MAX);
         return;
       }
 
       if (!file.type.startsWith('image/')) {
-        toast.error('Only image files are allowed');
+        toast.error(MEDIA_MESSAGES.IMAGE_ONLY);
         return;
       }
 
@@ -74,7 +76,9 @@ export function AvatarUpload({
       });
 
       if (!response.success || !response.data) {
-        toast.error(response.error || 'Failed to get upload url');
+        toast.error(
+          response.error || PROFILE_MESSAGES.AVATAR_UPLOAD_URL_FAILED
+        );
         return;
       }
 
@@ -83,21 +87,27 @@ export function AvatarUpload({
       const uploadResponse = await uploadAvatarAction(uploadUrl, file);
 
       if (!uploadResponse.success) {
-        toast.error(uploadResponse.error || 'Failed to upload avatar');
+        toast.error(
+          uploadResponse.error || PROFILE_MESSAGES.AVATAR_UPLOAD_FAILED
+        );
         return;
       }
 
       const updateResponse = await updateAvatarAction(fileKey);
 
       if (!updateResponse.success || !updateResponse.data) {
-        toast.error(updateResponse.error || 'Failed to update avatar');
+        toast.error(
+          updateResponse.error || PROFILE_MESSAGES.AVATAR_UPDATE_FAILED
+        );
         return;
       }
 
       onUploadSuccess(updateResponse.data.user);
-      toast.success('Profile photo updated');
+      toast.success(PROFILE_MESSAGES.PHOTO_UPDATED);
     } catch (error: unknown) {
-      toast.error(getErrorMessage(error) || 'Failed to upload avatar');
+      toast.error(
+        getErrorMessage(error) || PROFILE_MESSAGES.AVATAR_UPLOAD_FAILED
+      );
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

@@ -1,15 +1,14 @@
 'use client';
 
 import { useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 function CallbackContent() {
   const searchParams = useSearchParams();
   const success = searchParams.get('success');
-  const error = searchParams.get('error');
 
   useEffect(() => {
-    if (success == 'true') {
+    if (success === 'true') {
       window.location.href = '/home';
     } else {
       window.location.href = '/login';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   getSuspendedUsersAction,
   getSuspensionTimelineAction,
@@ -9,6 +9,8 @@ import {
   ISuspendedUserItem,
   ISuspensionTimelineItem,
 } from '@/types/fraud-report.type';
+import { ADMIN_USER_MESSAGES } from '@/constants/admin/messages.constants';
+import { useAsyncEffect } from '@/hooks/use-async-effect';
 import { toast } from 'sonner';
 import { SuspendedUsersTable } from './suspended-users-table';
 import { SuspensionTimeline } from './suspension-timeline';
@@ -28,7 +30,7 @@ export function SuspendedUsersManagementView() {
     try {
       const res = await getSuspendedUsersAction({ page, limit: 10, search });
       if (!res.success) {
-        toast.error(res.error ?? 'Failed to load suspended users');
+        toast.error(res.error ?? ADMIN_USER_MESSAGES.SUSPENDED_LOAD_FAILED);
         return;
       }
       setUsers(res.data?.users ?? []);
@@ -39,14 +41,14 @@ export function SuspendedUsersManagementView() {
     }
   }, [page, search]);
 
-  useEffect(() => {
-    fetchSuspended();
+  useAsyncEffect(() => {
+    void fetchSuspended();
   }, [fetchSuspended]);
 
   const openTimeline = async (userId: string) => {
     const res = await getSuspensionTimelineAction(userId);
     if (!res.success) {
-      toast.error(res.error ?? 'Failed to fetch timeline');
+      toast.error(res.error ?? ADMIN_USER_MESSAGES.TIMELINE_FETCH_FAILED);
       return;
     }
     setTimelineUserId(userId);

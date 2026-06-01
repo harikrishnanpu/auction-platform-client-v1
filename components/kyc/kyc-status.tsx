@@ -11,7 +11,6 @@ export function KycStatus({
   status = 'INITIAL',
   completedAt,
   reviewAt,
-  approvedAt,
 }: KycStatusProps) {
   return (
     <div className="space-y-6">

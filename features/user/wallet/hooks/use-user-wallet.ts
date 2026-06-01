@@ -6,7 +6,8 @@ import {
   verifyWalletTopupAction,
   withdrawWalletAction,
 } from '@/actions/user/wallet.actions';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useAsyncEffect } from '@/hooks/use-async-effect';
 import type {
   ICreateWalletTopupOrderResponse,
   IUserWallet,
@@ -36,7 +37,7 @@ export function useUserWallet() {
     }
   }, []);
 
-  useEffect(() => {
+  useAsyncEffect(() => {
     void fetchWallet();
   }, [fetchWallet]);
 

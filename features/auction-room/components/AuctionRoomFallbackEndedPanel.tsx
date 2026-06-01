@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { Bell, XOctagon } from 'lucide-react';
+import { AUCTION_ROOM_MESSAGES } from '@/constants/auction-room/constants';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -50,7 +51,7 @@ export function AuctionRoomFallbackEndedPanel({
       setBusy(null);
 
       if (!res) {
-        const msg = 'Socket handler not available';
+        const msg = AUCTION_ROOM_MESSAGES.SOCKET_UNAVAILABLE;
         setError(msg);
         toast.error(msg);
         return false;
@@ -60,8 +61,8 @@ export function AuctionRoomFallbackEndedPanel({
         const msg =
           res.error ??
           (kind === 'public'
-            ? 'Could not send public notification'
-            : 'Could not mark auction as failed');
+            ? AUCTION_ROOM_MESSAGES.PUBLIC_NOTIFICATION_FAILED
+            : AUCTION_ROOM_MESSAGES.MARK_FAILED);
         setError(msg);
         toast.error(msg);
         return false;
@@ -69,8 +70,8 @@ export function AuctionRoomFallbackEndedPanel({
 
       toast.success(
         kind === 'public'
-          ? 'Public notification sent'
-          : 'Auction marked as failed'
+          ? AUCTION_ROOM_MESSAGES.PUBLIC_NOTIFICATION_SENT
+          : AUCTION_ROOM_MESSAGES.MARKED_FAILED
       );
 
       const nextStatus = (res.data as { status?: string })?.status;

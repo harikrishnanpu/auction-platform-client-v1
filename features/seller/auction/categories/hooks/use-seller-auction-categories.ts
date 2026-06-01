@@ -3,6 +3,7 @@
 import { useMemo, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { SELLER_CATEGORY_MESSAGES } from '@/constants/seller/categories.constants';
 
 import type { AuctionCategory } from '@/types/auction.type';
 import { AuctionCategoryStatus } from '@/types/auction.type';
@@ -38,7 +39,7 @@ export function useSellerCategoryRequestForm(categories: AuctionCategory[]) {
   const onSubmit = useCallback(async () => {
     const trimmed = name.trim();
     if (!trimmed) {
-      toast.error('Please enter a category name.');
+      toast.error(SELLER_CATEGORY_MESSAGES.NAME_REQUIRED);
       return;
     }
 
@@ -51,7 +52,7 @@ export function useSellerCategoryRequestForm(categories: AuctionCategory[]) {
 
       if (!res.success) throw new Error(res.error ?? 'Request failed');
 
-      toast.success('Category request submitted for review.');
+      toast.success(SELLER_CATEGORY_MESSAGES.REQUEST_SUBMITTED);
       setName('');
       setParentId('');
       router.push('/seller/auction/categories/request');

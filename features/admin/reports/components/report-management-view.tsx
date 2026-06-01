@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   markFraudReportUnderReviewAction,
   updateFraudReportAction,
@@ -8,6 +8,8 @@ import {
   reviewFraudReportAction,
 } from '@/actions/admin/report.actions';
 import { IFraudReport, FraudAdminDecision } from '@/types/fraud-report.type';
+import { ADMIN_REPORT_MESSAGES } from '@/constants/admin/messages.constants';
+import { useAsyncEffect } from '@/hooks/use-async-effect';
 import { toast } from 'sonner';
 import {
   DEFAULT_REPORT_FILTERS,
@@ -38,7 +40,7 @@ export function ReportManagementView() {
         order: 'desc',
       });
       if (!res.success) {
-        toast.error(res.error ?? 'Failed to load reports');
+        toast.error(res.error ?? ADMIN_REPORT_MESSAGES.LOAD_FAILED);
         return;
       }
       setReports(res.data?.reports ?? []);
@@ -49,8 +51,8 @@ export function ReportManagementView() {
     }
   }, [page, filters]);
 
-  useEffect(() => {
-    fetchReports();
+  useAsyncEffect(() => {
+    void fetchReports();
   }, [fetchReports]);
 
   const handleReview = async (
@@ -59,20 +61,20 @@ export function ReportManagementView() {
   ) => {
     const res = await reviewFraudReportAction(reportId, { decision });
     if (!res.success) {
-      toast.error(res.error ?? 'Failed to review report');
+      toast.error(res.error ?? ADMIN_REPORT_MESSAGES.REVIEW_FAILED);
       return;
     }
-    toast.success('Report reviewed');
+    toast.success(ADMIN_REPORT_MESSAGES.REVIEWED);
     await fetchReports();
   };
 
   const handleMarkUnderReview = async (reportId: string) => {
     const res = await markFraudReportUnderReviewAction(reportId);
     if (!res.success) {
-      toast.error(res.error ?? 'Failed to update report');
+      toast.error(res.error ?? ADMIN_REPORT_MESSAGES.UPDATE_FAILED);
       return;
     }
-    toast.success('Marked under review');
+    toast.success(ADMIN_REPORT_MESSAGES.UNDER_REVIEW);
     await fetchReports();
   };
 
@@ -89,10 +91,10 @@ export function ReportManagementView() {
   ) => {
     const res = await updateFraudReportAction(reportId, input);
     if (!res.success) {
-      toast.error(res.error ?? 'Failed to update report');
+      toast.error(res.error ?? ADMIN_REPORT_MESSAGES.UPDATE_FAILED);
       return;
     }
-    toast.success('Report updated');
+    toast.success(ADMIN_REPORT_MESSAGES.UPDATED);
     await fetchReports();
   };
 

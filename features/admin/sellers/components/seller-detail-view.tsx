@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Mail,
@@ -26,6 +26,8 @@ import {
   rejectSellerKycAction,
 } from '@/actions/admin/admin.actions';
 import { SellerInfo } from '@/services/admin/admin.service';
+import { ADMIN_SELLER_MESSAGES } from '@/constants/admin/messages.constants';
+import { useAsyncEffect } from '@/hooks/use-async-effect';
 import { toast } from 'sonner';
 import { AuthProvider, UserRole, UserStatus } from '@/types/user.type';
 import { KycStatusEnum } from '@/types/kyc.type';
@@ -144,12 +146,7 @@ export function SellerDetailView() {
   const [docOpen, setDocOpen] = useState(false);
   const [activeDocId, setActiveDocId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!params.id) return;
-    fetchSeller(params.id as string);
-  }, [params.id]);
-
-  const fetchSeller = async (id: string) => {
+  const fetchSeller = useCallback(async (id: string) => {
     setLoading(true);
     setError('');
     try {
@@ -161,7 +158,12 @@ export function SellerDetailView() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useAsyncEffect(() => {
+    if (!params.id) return;
+    void fetchSeller(params.id as string);
+  }, [params.id, fetchSeller]);
 
   const handleBlockConfirm = async () => {
     if (!confirmBlock) return;
@@ -180,13 +182,15 @@ export function SellerDetailView() {
             : prev
         );
         toast.success(
-          confirmBlock.block ? 'Seller blocked.' : 'Seller unblocked.'
+          confirmBlock.block
+            ? ADMIN_SELLER_MESSAGES.BLOCKED
+            : ADMIN_SELLER_MESSAGES.UNBLOCKED
         );
       } else {
-        toast.error(res.error ?? 'Failed to update seller status.');
+        toast.error(res.error ?? ADMIN_SELLER_MESSAGES.STATUS_UPDATE_FAILED);
       }
     } catch {
-      toast.error('Failed to update seller status.');
+      toast.error(ADMIN_SELLER_MESSAGES.STATUS_UPDATE_FAILED);
     } finally {
       setBlocking(false);
       setConfirmBlock(null);
@@ -210,12 +214,12 @@ export function SellerDetailView() {
               }
             : prev
         );
-        toast.success('KYC approved.');
+        toast.success(ADMIN_SELLER_MESSAGES.KYC_APPROVED);
       } else {
-        toast.error(res.error ?? 'Failed to approve KYC.');
+        toast.error(res.error ?? ADMIN_SELLER_MESSAGES.KYC_APPROVE_FAILED);
       }
     } catch {
-      toast.error('Failed to approve KYC.');
+      toast.error(ADMIN_SELLER_MESSAGES.KYC_APPROVE_FAILED);
     } finally {
       setKycLoading(false);
       setKycAction(null);
@@ -224,7 +228,7 @@ export function SellerDetailView() {
 
   const handleKycReject = async () => {
     if (!seller || !rejectReason.trim()) {
-      toast.error('Please provide a rejection reason.');
+      toast.error(ADMIN_SELLER_MESSAGES.REJECTION_REASON_REQUIRED);
       return;
     }
     setKycLoading(true);
@@ -246,12 +250,12 @@ export function SellerDetailView() {
               }
             : prev
         );
-        toast.success('KYC rejected.');
+        toast.success(ADMIN_SELLER_MESSAGES.KYC_REJECTED);
       } else {
-        toast.error(res.error ?? 'Failed to reject KYC.');
+        toast.error(res.error ?? ADMIN_SELLER_MESSAGES.KYC_REJECT_FAILED);
       }
     } catch {
-      toast.error('Failed to reject KYC.');
+      toast.error(ADMIN_SELLER_MESSAGES.KYC_REJECT_FAILED);
     } finally {
       setKycLoading(false);
       setKycAction(null);
