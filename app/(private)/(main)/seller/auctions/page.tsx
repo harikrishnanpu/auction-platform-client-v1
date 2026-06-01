@@ -177,23 +177,18 @@ export default function SellerAuctionsPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="h-9 rounded-lg"
-          >
-            <Link href="/seller/auction/categories">
+          <Link href="/seller/auction/categories" className="inline-block">
+            <Button variant="outline" size="sm" className="h-9 rounded-lg">
               <Layers className="size-4" />
               Categories
-            </Link>
-          </Button>
-          <Button asChild size="sm" className="h-9 rounded-lg">
-            <Link href="/seller/auction/create">
+            </Button>
+          </Link>
+          <Link href="/seller/auction/create" className="inline-block">
+            <Button size="sm" className="h-9 rounded-lg">
               <Plus className="size-4" />
               New auction
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
       </header>
 
@@ -245,13 +240,17 @@ export default function SellerAuctionsPage() {
                 auctions={response?.auctions ?? []}
                 sortMode="none"
                 emptyAction={
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="h-8 text-xs rounded-lg mt-2"
+                  <Link
+                    href="/seller/auction/create"
+                    className="inline-block mt-2"
                   >
-                    <Link href="/seller/auction/create">Create auction</Link>
-                  </Button>
+                    <Button
+                      variant="outline"
+                      className="h-8 text-xs rounded-lg"
+                    >
+                      Create auction
+                    </Button>
+                  </Link>
                 }
               />
             )}

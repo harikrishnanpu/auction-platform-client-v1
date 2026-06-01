@@ -1,0 +1,22 @@
+export const COMMON_VALIDATION = {
+  EMAIL_INVALID: 'Invalid email address',
+  PASSWORD_MIN_LENGTH: 'Password must be at least 6 characters',
+  OTP_LENGTH: 'OTP must be 6 digits',
+  OTP_COMPLETE: 'Please enter the complete 6-digit code.',
+  PHONE_MIN: 'Phone number must be at least 10 digits',
+  PHONE_MAX: 'Phone number is too long',
+  PHONE_FORMAT: 'Phone number can only contain digits',
+  ADDRESS_MIN_5: 'Address must be at least 5 characters',
+  ADDRESS_MIN_10: 'Address must be at least 10 characters long',
+  ADDRESS_MAX_200: 'Address is too long',
+  ADDRESS_MAX_500: 'Address is too long',
+  ADDRESS_INVALID_CHARS:
+    'Address contains invalid characters (like $, %, etc.)',
+  PASSWORDS_DONT_MATCH: "Passwords don't match",
+  PASSWORDS_DO_NOT_MATCH: 'Passwords do not match',
+  NAME_MIN_3: 'Name must be at least 3 characters',
+  NAME_MAX: 'Name is too long',
+  NAME_LETTERS_ONLY: 'Name can only contain letters and spaces',
+  GENERIC_INVALID: 'Invalid',
+  SOMETHING_WENT_WRONG: 'Something went wrong',
+} as const;

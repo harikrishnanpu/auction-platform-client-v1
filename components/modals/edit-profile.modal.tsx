@@ -7,6 +7,8 @@ import { Textarea } from '../ui/textarea';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserInfo as User } from '@/types/user.type';
+import { COMMON_MESSAGES } from '@/constants/common/messages.constants';
+import { PROFILE_MESSAGES } from '@/constants/profile/constants';
 import { toast } from 'sonner';
 import { AlertCircle, ArrowLeftCircle } from 'lucide-react';
 import {
@@ -65,11 +67,11 @@ export function EditProfileModal({
       const response = await editProfileAction(data);
 
       if (!response.success || !response.data) {
-        toast.error(response.error || 'Failed to update profile');
+        toast.error(response.error || PROFILE_MESSAGES.UPDATE_FAILED);
         return;
       }
 
-      toast.success('Profile updated successfully');
+      toast.success(PROFILE_MESSAGES.UPDATED);
       setCurrentSection('profile');
       setOtpSend(false);
       console.log('response from edit', response.data);
@@ -77,7 +79,7 @@ export function EditProfileModal({
       onClose();
     } catch (error: unknown) {
       const errorMessage =
-        getErrorMessage(error) || 'An error occurred while updating profile';
+        getErrorMessage(error) || PROFILE_MESSAGES.UPDATE_ERROR;
       toast.error(errorMessage);
       setError('root', { message: errorMessage });
     }
@@ -88,15 +90,15 @@ export function EditProfileModal({
       const response = await editProfileSendOtpAction();
 
       if (!response.success) {
-        toast.error(response.error || 'Failed to send OTP');
+        toast.error(response.error || COMMON_MESSAGES.OTP_SEND_FAILED);
         return;
       }
 
-      toast.success('OTP sent successfully');
+      toast.success(COMMON_MESSAGES.OTP_SENT);
       setOtpSend(true);
     } catch (error: unknown) {
       const errorMessage =
-        getErrorMessage(error) || 'An error occurred while sending OTP';
+        getErrorMessage(error) || COMMON_MESSAGES.OTP_SEND_ERROR;
       toast.error(errorMessage);
     }
   };

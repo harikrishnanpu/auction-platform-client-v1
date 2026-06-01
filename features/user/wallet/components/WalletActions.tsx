@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
+import { WALLET_MESSAGES } from '@/constants/user/messages.constants';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -22,16 +23,16 @@ export function WalletActions({
 }: WalletActionsProps) {
   const handleAddAmount = async (amount: number) => {
     await onAddAmount(amount);
-    toast.info('Opening Razorpay checkout');
+    toast.info(WALLET_MESSAGES.CHECKOUT_OPENING);
   };
 
   const handleWithdrawAmount = async (amount: number) => {
     if (amount > wallet.mainBalance) {
-      toast.error('Insufficient balance');
+      toast.error(WALLET_MESSAGES.INSUFFICIENT_BALANCE);
       return;
     }
     await onWithdrawAmount(amount);
-    toast.success('Amount withdrawn from wallet');
+    toast.success(WALLET_MESSAGES.WITHDRAWN);
   };
 
   return (

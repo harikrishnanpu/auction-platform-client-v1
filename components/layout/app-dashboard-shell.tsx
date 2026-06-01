@@ -6,13 +6,13 @@ import { useState, type ReactNode } from 'react';
 
 import {
   APP_BRAND,
+  getAuctionRoomHeaderMeta,
   isAnyAuctionRoomPath,
   isSellerArea,
-  isSellerAuctionRoomPath,
 } from './config/app-nav';
-import { AppSidebar } from './app-sidebar';
-import { DashboardHeader } from './dashboard-header';
-import { AuctionRoomMenuProvider } from './auction-room-menu-context';
+import { AppSidebar } from './sidebar/app-sidebar';
+import { DashboardHeader } from './headers/dashboard-header';
+import { AuctionRoomMenuProvider } from './contexts/auction-room-menu-context';
 
 interface AppDashboardShellProps {
   children: ReactNode;
@@ -71,7 +71,7 @@ function getHeaderMeta(pathname: string): {
   if (PROFILE_HEADER_META[pathname]) {
     return PROFILE_HEADER_META[pathname];
   }
-  return null;
+  return getAuctionRoomHeaderMeta(pathname);
 }
 
 export function AppDashboardShell({ children }: AppDashboardShellProps) {
@@ -79,7 +79,6 @@ export function AppDashboardShell({ children }: AppDashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const headerMeta = getHeaderMeta(pathname);
   const isSeller = isSellerArea(pathname);
-  const isSellerAuctionRoom = isSellerAuctionRoomPath(pathname);
   const isAuctionRoom = isAnyAuctionRoomPath(pathname);
 
   const containerClass = isAuctionRoom
@@ -116,10 +115,10 @@ export function AppDashboardShell({ children }: AppDashboardShellProps) {
           headerMeta
             ? pathname.startsWith('/profile')
               ? 'mt-5 sm:mt-6'
-              : 'mt-4'
-            : isAuctionRoom
-              ? ''
-              : 'mt-2'
+              : isAuctionRoom
+                ? 'mt-3 sm:mt-4'
+                : 'mt-4'
+            : 'mt-2'
         }
       >
         {children}

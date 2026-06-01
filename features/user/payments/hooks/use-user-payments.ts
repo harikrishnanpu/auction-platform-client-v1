@@ -10,7 +10,8 @@ import type {
   IPaymentGatewayOrder,
   IVerifyGatewayPaymentInput,
 } from '@/types/payment-gateway.type';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useAsyncEffect } from '@/hooks/use-async-effect';
 import type { IUserPaymentsPage, PaymentStatus } from '../types/payments.types';
 
 export function useUserPayments({
@@ -47,7 +48,7 @@ export function useUserPayments({
     }
   }, [page, limit, status]);
 
-  useEffect(() => {
+  useAsyncEffect(() => {
     void fetchPayments();
   }, [fetchPayments]);
 

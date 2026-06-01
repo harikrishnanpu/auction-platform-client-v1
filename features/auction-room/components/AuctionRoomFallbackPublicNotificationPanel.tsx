@@ -2,6 +2,8 @@
 
 import { useCallback, useState } from 'react';
 import { CreditCard, X } from 'lucide-react';
+import { AUCTION_ROOM_MESSAGES } from '@/constants/auction-room/constants';
+import { SUBSCRIPTION_MESSAGES } from '@/constants/user/messages.constants';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -59,20 +61,20 @@ export function AuctionRoomFallbackPublicNotificationPanel({
     setBusy(null);
 
     if (res == null) {
-      const msg = 'Socket handler not available';
+      const msg = AUCTION_ROOM_MESSAGES.SOCKET_UNAVAILABLE;
       setError(msg);
       toast.error(msg);
       return;
     }
 
     if (!res.success) {
-      const msg = res.error ?? 'Could not decline';
+      const msg = res.error ?? AUCTION_ROOM_MESSAGES.DECLINE_FAILED;
       setError(msg);
       toast.error(msg);
       return;
     }
 
-    toast.success('You declined the offer');
+    toast.success(AUCTION_ROOM_MESSAGES.OFFER_DECLINED);
     const next = (res.data as { status?: string } | undefined)?.status;
     if (next) onStatusUpdated?.(next);
   }, [onDecline, onStatusUpdated]);
@@ -84,13 +86,13 @@ export function AuctionRoomFallbackPublicNotificationPanel({
     try {
       const res = await payFallbackPublic?.();
       if (res == null) {
-        const msg = 'Socket handler not available';
+        const msg = AUCTION_ROOM_MESSAGES.SOCKET_UNAVAILABLE;
         setError(msg);
         toast.error(msg);
         return;
       }
       if (!res.success || !res.data) {
-        const msg = res.error ?? 'Could not start payment';
+        const msg = res.error ?? AUCTION_ROOM_MESSAGES.PAYMENT_START_FAILED;
         setError(msg);
         toast.error(msg);
         return;
@@ -99,7 +101,7 @@ export function AuctionRoomFallbackPublicNotificationPanel({
       const order = res.data;
       const loaded = await loadRazorpayScript();
       if (!loaded || !window.Razorpay) {
-        const msg = 'Unable to load Razorpay checkout';
+        const msg = SUBSCRIPTION_MESSAGES.RAZORPAY_LOAD_FAILED;
         setError(msg);
         toast.error(msg);
         return;
@@ -122,7 +124,7 @@ export function AuctionRoomFallbackPublicNotificationPanel({
             try {
               const verify = verifyFallbackPublicAuctionPayment;
               if (!verify) {
-                toast.error('Verification handler not available');
+                toast.error(AUCTION_ROOM_MESSAGES.VERIFY_HANDLER_UNAVAILABLE);
                 return;
               }
               const ver = await verify({
@@ -132,17 +134,17 @@ export function AuctionRoomFallbackPublicNotificationPanel({
                 signature: r.razorpay_signature,
               });
               if (!ver.success) {
-                toast.error(ver.error ?? 'Payment verification failed');
+                toast.error(
+                  ver.error ?? AUCTION_ROOM_MESSAGES.PAYMENT_VERIFY_FAILED
+                );
                 return;
               }
-              toast.success('Payment completed');
+              toast.success(AUCTION_ROOM_MESSAGES.PAYMENT_COMPLETED);
               const next = (ver.data as { status?: string } | undefined)
                 ?.status;
               if (next) onStatusUpdated?.(next);
             } catch {
-              toast.error(
-                'Payment was taken, but verification failed. Contact support if needed.'
-              );
+              toast.error(AUCTION_ROOM_MESSAGES.PAYMENT_VERIFY_CONTACT_SUPPORT);
             }
           })();
         },

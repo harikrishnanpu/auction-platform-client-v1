@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { SELLER_KYC_MESSAGES } from '@/constants/seller/kyc.constants';
 import { ShieldAlert } from 'lucide-react';
 import React from 'react';
 import { UploadedFile } from '@/components/kyc/document-upload';
@@ -138,7 +139,7 @@ export function useSellerKyc() {
 
     if (errors.length > 0) {
       setValidationErrors(errors);
-      toast.error('Please complete all verification steps', {
+      toast.error(SELLER_KYC_MESSAGES.STEPS_INCOMPLETE, {
         icon: React.createElement(ShieldAlert, {
           className: 'text-red-500',
           size: 18,

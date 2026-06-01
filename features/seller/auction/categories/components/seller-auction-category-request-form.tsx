@@ -68,9 +68,15 @@ export function SellerAuctionCategoryRequestForm({
           <Button onClick={onSubmit} disabled={submitting}>
             {submitting ? 'Submitting...' : 'Submit request'}
           </Button>
-          <Button variant="outline" asChild disabled={submitting}>
-            <Link href="/seller/auction/create">Back to create auction</Link>
-          </Button>
+          {submitting ? (
+            <Button variant="outline" disabled>
+              Back to create auction
+            </Button>
+          ) : (
+            <Link href="/seller/auction/create" className="inline-block">
+              <Button variant="outline">Back to create auction</Button>
+            </Link>
+          )}
         </div>
       </CardContent>
     </Card>

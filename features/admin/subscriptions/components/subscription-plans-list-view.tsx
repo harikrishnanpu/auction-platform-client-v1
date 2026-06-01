@@ -23,6 +23,7 @@ import {
   ISubscriptionPlan,
 } from '@/types/subscription.type';
 import { useMemo, useState, useTransition } from 'react';
+import { ADMIN_SUBSCRIPTION_MESSAGES } from '@/constants/admin/messages.constants';
 import { toast } from 'sonner';
 
 const PAGE_SIZE = 6;
@@ -60,7 +61,7 @@ export function SubscriptionPlansListView({
   ) => {
     const planToUpdate = plans.find((plan) => plan.id === planId);
     if (!planToUpdate) {
-      toast.error('Unable to find selected plan');
+      toast.error(ADMIN_SUBSCRIPTION_MESSAGES.PLAN_NOT_FOUND);
       return;
     }
 
@@ -94,14 +95,16 @@ export function SubscriptionPlansListView({
 
       setUpdatingPlanId(null);
       if (!response.success || !response.data) {
-        toast.error(response.error ?? 'Failed to update subscription plan');
+        toast.error(
+          response.error ?? ADMIN_SUBSCRIPTION_MESSAGES.UPDATE_FAILED
+        );
         return;
       }
 
       setPlans((prev) =>
         prev.map((plan) => (plan.id === planId ? response.data! : plan))
       );
-      toast.success('Subscription plan updated');
+      toast.success(ADMIN_SUBSCRIPTION_MESSAGES.UPDATED);
     });
   };
 
@@ -128,7 +131,7 @@ export function SubscriptionPlansListView({
     if (!response.success || !response.data) {
       return {
         success: false,
-        error: response.error ?? 'Failed to update subscription plan',
+        error: response.error ?? ADMIN_SUBSCRIPTION_MESSAGES.UPDATE_FAILED,
       };
     }
 
@@ -187,7 +190,7 @@ export function SubscriptionPlansListView({
       }));
 
     if (payloadFeatures.length === 0) {
-      toast.error('Add at least one feature with a value');
+      toast.error(ADMIN_SUBSCRIPTION_MESSAGES.FEATURE_REQUIRED);
       return;
     }
 
@@ -195,11 +198,11 @@ export function SubscriptionPlansListView({
     const durationDaysNum = Number(versionFormValue.durationDays);
 
     if (!versionFormValue.name.trim() || !versionFormValue.description.trim()) {
-      toast.error('Plan name and description are required');
+      toast.error(ADMIN_SUBSCRIPTION_MESSAGES.PLAN_FIELDS_REQUIRED);
       return;
     }
     if (Number.isNaN(priceNum) || Number.isNaN(durationDaysNum)) {
-      toast.error('Plan amount and duration must be valid numbers');
+      toast.error(ADMIN_SUBSCRIPTION_MESSAGES.PLAN_NUMBERS_INVALID);
       return;
     }
 
@@ -214,14 +217,16 @@ export function SubscriptionPlansListView({
       });
 
       if (!response.success || !response.data) {
-        toast.error(response.error ?? 'Failed to create plan version');
+        toast.error(
+          response.error ?? ADMIN_SUBSCRIPTION_MESSAGES.VERSION_CREATE_FAILED
+        );
         return;
       }
 
       setPlans((prev) => [response.data!, ...prev]);
       setPage(1);
       closeCreateVersionModal();
-      toast.success('New subscription plan version created');
+      toast.success(ADMIN_SUBSCRIPTION_MESSAGES.VERSION_CREATED);
     });
   };
 

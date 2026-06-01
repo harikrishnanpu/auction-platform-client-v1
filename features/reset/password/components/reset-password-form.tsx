@@ -35,13 +35,14 @@ export function ResetPasswordForm() {
           </CardDescription>
         </CardHeader>
         <CardFooter className="flex justify-center pb-8 md:pb-10 px-8 md:px-10 pt-2">
-          <Button
-            variant="outline"
-            className="rounded-xl border-gray-200 dark:border-gray-700"
-            asChild
-          >
-            <Link href="/login">Back to login</Link>
-          </Button>
+          <Link href="/login" className="inline-block">
+            <Button
+              variant="outline"
+              className="rounded-xl border-gray-200 dark:border-gray-700"
+            >
+              Back to login
+            </Button>
+          </Link>
         </CardFooter>
       </AuthFormCard>
     );

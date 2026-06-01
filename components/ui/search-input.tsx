@@ -22,19 +22,21 @@ export function SearchInput({
   debounceMs = 500,
   inputClassName,
 }: SearchInputProps) {
-  const [internalValue, setInternalValue] = useState(controlledValue ?? '');
+  const isControlled = controlledValue !== undefined;
+  const [internalValue, setInternalValue] = useState(
+    () => controlledValue ?? ''
+  );
+  const displayValue = isControlled ? controlledValue : internalValue;
 
   useEffect(() => {
-    if (controlledValue !== undefined) setInternalValue(controlledValue);
-  }, [controlledValue]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onChange(internalValue);
-    }, debounceMs);
+    const timer = setTimeout(() => onChange(displayValue), debounceMs);
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [internalValue, debounceMs]);
+  }, [displayValue, debounceMs, onChange]);
+
+  const handleChange = (next: string) => {
+    if (isControlled) onChange(next);
+    else setInternalValue(next);
+  };
 
   return (
     <div className={cn('relative flex-1 min-w-0', className)}>
@@ -44,18 +46,18 @@ export function SearchInput({
       />
       <input
         type="text"
-        value={internalValue}
-        onChange={(e) => setInternalValue(e.target.value)}
+        value={displayValue}
+        onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder}
         className={cn(
           'w-full h-9 pl-9 pr-9 text-sm bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition',
           inputClassName
         )}
       />
-      {internalValue && (
+      {displayValue && (
         <button
           type="button"
-          onClick={() => setInternalValue('')}
+          onClick={() => handleChange('')}
           className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
           aria-label="Clear search"
         >

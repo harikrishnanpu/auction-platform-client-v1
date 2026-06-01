@@ -44,13 +44,7 @@ export function SubscriptionFeatureRow({
 
         <input
           className="rounded-md border bg-background px-3 py-2 text-sm"
-          placeholder={
-            meta?.valueType === 'BOOLEAN'
-              ? 'true or false'
-              : meta?.valueType === 'NUMBER'
-                ? 'Number'
-                : 'Value'
-          }
+          placeholder={meta?.valueType === 'NUMBER' ? 'Number' : 'Value'}
           value={feature.value}
           onChange={(e) =>
             onChange({
@@ -61,14 +55,9 @@ export function SubscriptionFeatureRow({
         />
       </div>
 
-      {meta && (
-        <div className="text-xs text-muted-foreground space-y-0.5">
-          <p>{meta.description}</p>
-          <p className="font-medium text-foreground/80">
-            Value type: {meta.valueType} (set automatically)
-          </p>
-        </div>
-      )}
+      {meta ? (
+        <p className="text-xs text-muted-foreground">{meta.description}</p>
+      ) : null}
 
       <button
         type="button"

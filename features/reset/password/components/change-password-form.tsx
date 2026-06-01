@@ -38,12 +38,11 @@ export function ChangePasswordForm() {
           </CardDescription>
         </CardHeader>
         <CardContent className="px-8 md:px-10 pb-8 md:pb-10">
-          <Button
-            className="w-full rounded-xl bg-black hover:bg-[#333333] dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black font-semibold py-6"
-            asChild
-          >
-            <Link href="/reset/password">Request new link</Link>
-          </Button>
+          <Link href="/reset/password" className="block w-full">
+            <Button className="w-full rounded-xl bg-black hover:bg-[#333333] dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black font-semibold py-6">
+              Request new link
+            </Button>
+          </Link>
         </CardContent>
       </AuthFormCard>
     );

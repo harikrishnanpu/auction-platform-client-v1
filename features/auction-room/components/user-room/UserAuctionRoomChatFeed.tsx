@@ -42,13 +42,8 @@ export function UserAuctionRoomChatFeed({
   const canSend = trimmed.length > 0 && canInteract;
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const {
-    endRef,
-    showJumpToBottom,
-    unreadWhileScrolledUp,
-    onScroll,
-    scrollToBottom,
-  } = useChatAutoScroll(messages.length, scrollRef);
+  const { showJumpToBottom, unreadWhileScrolledUp, onScroll, scrollToBottom } =
+    useChatAutoScroll(messages.length, scrollRef);
 
   const handleSend = () => {
     if (!canSend || !onSend) return;
@@ -57,16 +52,21 @@ export function UserAuctionRoomChatFeed({
   };
 
   return (
-    <div className={cn('flex h-full min-h-0 flex-col', className)}>
+    <div
+      className={cn(
+        'flex min-h-0 flex-col overflow-hidden',
+        showInput ? 'h-full' : 'absolute inset-0',
+        className
+      )}
+    >
       <div className="relative min-h-0 flex-1">
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="h-full overflow-y-auto overscroll-contain px-3 py-3"
+          className="absolute inset-0 overflow-x-hidden overflow-y-auto overscroll-y-contain px-3 py-3 touch-pan-y [-webkit-overflow-scrolling:touch]"
           role="log"
-          aria-live="polite"
         >
-          <div className="space-y-3">
+          <div className="space-y-3 pb-1">
             <div className="flex items-start gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2.5 text-xs text-brand-900 dark:border-brand-800 dark:bg-brand-950/40 dark:text-brand-100">
               <Pin className="mt-0.5 size-3.5 shrink-0 text-brand-600" />
               <p>
@@ -149,12 +149,11 @@ export function UserAuctionRoomChatFeed({
                 );
               })
             )}
-            <div ref={endRef} className="h-px shrink-0" aria-hidden />
           </div>
         </div>
 
         {showJumpToBottom ? (
-          <div className="pointer-events-none absolute bottom-3 left-0 right-0 z-10 flex justify-center px-3">
+          <div className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 flex justify-center px-3">
             <Button
               type="button"
               size="sm"
@@ -172,7 +171,7 @@ export function UserAuctionRoomChatFeed({
       </div>
 
       {showInput && onDraftChange && onSend ? (
-        <footer className="shrink-0 border-t border-border p-3">
+        <footer className="relative z-10 shrink-0 border-t border-border bg-card p-3">
           <div className="flex gap-2">
             <Input
               value={draft}

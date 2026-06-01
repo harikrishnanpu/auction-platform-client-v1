@@ -8,6 +8,8 @@ import {
   ZodChangePasswordFormValues,
 } from '@/features/user/profile/schemes/changeprofilePassword.schema';
 import { UserInfo as User, AuthProvider } from '@/types/user.type';
+import { COMMON_MESSAGES } from '@/constants/common/messages.constants';
+import { PROFILE_MESSAGES } from '@/constants/profile/constants';
 import { toast } from 'sonner';
 import { Loader2, Key, AlertCircle } from 'lucide-react';
 import { getErrorMessage } from '@/utils/get-app-error';
@@ -61,15 +63,15 @@ export function ChangePasswordModal({
       const response = await sendProfileChangePasswordOtpAction();
 
       if (!response.success) {
-        toast.error(response.error || 'Failed to send OTP');
+        toast.error(response.error || COMMON_MESSAGES.OTP_SEND_FAILED);
         return;
       }
 
-      toast.success('OTP sent successfully');
+      toast.success(COMMON_MESSAGES.OTP_SENT);
       setStep('form');
     } catch (error: unknown) {
       const errorMessage =
-        getErrorMessage(error) || 'Failed to send OTP. Please try again.';
+        getErrorMessage(error) || COMMON_MESSAGES.OTP_SEND_RETRY;
       toast.error(errorMessage);
     } finally {
       setOtpLoading(false);
@@ -81,17 +83,18 @@ export function ChangePasswordModal({
       const response = await changeProfilePasswordAction(data);
 
       if (!response.success || !response.data) {
-        toast.error(response.error || 'Failed to update password');
+        toast.error(response.error || PROFILE_MESSAGES.PASSWORD_UPDATE_FAILED);
         return;
       }
 
-      toast.success('Password updated successfully');
+      toast.success(PROFILE_MESSAGES.PASSWORD_UPDATED);
       reset();
       setStep('otp');
       onClose();
     } catch (error: unknown) {
       console.log('Password update error:', error);
-      const errorMsg = getErrorMessage(error) || 'Failed to update password';
+      const errorMsg =
+        getErrorMessage(error) || PROFILE_MESSAGES.PASSWORD_UPDATE_FAILED;
       toast.error(errorMsg);
     }
   };

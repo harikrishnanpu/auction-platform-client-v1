@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Check, Edit, Inbox, RefreshCw, X } from 'lucide-react';
+import { ADMIN_CATEGORY_MESSAGES } from '@/constants/admin/messages.constants';
 import { toast } from 'sonner';
 
 import {
@@ -73,12 +74,12 @@ export function AdminAuctionCategoryRequestsView({
       const res = await approveAuctionCategoryRequestAction(id);
 
       if (!res.success) {
-        toast.error(res.error ?? 'Failed to approve request');
+        toast.error(res.error ?? ADMIN_CATEGORY_MESSAGES.APPROVE_FAILED);
         setBusyId(null);
         return;
       }
 
-      toast.success('Request approved successfully');
+      toast.success(ADMIN_CATEGORY_MESSAGES.APPROVED);
       setBusyId(null);
       startTransition(() => router.refresh());
     },

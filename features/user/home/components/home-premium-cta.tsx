@@ -24,12 +24,11 @@ export function HomePremiumCta({ className }: { className?: string }) {
           </p>
         </div>
       </div>
-      <Button
-        asChild
-        className="mt-4 h-9 w-full rounded-[8px] bg-white text-sm font-semibold text-[#111111] hover:bg-white/90"
-      >
-        <Link href="/profile/subscription">View plans</Link>
-      </Button>
+      <Link href="/profile/subscription" className="block w-full mt-4">
+        <Button className="h-9 w-full rounded-[8px] bg-white text-sm font-semibold text-[#111111] hover:bg-white/90">
+          View plans
+        </Button>
+      </Link>
     </section>
   );
 }

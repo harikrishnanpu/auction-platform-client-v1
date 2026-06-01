@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { SELLER_LANDING_MESSAGES } from '@/constants/seller/landing.constants';
 import { KycStatusEnum } from '@/types/kyc.type';
-import { SiteFooter } from '@/components/layout/site-footer';
+import { SiteFooter } from '@/components/layout/footers/site-footer';
 
 import { HeroSection } from './hero-section';
 import { BenefitsSection } from './benefits-section';
@@ -23,7 +24,7 @@ export function SellerLandingView({
 
   const handleSubmit = () => {
     if (!acceptedTerms) {
-      toast.error('Please accept the Seller Agreement to proceed');
+      toast.error(SELLER_LANDING_MESSAGES.AGREEMENT_REQUIRED);
       return;
     }
     router.push('/seller/kyc');

@@ -223,9 +223,11 @@ export default function SellerDashboardView() {
         <p className="text-sm text-muted-foreground">
           Verify your seller account to view metrics and auctions.
         </p>
-        <Button asChild className="mt-6 rounded-full" size="sm">
-          <Link href="/seller/kyc">Seller KYC</Link>
-        </Button>
+        <Link href="/seller/kyc" className="inline-block mt-6">
+          <Button className="rounded-full" size="sm">
+            Seller KYC
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -325,13 +327,11 @@ export default function SellerDashboardView() {
           ) : (
             <>
               <SellerPaymentsDonut slices={paymentSlices} />
-              <Button
-                asChild
-                variant="outline"
-                className="mt-4 w-full rounded-full"
-              >
-                <Link href="/seller/payments">View Payments</Link>
-              </Button>
+              <Link href="/seller/payments" className="block mt-4 w-full">
+                <Button variant="outline" className="w-full rounded-full">
+                  View Payments
+                </Button>
+              </Link>
             </>
           )}
         </div>
@@ -350,12 +350,11 @@ export default function SellerDashboardView() {
               Upgrade your plan to get more exposure and higher limits.
             </p>
           </div>
-          <Button
-            asChild
-            className="mt-6 rounded-full bg-white text-brand-600 hover:bg-brand-50"
-          >
-            <Link href="/profile/subscription">View Plans</Link>
-          </Button>
+          <Link href="/profile/subscription" className="inline-block mt-6">
+            <Button className="rounded-full bg-white text-brand-600 hover:bg-brand-50">
+              View Plans
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -376,16 +375,15 @@ export default function SellerDashboardView() {
             </div>
           )}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4">
-            <Button
-              asChild
-              size="sm"
-              className="rounded-full bg-brand-600 hover:bg-brand-700"
-            >
-              <Link href="/seller/auction/create">
+            <Link href="/seller/auction/create" className="inline-block">
+              <Button
+                size="sm"
+                className="rounded-full bg-brand-600 hover:bg-brand-700"
+              >
                 <Plus className="size-4" />
                 Create New Auction
-              </Link>
-            </Button>
+              </Button>
+            </Link>
             <Link
               href="/seller/auctions"
               className="text-sm font-medium text-brand-600 hover:underline"

@@ -91,20 +91,17 @@ export function HomeTopBar({
         </div>
 
         <div className="flex shrink-0 flex-wrap gap-2">
-          <Button asChild size="sm" className="h-9 rounded-lg">
-            <Link href="/auctions">
+          <Link href="/auctions" className="inline-block">
+            <Button size="sm" className="h-9 rounded-lg">
               Browse
               <ArrowRight className="size-3.5" />
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="h-9 rounded-lg"
-          >
-            <Link href="/profile">Profile</Link>
-          </Button>
+            </Button>
+          </Link>
+          <Link href="/profile" className="inline-block">
+            <Button variant="outline" size="sm" className="h-9 rounded-lg">
+              Profile
+            </Button>
+          </Link>
         </div>
       </div>
 

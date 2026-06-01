@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { SUBSCRIPTION_MESSAGES } from '@/constants/user/messages.constants';
 import { toast } from 'sonner';
 import { startUserSubscriptionCheckoutAction } from '@/actions/user/subscription.actions';
 import { loadRazorpayScript, type RazorpayOptions } from '@/lib/razorpay';
@@ -29,7 +30,7 @@ export function useSubscriptionCheckout() {
       const isRazorpayLoaded = await loadRazorpayScript();
 
       if (!isRazorpayLoaded || !window.Razorpay) {
-        toast.error('Unable to load Razorpay checkout');
+        toast.error(SUBSCRIPTION_MESSAGES.RAZORPAY_LOAD_FAILED);
         setActivePlanId(null);
         return;
       }
@@ -45,13 +46,13 @@ export function useSubscriptionCheckout() {
           contact: user?.phone,
         },
         handler: () => {
-          toast.success('Subscription checkout successful');
+          toast.success(SUBSCRIPTION_MESSAGES.CHECKOUT_SUCCESS);
           setActivePlanId(null);
           router.refresh();
         },
         modal: {
           ondismiss: () => {
-            toast.info('Subscription checkout cancelled');
+            toast.info(SUBSCRIPTION_MESSAGES.CHECKOUT_CANCELLED);
             setActivePlanId(null);
             router.refresh();
           },

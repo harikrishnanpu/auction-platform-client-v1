@@ -12,11 +12,12 @@ import { cn } from '@/lib/utils';
 
 import { AssistantChatPanel } from './assistant-chat-panel';
 import {
+  AI_AGENT_NOT_IN_PLAN_MESSAGE,
   ASSISTANT_HEAD_IMAGES,
   ASSISTANT_MOOD_CYCLE,
   type AssistantChatMessage,
   type AssistantMood,
-} from './assistant-constants';
+} from '@/constants/assistant/assistant.constants';
 import { AssistantAvatar } from './assistant-avatar';
 import { useAssistantChatSocket } from '@/socket/useAssistantChatSocket';
 
@@ -24,6 +25,14 @@ const IDLE_POSE_MS = 2800;
 
 function nextId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function isSubscriptionAiError(error?: string): boolean {
+  if (!error) return false;
+  return (
+    error.includes('not included in your current subscription') ||
+    error.includes('AI assistant')
+  );
 }
 
 export function UserAssistantChat() {
@@ -64,11 +73,6 @@ export function UserAssistantChat() {
     const text = draft.trim();
     if (!text || isThinking) return;
 
-    const lastMessages = messages.slice(-5).map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
-
     const userMsg: AssistantChatMessage = {
       id: nextId(),
       role: 'user',
@@ -76,6 +80,12 @@ export function UserAssistantChat() {
     };
     setDraft('');
     setMessages((prev) => [...prev, userMsg]);
+
+    const lastMessages = messages.slice(-5).map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
     setIsThinking(true);
 
     const ack = await askAgent(text, lastMessages);
@@ -84,8 +94,9 @@ export function UserAssistantChat() {
 
     const response = ack.data?.response;
     if (!ack.success || response == null) {
-      const err =
-        ack.error ?? 'Could not reach the assistant. Please try again.';
+      const err = isSubscriptionAiError(ack.error)
+        ? AI_AGENT_NOT_IN_PLAN_MESSAGE
+        : (ack.error ?? 'Could not reach the assistant. Please try again.');
       setMessages((prev) => [
         ...prev,
         {

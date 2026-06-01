@@ -24,6 +24,9 @@ type UserAuctionRoomChatProps = {
   className?: string;
 };
 
+const CHAT_SHELL_HEIGHT =
+  'h-[min(420px,58vh)] max-h-[min(420px,58vh)] min-[1320px]:h-[calc(100dvh-5.5rem)] min-[1320px]:max-h-[calc(100dvh-5.5rem)]';
+
 export function UserAuctionRoomChat({
   messages,
   draft,
@@ -38,13 +41,8 @@ export function UserAuctionRoomChat({
   const canSend = trimmed.length > 0 && canInteract;
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const {
-    endRef,
-    showJumpToBottom,
-    unreadWhileScrolledUp,
-    onScroll,
-    scrollToBottom,
-  } = useChatAutoScroll(messages.length, scrollRef);
+  const { showJumpToBottom, unreadWhileScrolledUp, onScroll, scrollToBottom } =
+    useChatAutoScroll(messages.length, scrollRef);
 
   const handleSend = () => {
     if (!canSend) return;
@@ -56,12 +54,12 @@ export function UserAuctionRoomChat({
     <aside
       className={cn(
         urCard(
-          'flex min-h-[min(420px,58vh)] flex-col p-0 min-[1320px]:sticky min-[1320px]:top-3 min-[1320px]:max-h-[calc(100dvh-5.5rem)] min-[1320px]:min-h-[calc(100dvh-5.5rem)]'
+          `flex ${CHAT_SHELL_HEIGHT} flex-col overflow-hidden p-0 min-[1320px]:sticky min-[1320px]:top-3`
         ),
         className
       )}
     >
-      <header className="border-b border-border px-3.5 py-3">
+      <header className="shrink-0 border-b border-border px-3.5 py-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-semibold">Auction Chat</h2>
           <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
@@ -75,9 +73,8 @@ export function UserAuctionRoomChat({
         <div
           ref={scrollRef}
           onScroll={onScroll}
-          className="h-full overflow-y-auto overscroll-contain px-3 py-3"
+          className="absolute inset-0 overflow-x-hidden overflow-y-auto overscroll-y-contain px-3 py-3 touch-pan-y [-webkit-overflow-scrolling:touch]"
           role="log"
-          aria-live="polite"
         >
           <div className="space-y-3">
             <div className="flex items-start gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2.5 text-xs text-brand-900 dark:border-brand-800 dark:bg-brand-950/40 dark:text-brand-100">
@@ -130,7 +127,6 @@ export function UserAuctionRoomChat({
                 );
               })
             )}
-            <div ref={endRef} className="h-px shrink-0" aria-hidden />
           </div>
         </div>
 

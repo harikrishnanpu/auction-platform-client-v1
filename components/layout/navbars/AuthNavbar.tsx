@@ -1,4 +1,4 @@
-import { Logo } from '@/components/ui/logo/Logo';
+import { Logo } from '@/components/layout/logo/Logo';
 import { ModeToggle } from '@/components/ui/mode-toggle';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';

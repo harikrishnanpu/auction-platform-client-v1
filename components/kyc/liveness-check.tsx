@@ -8,6 +8,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { LIVENESS_MESSAGES } from '@/constants/kyc/liveness.constants';
 import { toast } from 'sonner';
 
 interface LivenessCheckProps {
@@ -46,9 +47,9 @@ export function LivenessCheck({ isCompleted, onComplete }: LivenessCheckProps) {
     try {
       setIsUploading(true);
       onComplete(true);
-      toast.success('Liveness check completed!');
-    } catch (error: unknown) {
-      toast.error('Failed to complete liveness check');
+      toast.success(LIVENESS_MESSAGES.COMPLETED);
+    } catch {
+      toast.error(LIVENESS_MESSAGES.FAILED);
     } finally {
       setIsUploading(false);
     }

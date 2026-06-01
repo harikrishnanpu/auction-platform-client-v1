@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ADMIN_SUBSCRIPTION_MESSAGES } from '@/constants/admin/messages.constants';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -107,14 +108,14 @@ function SubscriptionPlanEditModalContent({
 
   const handleSave = async () => {
     if (!formValue.name.trim() || !formValue.description.trim()) {
-      toast.error('Plan name and description are required');
+      toast.error(ADMIN_SUBSCRIPTION_MESSAGES.PLAN_FIELDS_REQUIRED);
       return;
     }
 
     const price = Number(formValue.price);
     const durationDays = Number(formValue.durationDays);
     if (Number.isNaN(price) || Number.isNaN(durationDays)) {
-      toast.error('Plan amount and duration must be valid numbers');
+      toast.error(ADMIN_SUBSCRIPTION_MESSAGES.PLAN_NUMBERS_INVALID);
       return;
     }
 
@@ -126,7 +127,7 @@ function SubscriptionPlanEditModalContent({
       }));
 
     if (validFeatures.length === 0) {
-      toast.error('Add at least one feature with a value');
+      toast.error(ADMIN_SUBSCRIPTION_MESSAGES.FEATURE_REQUIRED);
       return;
     }
 
@@ -138,11 +139,11 @@ function SubscriptionPlanEditModalContent({
     });
 
     if (!res.success) {
-      toast.error(res.error ?? 'Failed to update plan');
+      toast.error(res.error ?? ADMIN_SUBSCRIPTION_MESSAGES.UPDATE_FAILED);
       return;
     }
 
-    toast.success('Subscription plan updated');
+    toast.success(ADMIN_SUBSCRIPTION_MESSAGES.UPDATED);
     onClose();
   };
 

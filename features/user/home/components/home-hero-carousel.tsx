@@ -124,13 +124,14 @@ export function HomeHeroCarousel() {
               <p className="mt-1.5 max-w-md text-[13px] text-muted-foreground sm:text-sm">
                 {slide.description}
               </p>
-              <Button
-                asChild
-                size="sm"
-                className="mt-4 w-fit rounded-full bg-brand-600 px-5 hover:bg-brand-700"
-              >
-                <Link href={slide.href}>{slide.cta}</Link>
-              </Button>
+              <Link href={slide.href} className="inline-block mt-4 w-fit">
+                <Button
+                  size="sm"
+                  className="rounded-full bg-brand-600 px-5 hover:bg-brand-700 w-full"
+                >
+                  {slide.cta}
+                </Button>
+              </Link>
             </div>
           </div>
         );

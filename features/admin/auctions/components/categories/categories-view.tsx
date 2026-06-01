@@ -18,6 +18,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { AuctionCategory, AuctionCategoryStatus } from '@/types/auction.type';
 import { EditCategoryModal } from './category-modals';
+import { ADMIN_CATEGORY_MESSAGES } from '@/constants/admin/messages.constants';
 import { toast } from 'sonner';
 import {
   normalizeCategoryStatus,
@@ -87,11 +88,11 @@ export function AdminAuctionCategoriesView({
       const newStatus = row.isActive ? false : true;
       const res = await setAuctionCategoryStatusAction(row.id, newStatus);
       if (!res.success) {
-        toast.error(res.error ?? 'Failed to update category status');
+        toast.error(res.error ?? ADMIN_CATEGORY_MESSAGES.STATUS_UPDATE_FAILED);
         setBusyId(null);
         return;
       }
-      toast.success(`Category status updated to ${newStatus}`);
+      toast.success(ADMIN_CATEGORY_MESSAGES.statusUpdated(String(newStatus)));
       startTransition(() => router.refresh());
       setBusyId(null);
     },

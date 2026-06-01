@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { UserStats } from './user-stats';
 import { UserFilters, UserFilterState, DEFAULT_FILTERS } from './user-filters';
 import { UserTable, User } from './user-table';
@@ -10,6 +10,8 @@ import {
 } from '@/actions/admin/admin.actions';
 import { IgetllUsersParams } from '@/types/admin.type';
 import { UserStatus } from '@/types/user.type';
+import { ADMIN_USER_MESSAGES } from '@/constants/admin/messages.constants';
+import { useAsyncEffect } from '@/hooks/use-async-effect';
 import { toast } from 'sonner';
 import useUserStore from '@/store/user.store';
 
@@ -50,8 +52,8 @@ export function UserManagementView() {
     }
   }, [page, filters]);
 
-  useEffect(() => {
-    fetchData();
+  useAsyncEffect(() => {
+    void fetchData();
   }, [fetchData]);
 
   const handleFiltersChange = (newFilters: UserFilterState) => {
@@ -76,10 +78,10 @@ export function UserManagementView() {
         )
       );
       toast.success(
-        block ? 'User blocked successfully' : 'User unblocked successfully'
+        block ? ADMIN_USER_MESSAGES.BLOCKED : ADMIN_USER_MESSAGES.UNBLOCKED
       );
     } else {
-      toast.error(res.error ?? 'Failed to update user');
+      toast.error(res.error ?? ADMIN_USER_MESSAGES.UPDATE_FAILED);
     }
   };
 

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, Menu } from 'lucide-react';
 
 import { DashboardUtilityActions } from '@/components/layout/dashboard-utility-actions';
-import { useAuctionRoomMenu } from '@/components/layout/auction-room-menu-context';
+import { useAuctionRoomMenu } from '@/components/layout/contexts/auction-room-menu-context';
 
 export function UserAuctionRoomTopBar() {
   const onMenuOpen = useAuctionRoomMenu();

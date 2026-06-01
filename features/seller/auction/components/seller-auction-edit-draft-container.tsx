@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { MEDIA_MESSAGES } from '@/constants/common/messages.constants';
+import { COMMON_VALIDATION } from '@/constants/common/validation.constants';
+import { SELLER_AUCTION_MESSAGES } from '@/constants/seller/auction.constants';
 import { ArrowLeft, Gavel, Loader2 } from 'lucide-react';
 
 import type {
@@ -116,7 +119,7 @@ export function SellerAuctionEditDraftContainer({
       const valid = list.filter((f) => allowed.includes(f.type));
 
       if (valid.length !== list.length) {
-        toast.error('Only JPEG, PNG, WebP images and MP4 video are allowed.');
+        toast.error(MEDIA_MESSAGES.AUCTION_ASSET_TYPES);
       }
 
       const startPos = assets.length;
@@ -157,7 +160,7 @@ export function SellerAuctionEditDraftContainer({
         });
 
         if (!urlRes.success || !urlRes.data) {
-          throw new Error(urlRes.error ?? 'Failed to get upload URL');
+          throw new Error(urlRes.error ?? MEDIA_MESSAGES.UPLOAD_URL_FAILED);
         }
 
         const { uploadUrl, fileKey } = urlRes.data;
@@ -168,7 +171,7 @@ export function SellerAuctionEditDraftContainer({
           body: item.file,
         });
 
-        if (!putRes.ok) throw new Error('Upload to storage failed');
+        if (!putRes.ok) throw new Error(MEDIA_MESSAGES.UPLOAD_STORAGE_FAILED);
 
         setAssets((prev) => {
           const next = [...prev];
@@ -182,7 +185,7 @@ export function SellerAuctionEditDraftContainer({
           return next;
         });
       } catch (err: unknown) {
-        const msg = getErrorMessage(err) ?? 'Upload failed';
+        const msg = getErrorMessage(err) ?? MEDIA_MESSAGES.UPLOAD_FAILED;
         setUploadError(msg);
         toast.error(msg);
         setAssets((prev) => {
@@ -216,13 +219,13 @@ export function SellerAuctionEditDraftContainer({
 
         const uploadedAssets = assets.filter((a) => a.fileKey);
         if (uploadedAssets.length === 0) {
-          const msg = 'At least one image or video is required.';
+          const msg = SELLER_AUCTION_MESSAGES.ASSET_REQUIRED;
           toast.error(msg);
           form.setError('root', { message: msg });
           return;
         }
         if (assets.some((a) => a.status === 'uploading')) {
-          const msg = 'Please wait for uploads to finish.';
+          const msg = SELLER_AUCTION_MESSAGES.WAIT_FOR_UPLOADS;
           toast.error(msg);
           form.setError('root', { message: msg });
           return;
@@ -253,16 +256,18 @@ export function SellerAuctionEditDraftContainer({
 
           const res = await updateSellerAuctionDraftAction(auction.id, payload);
           if (!res.success) {
-            const msg = res.error ?? 'Failed to update draft';
+            const msg =
+              res.error ?? SELLER_AUCTION_MESSAGES.DRAFT_UPDATE_FAILED;
             form.setError('root', { message: msg });
             toast.error(msg);
             return;
           }
 
-          toast.success('Draft updated.');
+          toast.success(SELLER_AUCTION_MESSAGES.DRAFT_UPDATED);
           router.push(`/seller/auction/${auction.id}/draft`);
         } catch (err) {
-          const msg = getErrorMessage(err) ?? 'Something went wrong';
+          const msg =
+            getErrorMessage(err) ?? COMMON_VALIDATION.SOMETHING_WENT_WRONG;
           form.setError('root', { message: msg });
           toast.error(msg);
         } finally {
@@ -278,15 +283,16 @@ export function SellerAuctionEditDraftContainer({
     try {
       const res = await publishSellerAuctionAction(auction.id);
       if (!res.success) {
-        const msg = res.error ?? 'Failed to publish draft';
+        const msg = res.error ?? SELLER_AUCTION_MESSAGES.PUBLISH_FAILED;
         form.setError('root', { message: msg });
         toast.error(msg);
         return;
       }
-      toast.success('Auction published.');
+      toast.success(SELLER_AUCTION_MESSAGES.PUBLISHED);
       router.push(`/seller/auctions/${auction.id}`);
     } catch (err) {
-      const msg = getErrorMessage(err) ?? 'Something went wrong';
+      const msg =
+        getErrorMessage(err) ?? COMMON_VALIDATION.SOMETHING_WENT_WRONG;
       form.setError('root', { message: msg });
       toast.error(msg);
     } finally {
@@ -301,12 +307,15 @@ export function SellerAuctionEditDraftContainer({
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Button variant="outline" asChild className="h-8 text-xs">
-            <Link href={`/seller/auction/${auction.id}/draft`}>
+          <Link
+            href={`/seller/auction/${auction.id}/draft`}
+            className="inline-block"
+          >
+            <Button variant="outline" className="h-8 text-xs">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to draft
-            </Link>
-          </Button>
+            </Button>
+          </Link>
 
           <h1 className="mt-3 text-2xl font-bold tracking-tight">
             Editing {typeLabel} draft

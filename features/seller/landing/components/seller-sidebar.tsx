@@ -94,10 +94,7 @@ export function SellerSidebar({
             <ShieldCheck size={18} aria-hidden /> Verified seller
           </div>
         ) : kycStatus === KycStatusEnum.PENDING ? (
-          <Button
-            asChild
-            className="group h-auto w-full rounded-lg py-6 text-base font-semibold"
-          >
+          <Button className="group h-auto w-full rounded-lg py-6 text-base font-semibold">
             <Link href="/seller/kyc">
               View Application Status{' '}
               <ArrowRight
@@ -108,7 +105,6 @@ export function SellerSidebar({
           </Button>
         ) : kycStatus === KycStatusEnum.REJECTED ? (
           <Button
-            asChild
             disabled={!acceptedTerms}
             variant="destructive"
             className="group h-auto w-full rounded-lg py-6 text-base font-semibold disabled:opacity-50"

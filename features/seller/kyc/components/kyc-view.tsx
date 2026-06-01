@@ -6,7 +6,7 @@ import {
   ShieldAlert,
   Loader2 as LoaderIcon,
 } from 'lucide-react';
-import { SiteFooter } from '@/components/layout/site-footer';
+import { SiteFooter } from '@/components/layout/footers/site-footer';
 import { PersonalInfo } from '@/components/kyc/personal-info';
 import { DocumentUpload } from '@/components/kyc/document-upload';
 import { LivenessCheck } from '@/components/kyc/liveness-check';

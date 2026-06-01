@@ -57,7 +57,6 @@ import { UserAuctionRoomBidPanel } from './UserAuctionRoomBidPanel';
 import { UserAuctionRoomChat } from './UserAuctionRoomChat';
 import { UserAuctionRoomLiveSidebar } from './UserAuctionRoomLiveSidebar';
 import { UserAuctionRoomLiveStream } from './UserAuctionRoomLiveStream';
-import { UserAuctionRoomTopBar } from './UserAuctionRoomTopBar';
 import { urCard, urPage, urSectionTitle } from './user-room-ui';
 import {
   formatAuctionEndHint,
@@ -155,6 +154,13 @@ export type UserAuctionRoomLayoutProps = {
   } | null;
   canReportAuction: boolean;
   onReportAuction: () => void;
+  currentUserId?: string | null;
+  onReportParticipant?: (input: {
+    targetedUserId: string;
+    reason: string;
+    category: 'AUCTION_FRAUD_CRITICAL' | 'PAYMENT_CRITICAL' | 'OTHER';
+    level: 'LOW' | 'MEDIUM' | 'CRITICAL';
+  }) => Promise<void>;
   onAuctionStatusOverride?: (status: string) => void;
   payFallbackPublic?: () => Promise<{
     success: boolean;
@@ -206,6 +212,8 @@ export function UserAuctionRoomLayout({
   soldSummary,
   canReportAuction,
   onReportAuction,
+  currentUserId,
+  onReportParticipant,
   onAuctionStatusOverride,
   payFallbackPublic,
   verifyFallbackPublicAuctionPayment,
@@ -256,7 +264,22 @@ export function UserAuctionRoomLayout({
 
   const productTitleBlock = (
     <>
-      <div className="flex flex-wrap items-start gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {isLive ? (
+          <span className="rounded-full bg-brand-600 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+            Live
+          </span>
+        ) : (
+          <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+            {statusLabel}
+          </span>
+        )}
+        <span className="text-[11px] font-medium text-muted-foreground">
+          {formatAuctionNumberDisplay(auction)}
+        </span>
+      </div>
+
+      <div className="mt-1.5 flex flex-wrap items-start gap-2">
         <h1 className="text-base font-semibold leading-snug text-foreground sm:text-lg">
           {auction?.title ?? 'Loading auction…'}
         </h1>
@@ -265,20 +288,6 @@ export function UserAuctionRoomLayout({
             className="size-5 shrink-0 text-brand-600"
             aria-label="Verified category"
           />
-        ) : null}
-      </div>
-
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        <span className="text-sm font-medium text-muted-foreground">
-          {formatAuctionNumberDisplay(auction)}
-        </span>
-        <span className="rounded-full border border-brand-200 bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-700 dark:border-brand-800 dark:bg-brand-950/50 dark:text-brand-300">
-          Live Auction
-        </span>
-        {!isLive ? (
-          <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-            {statusLabel}
-          </span>
         ) : null}
       </div>
       <div className="mt-3 flex flex-wrap gap-1.5">
@@ -537,7 +546,7 @@ export function UserAuctionRoomLayout({
             valueClassName="font-semibold text-brand-600"
           />
         </div>
-        {canReportAuction ? (
+        {canReportAuction && !isLiveRoom ? (
           <button
             type="button"
             onClick={onReportAuction}
@@ -590,7 +599,6 @@ export function UserAuctionRoomLayout({
     <UserAuctionRoomLiveSidebar
       className="w-full min-[1320px]:w-[300px] min-[1320px]:shrink-0"
       sellerId={auction?.sellerId}
-      sellerName={sellerName}
       heroImageUrl={heroImage}
       messages={chatMessages}
       draft={chatDraft}
@@ -598,9 +606,11 @@ export function UserAuctionRoomLayout({
       onSend={onSendChat}
       canInteract={canInteract}
       participants={participants}
-      watchingCount={watchingCount}
       currentLeadUserId={currentLeadUserId}
-      remoteStreams={remoteStreams}
+      currentUserId={currentUserId}
+      canReportAuction={canReportAuction}
+      onReportAuction={onReportAuction}
+      onReportParticipant={onReportParticipant}
     />
   ) : (
     <UserAuctionRoomChat
@@ -617,7 +627,6 @@ export function UserAuctionRoomLayout({
 
   return (
     <div className={cn(urPage(), 'w-full min-w-0')}>
-      <UserAuctionRoomTopBar />
       {error ? (
         <AuctionRoomAlert message={error} className={cn(urCard(), 'mb-4')} />
       ) : null}

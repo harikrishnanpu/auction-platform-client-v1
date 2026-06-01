@@ -6,9 +6,9 @@ import {
   ZodChangePasswordValues,
 } from '../schems/change-password.schema';
 import { toast } from 'sonner';
+import { RESET_PASSWORD_MESSAGES } from '@/constants/reset/password.constants';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { getErrorMessage } from '@/utils/get-app-error';
 import { changePasswordAction } from '@/actions/auth/auth.actions';
 
 export const useChangePassword = () => {
@@ -34,7 +34,7 @@ export const useChangePassword = () => {
     });
 
     if (response.success) {
-      toast.success('Password reset successfully! Please login.');
+      toast.success(RESET_PASSWORD_MESSAGES.SUCCESS);
       router.push('/login');
     } else {
       setError('root', {

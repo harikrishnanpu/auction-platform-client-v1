@@ -146,14 +146,15 @@ export default function AdminAuctionsPage() {
           </div>
         </div>
 
-        <Button
-          asChild
-          variant="outline"
-          size="sm"
-          className="h-8 text-xs rounded-lg"
-        >
-          <Link href="/admin/auctions/categories">Categories</Link>
-        </Button>
+        <Link href="/admin/auctions/categories" className="inline-block">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs rounded-lg"
+          >
+            Categories
+          </Button>
+        </Link>
       </header>
 
       <UserAuctionFilters
@@ -192,13 +193,14 @@ export default function AdminAuctionsPage() {
                   Try adjusting your filters.
                 </div>
                 <div className="mt-4">
-                  <Button
-                    variant="outline"
-                    className="h-8 text-xs rounded-lg"
-                    asChild
-                  >
-                    <Link href="/admin/auctions">Refresh</Link>
-                  </Button>
+                  <Link href="/admin/auctions" className="inline-block">
+                    <Button
+                      variant="outline"
+                      className="h-8 text-xs rounded-lg"
+                    >
+                      Refresh
+                    </Button>
+                  </Link>
                 </div>
               </div>
             ) : (

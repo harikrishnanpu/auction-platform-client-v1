@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { SellerTable } from './seller-table';
 import {
   blockUserAction,
@@ -9,6 +9,8 @@ import {
 import { SellerInfo } from '@/services/admin/admin.service';
 import { IgetllSellersParams } from '@/types/admin.type';
 import { UserStatus } from '@/types/user.type';
+import { ADMIN_USER_MESSAGES } from '@/constants/admin/messages.constants';
+import { useAsyncEffect } from '@/hooks/use-async-effect';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import {
@@ -54,8 +56,8 @@ export function SellerManagementView() {
     }
   }, [page, limit, pendingOnly]);
 
-  useEffect(() => {
-    fetchData();
+  useAsyncEffect(() => {
+    void fetchData();
   }, [fetchData]);
 
   const filteredSellers = useMemo(() => {
@@ -89,10 +91,10 @@ export function SellerManagementView() {
         )
       );
       toast.success(
-        block ? 'User blocked successfully' : 'User unblocked successfully'
+        block ? ADMIN_USER_MESSAGES.BLOCKED : ADMIN_USER_MESSAGES.UNBLOCKED
       );
     } else {
-      toast.error(res.error ?? 'Failed to update user status');
+      toast.error(res.error ?? ADMIN_USER_MESSAGES.STATUS_UPDATE_FAILED);
     }
   };
 

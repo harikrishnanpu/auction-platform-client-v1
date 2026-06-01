@@ -8,9 +8,8 @@ import {
   ZodCompleteProfileValues,
 } from '../schemes/complete-profile-schema';
 import { toast } from 'sonner';
+import { COMPLETE_PROFILE_MESSAGES } from '@/constants/profile/constants';
 import { completeProfileAction } from '@/actions/auth/auth.actions';
-import { getErrorMessage } from '@/utils/get-app-error';
-
 export const useCompleteProfile = () => {
   const router = useRouter();
 
@@ -31,7 +30,7 @@ export const useCompleteProfile = () => {
     const response = await completeProfileAction(data);
 
     if (response.success && response.data) {
-      toast.success('Profile updated successfully');
+      toast.success(COMPLETE_PROFILE_MESSAGES.UPDATED);
 
       if (!response.data.isVerified) {
         router.replace(`/email?email=${response.data.email}&autoSend=1`);

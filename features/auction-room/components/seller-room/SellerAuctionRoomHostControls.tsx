@@ -11,6 +11,7 @@ import {
   Square,
   XOctagon,
 } from 'lucide-react';
+import { AUCTION_ROOM_MESSAGES } from '@/constants/auction-room/constants';
 import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
@@ -87,7 +88,7 @@ export function SellerAuctionRoomHostControls({
       setFallbackBusy(null);
 
       if (!res) {
-        const msg = 'Socket handler not available';
+        const msg = AUCTION_ROOM_MESSAGES.SOCKET_UNAVAILABLE;
         setFallbackError(msg);
         toast.error(msg);
         return false;
@@ -97,8 +98,8 @@ export function SellerAuctionRoomHostControls({
         const msg =
           res.error ??
           (kind === 'public'
-            ? 'Could not send public notification'
-            : 'Could not mark auction as failed');
+            ? AUCTION_ROOM_MESSAGES.PUBLIC_NOTIFICATION_FAILED
+            : AUCTION_ROOM_MESSAGES.MARK_FAILED);
         setFallbackError(msg);
         toast.error(msg);
         return false;
@@ -106,8 +107,8 @@ export function SellerAuctionRoomHostControls({
 
       toast.success(
         kind === 'public'
-          ? 'Public notification sent'
-          : 'Auction marked as failed'
+          ? AUCTION_ROOM_MESSAGES.PUBLIC_NOTIFICATION_SENT
+          : AUCTION_ROOM_MESSAGES.MARKED_FAILED
       );
 
       const nextStatus = (res.data as { status?: string })?.status;
@@ -189,11 +190,7 @@ export function SellerAuctionRoomHostControls({
             </button>
             <button
               type="button"
-              onClick={() =>
-                toast.info(
-                  'Anti-snipe extensions apply automatically when bids arrive near the end time.'
-                )
-              }
+              onClick={() => toast.info(AUCTION_ROOM_MESSAGES.ANTI_SNIPE_INFO)}
               disabled={isAuctionEnded}
               className={cn(
                 hostBtnBase,

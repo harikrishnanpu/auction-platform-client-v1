@@ -17,12 +17,12 @@ import {
   IndianRupee,
   MapPin,
   Package,
-  Pencil,
   Share2,
   Tag,
   TrendingUp,
   HeartPulse,
 } from 'lucide-react';
+import { AUCTION_ROOM_MESSAGES } from '@/constants/auction-room/constants';
 import { toast } from 'sonner';
 
 import type { IAuctionDto } from '@/types/auction.type';
@@ -46,14 +46,13 @@ import { getAuctionMediaItems } from '../../utils/auction-room.utils';
 import { SellerAuctionRoomHostControls } from './SellerAuctionRoomHostControls';
 import { SellerAuctionRoomLiveSidebar } from './SellerAuctionRoomLiveSidebar';
 import { SellerAuctionRoomLiveStream } from './SellerAuctionRoomLiveStream';
-import { SellerAuctionRoomTopBar } from './SellerAuctionRoomTopBar';
+import { SellerAuctionRoomHeroHeading } from './SellerAuctionRoomHeroHeading';
 import { SellerAuctionRoomChat } from './SellerAuctionRoomChat';
 import {
   formatBidAmount,
   formatAuctionEndHint,
   formatAuctionNumberDisplay,
   getBidderName,
-  getParticipantHighBid,
   getUserInitials,
 } from './seller-room-helpers';
 import { srCard, srPage, srSectionTitle } from './seller-room-ui';
@@ -250,13 +249,6 @@ export function SellerAuctionRoomLayout({
         ? 'Camera off'
         : 'Starting…';
 
-  const sellerName = useMemo(() => {
-    if (!auction?.sellerId) return 'You';
-    return (
-      participants.find((p) => p.userId === auction.sellerId)?.userName ?? 'You'
-    );
-  }, [auction, participants]);
-
   const liveNotice = isLiveRoom ? (
     <div className="rounded-lg border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm text-brand-900 dark:border-brand-800 dark:bg-brand-950/40 dark:text-brand-100">
       <span className="font-semibold">Live auction:</span> You are broadcasting
@@ -268,7 +260,6 @@ export function SellerAuctionRoomLayout({
     <SellerAuctionRoomLiveSidebar
       className="w-full min-[1320px]:w-[300px] min-[1320px]:shrink-0"
       sellerId={auction?.sellerId}
-      sellerName={sellerName}
       heroImageUrl={heroImage}
       messages={chatMessages}
       draft={chatDraft}
@@ -276,20 +267,19 @@ export function SellerAuctionRoomLayout({
       onSend={onSendChat}
       canInteract={canInteract}
       participants={participants}
-      watchingCount={watchingCount}
       currentLeadUserId={currentLeadUserId}
-      isLocalAudioEnabled={isLocalAudioEnabled}
-      isLocalVideoEnabled={isLocalVideoEnabled}
-      isHostProducer={isHostProducer}
     />
   ) : (
     <SellerAuctionRoomChat
       className="w-full min-[1320px]:w-[252px] min-[1320px]:shrink-0"
+      sellerId={auction?.sellerId}
+      heroImageUrl={heroImage}
       messages={chatMessages}
       draft={chatDraft}
       onDraftChange={onChatDraftChange}
       onSend={onSendChat}
       canInteract={canInteract}
+      participants={participants}
       currentLeadUserId={currentLeadUserId}
     />
   );
@@ -308,8 +298,6 @@ export function SellerAuctionRoomLayout({
       />
 
       <div className={cn(srPage(), 'w-full min-w-0')}>
-        <SellerAuctionRoomTopBar />
-
         {error ? (
           <AuctionRoomAlert message={error} className={cn(srCard(), 'mb-4')} />
         ) : null}
@@ -343,39 +331,12 @@ export function SellerAuctionRoomLayout({
                     auctionTitle={auction?.title}
                   />
                   <div className="flex min-w-0 flex-1 flex-col justify-center gap-4 lg:max-w-[42%]">
-                    <div>
-                      <h1 className="text-base font-semibold leading-snug text-foreground sm:text-lg">
-                        {auction?.title ?? 'Loading auction…'}
-                      </h1>
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-medium text-muted-foreground">
-                          {formatAuctionNumberDisplay(auction)}
-                        </span>
-                        <span className="rounded-full border border-brand-200 bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-700 dark:border-brand-800 dark:bg-brand-950/50 dark:text-brand-300">
-                          Live Auction
-                        </span>
-                        {isLive ? (
-                          <span className="rounded-full bg-brand-600 px-2.5 py-0.5 text-xs font-semibold text-white">
-                            Live
-                          </span>
-                        ) : (
-                          <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                            {statusLabel}
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                        {auction?.description?.trim() ||
-                          'No description provided.'}
-                      </p>
-                      <Link
-                        href={`/seller/auction/${auctionId}/edit`}
-                        className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:underline"
-                      >
-                        <Pencil className="size-3.5" />
-                        Edit Details
-                      </Link>
-                    </div>
+                    <SellerAuctionRoomHeroHeading
+                      auctionId={auctionId}
+                      auction={auction}
+                      statusLabel={statusLabel}
+                      isLive={isLive}
+                    />
                     <div className="flex flex-col gap-3">
                       <div className="rounded-xl border border-border/80 bg-[#f0f4fb] p-3 dark:bg-muted/30">
                         <p className="text-[11px] font-medium text-muted-foreground">
@@ -439,34 +400,12 @@ export function SellerAuctionRoomLayout({
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h1 className="text-sm font-semibold leading-snug text-foreground">
-                        {auction?.title ?? 'Loading auction…'}
-                      </h1>
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
-                          {formatAuctionNumberDisplay(auction)}
-                        </span>
-                        {isLive ? (
-                          <span className="rounded-full bg-brand-600 px-2.5 py-0.5 text-xs font-semibold text-white">
-                            Live
-                          </span>
-                        ) : (
-                          <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                            {statusLabel}
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                        {auction?.description?.trim() ||
-                          'No description provided.'}
-                      </p>
-                      <Link
-                        href={`/seller/auction/${auctionId}/edit`}
-                        className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:underline"
-                      >
-                        <Pencil className="size-3.5" />
-                        Edit Details
-                      </Link>
+                      <SellerAuctionRoomHeroHeading
+                        auctionId={auctionId}
+                        auction={auction}
+                        statusLabel={statusLabel}
+                        isLive={isLive}
+                      />
                     </div>
                   </div>
 
@@ -557,25 +496,6 @@ export function SellerAuctionRoomLayout({
                     View Public Listing
                     <ExternalLink className="size-4" />
                   </Link>
-                </section>
-
-                <section className={srCard()}>
-                  <div className="flex items-center gap-2">
-                    <HeartPulse className="size-4 text-emerald-600" />
-                    <h2 className={srSectionTitle()}>Everything looks good</h2>
-                  </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Auction health
-                  </p>
-                  <div className="mt-4 space-y-1">
-                    <HealthRow
-                      label="Internet Connection"
-                      status={connectionOk ? 'Stable' : 'Connecting…'}
-                    />
-                    <HealthRow label="Live Stream" status={streamStatus} />
-                    <HealthRow label="Bids Sync" status="Synced" />
-                    <HealthRow label="Notifications" status="Active" />
-                  </div>
                 </section>
               </div>
 
@@ -719,56 +639,6 @@ export function SellerAuctionRoomLayout({
                   onMarkAuctionFailed={onMarkAuctionFailed}
                 />
 
-                {!isLiveRoom ? (
-                  <section className={srCard()}>
-                    <h2 className={srSectionTitle()}>
-                      Participants ({participants.length})
-                    </h2>
-                    <ul className="mt-4 space-y-3">
-                      {participants.length === 0 ? (
-                        <li className="py-4 text-center text-sm text-muted-foreground">
-                          No participants yet
-                        </li>
-                      ) : (
-                        participants.slice(0, 4).map((p) => {
-                          const bid = getParticipantHighBid(p.userId, liveFeed);
-                          return (
-                            <li
-                              key={p.id}
-                              className="flex items-center justify-between gap-3"
-                            >
-                              <div className="flex min-w-0 items-center gap-3">
-                                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">
-                                  {getUserInitials(p.userName)}
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="truncate text-sm font-medium">
-                                    {p.userName}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    Joined {formatAuctionDateTime(p.joinedAt)}
-                                  </p>
-                                </div>
-                              </div>
-                              <span className="shrink-0 text-sm font-semibold tabular-nums">
-                                {bid != null ? formatBidAmount(bid) : '—'}
-                              </span>
-                            </li>
-                          );
-                        })
-                      )}
-                    </ul>
-                    {participants.length > 4 ? (
-                      <button
-                        type="button"
-                        className="mt-4 text-sm font-medium text-brand-600 hover:underline"
-                      >
-                        View All Participants
-                      </button>
-                    ) : null}
-                  </section>
-                ) : null}
-
                 <section className={srCard()}>
                   <h2 className={srSectionTitle()}>Quick Actions</h2>
                   <ul className="mt-3 divide-y divide-border">
@@ -787,7 +657,7 @@ export function SellerAuctionRoomLayout({
                           void navigator.clipboard?.writeText(
                             `${window.location.origin}/auction/${auctionId}`
                           );
-                          toast.success('Link copied to clipboard');
+                          toast.success(AUCTION_ROOM_MESSAGES.LINK_COPIED);
                         },
                       },
                       {
@@ -795,7 +665,9 @@ export function SellerAuctionRoomLayout({
                         label: 'Download Report',
                         icon: Download,
                         onClick: () =>
-                          toast.info('Report download coming soon'),
+                          toast.info(
+                            AUCTION_ROOM_MESSAGES.REPORT_DOWNLOAD_SOON
+                          ),
                       },
                     ].map((item) => {
                       const Icon = item.icon;

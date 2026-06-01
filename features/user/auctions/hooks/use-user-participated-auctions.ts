@@ -1,7 +1,8 @@
 'use client';
 
 import { API_ENDPOINTS, buildApiUrl, buildQuery } from '@/apiInstance';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useAsyncEffect } from '@/hooks/use-async-effect';
 import type {
   IGetMyAuctionsFilter,
   IGetMyAuctionsResponse,
@@ -54,7 +55,7 @@ export function useUserParticipatedAuctions() {
     }
   }, [filters]);
 
-  useEffect(() => {
+  useAsyncEffect(() => {
     void fetchAuctions();
   }, [fetchAuctions]);
 

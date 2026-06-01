@@ -194,7 +194,7 @@ export function UserAuctionRoomLiveFullscreen({
         </div>
       </div>
 
-      <aside className="flex h-[min(42vh,320px)] min-h-0 w-full shrink-0 flex-col border-t border-white/10 bg-card sm:h-auto sm:max-w-[380px] sm:border-l sm:border-t-0">
+      <aside className="flex h-[min(42vh,360px)] min-h-0 w-full shrink-0 flex-col overflow-hidden border-t border-white/10 bg-card sm:h-full sm:max-w-[380px] sm:border-l sm:border-t-0">
         <header className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
           <h2 className="text-sm font-semibold">Auction Chat</h2>
           <button
@@ -211,7 +211,7 @@ export function UserAuctionRoomLiveFullscreen({
           hostUserId={hostUserId}
           currentLeadUserId={currentLeadUserId}
           heroImageUrl={heroImageUrl}
-          className="min-h-0 flex-1"
+          className="min-h-0 flex-1 overflow-hidden"
           draft={chatDraft}
           onDraftChange={onChatDraftChange}
           onSend={onSendChat}

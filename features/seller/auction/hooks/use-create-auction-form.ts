@@ -5,6 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { COMMON_VALIDATION } from '@/constants/common/validation.constants';
+import { MEDIA_MESSAGES } from '@/constants/common/messages.constants';
+import { SELLER_AUCTION_MESSAGES } from '@/constants/seller/auction.constants';
 
 import {
   createAuctionAction,
@@ -111,7 +114,7 @@ export function useCreateAuctionForm() {
       const allowed = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4'];
       const valid = files.filter((f) => allowed.includes(f.type));
       if (valid.length !== files.length) {
-        toast.error('Only JPEG, PNG, WebP images and MP4 video are allowed.');
+        toast.error(MEDIA_MESSAGES.AUCTION_ASSET_TYPES);
       }
 
       const newAssets: PendingAsset[] = valid.map((file, i) => ({
@@ -148,7 +151,7 @@ export function useCreateAuctionForm() {
           fileSize: item.file.size,
         });
         if (!urlRes.success || !urlRes.data) {
-          throw new Error(urlRes.error ?? 'Failed to get upload URL');
+          throw new Error(urlRes.error ?? MEDIA_MESSAGES.UPLOAD_URL_FAILED);
         }
         const { uploadUrl, fileKey } = urlRes.data;
         const putRes = await fetch(uploadUrl, {
@@ -157,7 +160,7 @@ export function useCreateAuctionForm() {
           body: item.file,
         });
 
-        if (!putRes.ok) throw new Error('Upload to storage failed');
+        if (!putRes.ok) throw new Error(MEDIA_MESSAGES.UPLOAD_STORAGE_FAILED);
 
         setAssets((prev) => {
           const next = [...prev];
@@ -194,14 +197,14 @@ export function useCreateAuctionForm() {
       const withKeys = assets.filter((a) => a.fileKey);
 
       if (assets.length > 0 && withKeys.length === 0) {
-        const msg = 'Please upload all selected files first.';
+        const msg = SELLER_AUCTION_MESSAGES.UPLOAD_ALL_FILES;
         toast.error(msg);
         form.setError('root', { message: msg });
         return;
       }
 
       if (assets.some((a) => a.status === 'uploading')) {
-        const msg = 'Please wait for uploads to finish.';
+        const msg = SELLER_AUCTION_MESSAGES.WAIT_FOR_UPLOADS;
         toast.error(msg);
         form.setError('root', { message: msg });
         return;
@@ -216,7 +219,7 @@ export function useCreateAuctionForm() {
         }));
 
       if (assetDtos.length === 0) {
-        const msg = 'At least one image or video is required.';
+        const msg = SELLER_AUCTION_MESSAGES.ASSET_REQUIRED;
         toast.error(msg);
         form.setError('root', { message: msg });
         return;
@@ -242,16 +245,17 @@ export function useCreateAuctionForm() {
         });
 
         if (!result.success || !result.data) {
-          const msg = result.error ?? 'Failed to create auction';
+          const msg = result.error ?? SELLER_AUCTION_MESSAGES.CREATE_FAILED;
           form.setError('root', { message: msg });
           toast.error(msg);
           return;
         }
 
-        toast.success('Auction created as draft.');
+        toast.success(SELLER_AUCTION_MESSAGES.DRAFT_CREATED);
         router.push(`/seller/auction/${result.data.id}/draft`);
       } catch (err) {
-        const msg = getErrorMessage(err) ?? 'Something went wrong';
+        const msg =
+          getErrorMessage(err) ?? COMMON_VALIDATION.SOMETHING_WENT_WRONG;
         form.setError('root', { message: msg });
         toast.error(msg);
       }

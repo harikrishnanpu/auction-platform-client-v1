@@ -1,0 +1,44 @@
+[
+  {
+    "id": "landing_page_load",
+    "title": "Landing Page Loads Successfully",
+    "name": "Landing Page Loads Successfully",
+    "description": "Verify that the landing page loads without errors",
+    "route": "/",
+    "steps": [
+      {
+        "action": "navigate",
+        "target": "/",
+        "description": "Navigate to home page"
+      }
+    ]
+  },
+  {
+    "id": "login_page_access",
+    "title": "Access Login Page",
+    "name": "Access Login Page",
+    "description": "Verify that login page is accessible",
+    "route": "/login",
+    "steps": [
+      {
+        "action": "navigate",
+        "target": "/login",
+        "description": "Navigate to login page"
+      }
+    ]
+  },
+  {
+    "id": "register_page_access",
+    "title": "Access Register Page",
+    "name": "Access Register Page",
+    "description": "Verify that register page is accessible",
+    "route": "/register",
+    "steps": [
+      {
+        "action": "navigate",
+        "target": "/register",
+        "description": "Navigate to register page"
+      }
+    ]
+  }
+]

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, ZoomIn, Eye, Download, Image as ImageIcon } from 'lucide-react';
+import { X, ZoomIn, Download, Image as ImageIcon } from 'lucide-react';
 
 interface DocumentViewerProps {
   src: string;

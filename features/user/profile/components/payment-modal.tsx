@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, CreditCard, Trophy } from 'lucide-react';
+import { PAYMENT_MESSAGES } from '@/constants/user/messages.constants';
 import { toast } from 'sonner';
 import { RazorpayOptions } from '@/lib/razorpay';
 
@@ -56,9 +57,7 @@ export function PaymentModal({
 
   const openRazorpayCheckout = useCallback(async () => {
     if (!RAZORPAY_KEY) {
-      setError(
-        'Razorpay is not configured. Please set NEXT_PUBLIC_RAZORPAY_KEY_ID.'
-      );
+      setError(PAYMENT_MESSAGES.RAZORPAY_NOT_CONFIGURED);
       return;
     }
 
@@ -76,7 +75,7 @@ export function PaymentModal({
       const data = await res.json();
 
       if (!data.success || !data.data?.orderId) {
-        throw new Error(data.error || 'Failed to create order');
+        throw new Error(data.error || PAYMENT_MESSAGES.ORDER_CREATE_FAILED);
       }
 
       const { orderId, amount } = data.data;
@@ -84,7 +83,7 @@ export function PaymentModal({
       await loadRazorpayScript();
 
       if (!window.Razorpay) {
-        throw new Error('Razorpay checkout failed to load');
+        throw new Error(PAYMENT_MESSAGES.CHECKOUT_LOAD_FAILED);
       }
 
       const options = {
@@ -112,20 +111,23 @@ export function PaymentModal({
             const verifyData = await verifyRes.json();
 
             if (verifyData.success) {
-              toast.success('Payment Successful! 🎉', {
-                description: 'Your payment has been processed successfully.',
+              toast.success(PAYMENT_MESSAGES.SUCCESS_TITLE, {
+                description: PAYMENT_MESSAGES.SUCCESS_DESCRIPTION,
               });
               onSuccess?.();
               onClose();
               router.refresh();
             } else {
               throw new Error(
-                verifyData.error || 'Payment verification failed'
+                verifyData.error || PAYMENT_MESSAGES.VERIFY_FAILED
               );
             }
           } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : 'Unknown error';
-            toast.error('Payment verification failed', { description: msg });
+            const msg =
+              err instanceof Error
+                ? err.message
+                : PAYMENT_MESSAGES.UNKNOWN_ERROR;
+            toast.error(PAYMENT_MESSAGES.VERIFY_FAILED, { description: msg });
             setError(msg);
           } finally {
             setPaying(false);
@@ -142,10 +144,11 @@ export function PaymentModal({
       rzp.open();
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : 'Failed to initiate payment'
+        err instanceof Error ? err.message : PAYMENT_MESSAGES.INITIATE_FAILED
       );
-      toast.error('Payment Error', {
-        description: err instanceof Error ? err.message : 'Unknown error',
+      toast.error(PAYMENT_MESSAGES.ERROR_TITLE, {
+        description:
+          err instanceof Error ? err.message : PAYMENT_MESSAGES.UNKNOWN_ERROR,
       });
     } finally {
       setPaying(false);
